@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Custom CSS Variables */
+:root {
+  --background-primary: #0A0A0B;
+  --background-secondary: #0F0F0F;
+  --background-card: #18181B;
+  --background-hover: #27272A;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --border-default: #27272A;
+  --border-light: #3F3F46;
+  --primary-purple: #9333EA;
+  --primary-purple-dark: #7C3AED;
+}
+
+/* Base Styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background-primary text-text-primary;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "cv11", "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-light ring-offset-2 ring-offset-background-primary;
+  }
+
+  /* Selection styles */
+  ::selection {
+    @apply bg-primary-light/20 text-text-primary;
+  }
+
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background-secondary;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-light rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-light to-primary-DEFAULT bg-clip-text text-transparent;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background-card/80 backdrop-blur-lg;
+  }
+
+  /* Glow effect */
+  .glow {
+    @apply shadow-purple-glow;
+  }
+
+  /* Animated gradient background */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-light/10 via-background-primary to-primary-DEFAULT/10;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply bg-background-hover animate-pulse rounded;
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Component specific animations */
+@layer components {
+  /* Button hover effects */
+  .btn-hover {
+    @apply transition-all duration-200 ease-out hover:scale-102 hover:brightness-110 active:scale-98;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out hover:scale-102 hover:shadow-card-hover;
+  }
+
+  /* Input focus effects */
+  .input-focus {
+    @apply transition-all duration-200 focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background-primary;
+  }
+
+  /* Sidebar transition */
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
