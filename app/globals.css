@@ -120,21 +120,36 @@
 @layer components {
   /* Button hover effects */
   .btn-hover {
-    @apply transition-all duration-200 ease-out hover:scale-102 hover:brightness-110 active:scale-98;
+    transition: all 0.2s;
+    &:hover {
+      transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+    &:active {
+      transform: scale(0.98);
+    }
   }
 
   /* Card hover effects */
   .card-hover {
-    @apply transition-all duration-300 ease-out hover:scale-102 hover:shadow-card-hover;
+    transition: all 0.3s;
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
   }
 
   /* Input focus effects */
   .input-focus {
-    @apply transition-all duration-200 focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background-primary;
+    transition: all 0.2s;
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 4px var(--primary-purple);
+    }
   }
 
   /* Sidebar transition */
   .sidebar-transition {
-    @apply transition-all duration-300 ease-in-out;
+    transition: all 0.3s;
   }
 }
