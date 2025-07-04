@@ -42,6 +42,10 @@ cd carpentry-quoting-system
 # Install dependencies
 npm install
 
+# Copy environment variables
+cp .env.example .env.local
+# Edit .env.local with your actual keys
+
 # Generate Prisma client
 npx prisma generate
 
@@ -56,7 +60,9 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ### Environment Variables
 
-Your `.env.local` is already configured. For production, update with your own keys.
+Copy `.env.example` to `.env.local` and update with your actual keys from:
+- [Supabase Dashboard](https://supabase.com)
+- [Clerk Dashboard](https://clerk.com)
 
 ## Project Structure
 
