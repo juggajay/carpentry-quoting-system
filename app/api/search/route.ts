@@ -39,16 +39,16 @@ export async function GET(request: NextRequest) {
     // Text search across multiple fields
     if (search) {
       where.OR = [
-        { quoteNumber: { contains: search, mode: "insensitive" } },
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { client: { name: { contains: search, mode: "insensitive" } } },
-        { client: { email: { contains: search, mode: "insensitive" } } },
-        { client: { company: { contains: search, mode: "insensitive" } } },
+        { quoteNumber: { contains: search } },
+        { title: { contains: search } },
+        { description: { contains: search } },
+        { client: { name: { contains: search } } },
+        { client: { email: { contains: search } } },
+        { client: { company: { contains: search } } },
         {
           items: {
             some: {
-              description: { contains: search, mode: "insensitive" },
+              description: { contains: search },
             },
           },
         },
