@@ -6,8 +6,9 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { quoteId: string } }
+  { params }: { params: Promise<{ quoteId: string }> }
 ) {
+  const { quoteId } = await params;
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -25,7 +26,7 @@ export async function GET(
     // Get quote with items
     const quote = await prisma.quote.findFirst({
       where: {
-        id: params.quoteId,
+        id: quoteId,
         userId: user.id,
       },
       include: {

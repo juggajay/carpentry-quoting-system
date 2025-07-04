@@ -5,12 +5,6 @@ import VerificationLayout from "./verification-layout";
 
 const prisma = new PrismaClient();
 
-interface PageProps {
-  params: {
-    fileId: string;
-  };
-}
-
 interface ExtractedItem {
   description: string;
   quantity: number;
@@ -19,7 +13,12 @@ interface ExtractedItem {
   total: number;
 }
 
-export default async function VerifyPage({ params }: PageProps) {
+export default async function VerifyPage({
+  params,
+}: {
+  params: Promise<{ fileId: string }>;
+}) {
+  const resolvedParams = await params;
   const { userId } = await auth();
   if (!userId) return notFound();
 
@@ -33,7 +32,7 @@ export default async function VerifyPage({ params }: PageProps) {
   // Get file
   const file = await prisma.uploadedFile.findUnique({
     where: { 
-      id: params.fileId,
+      id: resolvedParams.fileId,
       userId: user.id,
     },
   });

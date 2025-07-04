@@ -27,7 +27,8 @@
   }
   
   body {
-    @apply bg-background-primary text-text-primary;
+    background-color: var(--background-primary);
+    color: var(--text-primary);
     font-family: 'Inter', system-ui, sans-serif;
     font-feature-settings: "cv11", "rlig" 1, "calt" 1;
   }
