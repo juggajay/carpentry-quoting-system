@@ -30,12 +30,12 @@ export async function exportSearchResults(filters: {
 
     if (filters.search) {
       where.OR = [
-        { quoteNumber: { contains: filters.search, mode: "insensitive" } },
-        { title: { contains: filters.search, mode: "insensitive" } },
-        { description: { contains: filters.search, mode: "insensitive" } },
-        { client: { name: { contains: filters.search, mode: "insensitive" } } },
-        { client: { email: { contains: filters.search, mode: "insensitive" } } },
-        { client: { company: { contains: filters.search, mode: "insensitive" } } },
+        { quoteNumber: { contains: filters.search } },
+        { title: { contains: filters.search } },
+        { description: { contains: filters.search } },
+        { client: { name: { contains: filters.search } } },
+        { client: { email: { contains: filters.search } } },
+        { client: { company: { contains: filters.search } } },
       ];
     }
 
@@ -94,10 +94,10 @@ export async function exportSearchResults(filters: {
     const rows = quotes.map((quote) => [
       quote.quoteNumber,
       new Date(quote.createdAt).toLocaleDateString(),
-      quote.client.name,
-      quote.client.email || "",
-      quote.client.phone || "",
-      quote.client.company || "",
+      quote.client?.name || "No client",
+      quote.client?.email || "",
+      quote.client?.phone || "",
+      quote.client?.company || "",
       quote.status,
       quote.items.length.toString(),
       quote.subtotal.toFixed(2),
