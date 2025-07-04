@@ -16,7 +16,7 @@ export async function GET() {
 
   // Check Clerk
   try {
-    const { userId } = await auth();
+    await auth();
     checks.checks.clerk = true;
   } catch (error) {
     checks.errors.push(`Clerk auth failed: ${error}`);
