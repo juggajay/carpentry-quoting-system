@@ -26,8 +26,8 @@ export default function ExportButton({ filters, disabled }: ExportButtonProps) {
     try {
       const result = await exportSearchResults(filters);
       
-      if (!result.success) {
-        throw new Error(result.error);
+      if (!result.success || !result.csv || !result.fileName) {
+        throw new Error(result.error || "Export failed");
       }
 
       // Create blob and download
