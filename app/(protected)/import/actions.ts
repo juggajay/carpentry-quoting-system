@@ -249,9 +249,17 @@ export async function deleteUploadedFile(fileId: string) {
   }
 }
 
+interface LineItem {
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  total: number;
+}
+
 export async function saveVerifiedData(
   fileId: string,
-  items: any[],
+  items: LineItem[],
   clientInfo: { name: string; email?: string; phone?: string }
 ) {
   try {

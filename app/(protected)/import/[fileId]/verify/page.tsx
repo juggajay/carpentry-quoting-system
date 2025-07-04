@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import VerificationLayout from "./verification-layout";
@@ -9,6 +9,14 @@ interface PageProps {
   params: {
     fileId: string;
   };
+}
+
+interface ExtractedItem {
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  total: number;
 }
 
 export default async function VerifyPage({ params }: PageProps) {
@@ -36,13 +44,13 @@ export default async function VerifyPage({ params }: PageProps) {
 
   // Parse extracted items
   const extractedItems = Array.isArray(file.extractedItems) 
-    ? file.extractedItems 
+    ? file.extractedItems as ExtractedItem[]
     : [];
 
   return (
     <VerificationLayout
       file={file}
-      extractedItems={extractedItems as any[]}
+      extractedItems={extractedItems}
     />
   );
 }

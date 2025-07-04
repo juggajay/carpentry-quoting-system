@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     // Status filter
     if (status) {
-      where.status = status as any;
+      where.status = status as Prisma.EnumQuoteStatusFilter;
     }
 
     // Amount range filter

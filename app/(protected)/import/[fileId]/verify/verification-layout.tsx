@@ -5,17 +5,40 @@ import { useRouter } from "next/navigation";
 import PdfViewer from "@/features/import/components/PdfViewer";
 import VerificationForm from "@/features/import/components/VerificationForm";
 import { saveVerifiedData } from "../../actions";
+import { UploadedFile } from "@prisma/client";
+
+interface ExtractedItem {
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  total: number;
+}
+
+interface HighlightArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  label: string;
+}
+
+interface ClientInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+}
 
 interface VerificationLayoutProps {
-  file: any;
-  extractedItems: any[];
+  file: UploadedFile;
+  extractedItems: ExtractedItem[];
 }
 
 export default function VerificationLayout({ file, extractedItems }: VerificationLayoutProps) {
   const router = useRouter();
-  const [highlightArea, setHighlightArea] = useState<any>(null);
+  const [highlightArea, setHighlightArea] = useState<HighlightArea | null>(null);
 
-  const handleSave = async (items: any[], clientInfo: any) => {
+  const handleSave = async (items: ExtractedItem[], clientInfo: ClientInfo) => {
     const result = await saveVerifiedData(file.id, items, clientInfo);
     if (result.success) {
       router.push("/quotes");

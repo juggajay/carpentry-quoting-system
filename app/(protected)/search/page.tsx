@@ -43,7 +43,7 @@ export default function SearchPage() {
       const items = await response.json();
       addItems(items);
       toast.success(`${items.length} items copied to clipboard`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy items");
     }
   };
