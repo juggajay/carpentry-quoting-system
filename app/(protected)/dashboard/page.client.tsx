@@ -2,12 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import { 
   DocumentTextIcon, 
-  UsersIcon, 
-  ArrowUpIcon,
-  ArrowTrendingUpIcon,
   PlusIcon,
   DocumentArrowUpIcon
 } from "@heroicons/react/24/outline";
