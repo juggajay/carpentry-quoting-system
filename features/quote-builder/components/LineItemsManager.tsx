@@ -27,6 +27,7 @@ import {
   PlusIcon, 
   Bars3Icon 
 } from "@heroicons/react/24/outline";
+import { type QuoteFormData } from "./QuoteForm";
 
 interface LineItem {
   description: string;
@@ -37,7 +38,7 @@ interface LineItem {
 }
 
 interface LineItemsManagerProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<QuoteFormData>;
   onLineUpdate: (index: number) => void;
 }
 
@@ -50,7 +51,7 @@ function SortableLineItem({
 }: {
   id: string;
   index: number;
-  form: UseFormReturn<any>;
+  form: UseFormReturn<QuoteFormData>;
   onRemove: () => void;
   onUpdate: () => void;
 }) {
@@ -70,6 +71,13 @@ function SortableLineItem({
   };
 
   const { register, formState: { errors } } = form;
+  
+  // Safely access nested errors
+  const itemErrors = errors.items as any;
+  const descriptionError = itemErrors?.[index]?.description?.message as string | undefined;
+  const quantityError = itemErrors?.[index]?.quantity?.message as string | undefined;
+  const unitError = itemErrors?.[index]?.unit?.message as string | undefined;
+  const unitPriceError = itemErrors?.[index]?.unitPrice?.message as string | undefined;
 
   return (
     <div
@@ -100,7 +108,7 @@ function SortableLineItem({
           {...register(`items.${index}.description`, {
             required: "Description is required",
           })}
-          error={errors.items?.[index]?.description?.message}
+          error={descriptionError}
         />
       </div>
       <div className="col-span-2">
@@ -113,7 +121,7 @@ function SortableLineItem({
             valueAsNumber: true,
             onChange: onUpdate,
           })}
-          error={errors.items?.[index]?.quantity?.message}
+          error={quantityError}
         />
       </div>
       <div className="col-span-1">
@@ -122,7 +130,7 @@ function SortableLineItem({
           {...register(`items.${index}.unit`, {
             required: "Required",
           })}
-          error={errors.items?.[index]?.unit?.message}
+          error={unitError}
         />
       </div>
       <div className="col-span-2">
@@ -135,7 +143,7 @@ function SortableLineItem({
             valueAsNumber: true,
             onChange: onUpdate,
           })}
-          error={errors.items?.[index]?.unitPrice?.message}
+          error={unitPriceError}
         />
       </div>
       <div className="col-span-1">
