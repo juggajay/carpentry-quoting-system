@@ -9,14 +9,18 @@ import ExportButton from "@/features/search/components/ExportButton";
 import { toast } from "sonner";
 import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
 
+interface SearchFilters {
+  search: string;
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  minAmount?: number;
+  maxAmount?: number;
+}
+
 export default function SearchPage() {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<SearchFilters>({
     search: "",
-    dateFrom: undefined as string | undefined,
-    dateTo: undefined as string | undefined,
-    status: undefined as string | undefined,
-    minAmount: undefined as number | undefined,
-    maxAmount: undefined as number | undefined,
   });
 
   // Debounce the search term
@@ -30,7 +34,7 @@ export default function SearchPage() {
 
   const { addItems } = useQuoteClipboard();
 
-  const handleFiltersChange = useCallback((newFilters: typeof filters) => {
+  const handleFiltersChange = useCallback((newFilters: SearchFilters) => {
     setFilters(newFilters);
   }, []);
 
