@@ -15,7 +15,7 @@ export default function SignInPage() {
               "bg-background-secondary border-border-default hover:bg-background-hover text-text-primary transition-colors",
             formFieldLabel: "text-text-secondary",
             formFieldInput: 
-              "bg-background-secondary border-border-default text-text-primary focus:border-primary-light focus:ring-primary-light",
+              "bg-background-secondary border-border-default text-text-primary focus:border-primary-light",
             footerActionLink: "text-primary-light hover:text-primary-DEFAULT",
             identityPreviewText: "text-text-secondary",
             identityPreviewEditButtonIcon: "text-primary-light",

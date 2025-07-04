@@ -43,7 +43,7 @@ export default async function VerifyPage({
 
   // Parse extracted items
   const extractedItems = Array.isArray(file.extractedItems) 
-    ? file.extractedItems as ExtractedItem[]
+    ? (file.extractedItems as unknown as ExtractedItem[])
     : [];
 
   return (

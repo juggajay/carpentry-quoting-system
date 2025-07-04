@@ -159,7 +159,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
                     setStatus(e.target.value);
                     updateSearchParams({ status: e.target.value });
                   }}
-                  className="w-full h-10 px-3 rounded-lg border border-border-default bg-background-secondary text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-light focus:ring-offset-2 focus:ring-offset-background-primary"
+                  className="w-full h-10 px-3 rounded-lg border border-border-default bg-background-secondary text-text-primary focus:outline-none focus:border-primary-light"
                 >
                   <option value="">All Statuses</option>
                   <option value="DRAFT">Draft</option>
