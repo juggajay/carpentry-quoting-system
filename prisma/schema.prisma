@@ -23,7 +23,6 @@ model User {
   clients         Client[]
   quotes          Quote[]
   uploadedFiles   UploadedFile[]
-  quoteVersions   QuoteVersion[]
 
   @@index([clerkId])
   @@index([email])
@@ -63,13 +62,14 @@ model Quote {
   total          Float       @default(0)
   notes          String?
   termsConditions String?
-  clientId       String
+  versionNumber  Int         @default(1)
+  clientId       String?
   userId         String
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
   // Relations
-  client        Client         @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  client        Client?        @relation(fields: [clientId], references: [id], onDelete: Restrict)
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   items         QuoteItem[]
   versions      QuoteVersion[]
@@ -107,14 +107,12 @@ model QuoteVersion {
   id         String   @id @default(uuid())
   quoteId    String
   versionNumber Int
-  data       Json     // Stores the complete quote data as JSON
+  changes    Json     // Stores the version changes as JSON
   notes      String?
-  userId     String
   createdAt  DateTime @default(now())
 
   // Relations
   quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([quoteId, versionNumber])
   @@index([quoteId])

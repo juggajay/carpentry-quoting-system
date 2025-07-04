@@ -68,7 +68,7 @@ export default async function QuotesPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-lg">{quote.quoteNumber}</CardTitle>
-                    <CardDescription>{quote.client.name}</CardDescription>
+                    <CardDescription>{quote.client?.name || "No client"}</CardDescription>
                   </div>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${

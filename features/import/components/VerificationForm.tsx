@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
 import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
+import CopyToQuoteButton from "../components/CopyToQuoteButton";
 
 interface LineItem {
   description: string;
@@ -282,13 +283,16 @@ export default function VerificationForm({
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-end space-x-4">
-        <Button type="button" variant="secondary">
-          Cancel
-        </Button>
-        <Button type="submit" loading={saving}>
-          Save & Import
-        </Button>
+      <div className="flex justify-between">
+        <CopyToQuoteButton items={watchedItems} />
+        <div className="flex space-x-4">
+          <Button type="button" variant="secondary">
+            Cancel
+          </Button>
+          <Button type="submit" loading={saving}>
+            Save & Import
+          </Button>
+        </div>
       </div>
     </form>
   );
