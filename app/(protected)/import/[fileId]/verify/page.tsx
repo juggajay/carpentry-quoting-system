@@ -4,7 +4,6 @@ import { PrismaClient } from "@prisma/client";
 import VerificationLayout from "./verification-layout";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
-import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
