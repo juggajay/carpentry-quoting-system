@@ -187,7 +187,7 @@ export default function ComponentsDemoPage() {
             <div className="p-4 bg-background-hover rounded animate-pulse">
               Pulse Animation
             </div>
-            <div className="p-4 bg-gradient-to-r from-primary-light to-primary-DEFAULT text-white rounded animate-gradient-shift">
+            <div className="p-4 text-white rounded animate-gradient-shift" style={{ background: "linear-gradient(to right, #9333EA, #7C3AED)" }}>
               Gradient Shift
             </div>
           </div>

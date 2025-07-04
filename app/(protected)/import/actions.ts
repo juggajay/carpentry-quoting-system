@@ -167,7 +167,7 @@ export async function processUploadedPdf(fileId: string) {
           confidence: parseResult.confidence,
           metadata: parseResult.metadata,
         },
-        extractedItems: parseResult.items,
+        extractedItems: parseResult.items as unknown as Prisma.InputJsonValue,
       },
     });
 

@@ -74,29 +74,35 @@
 @layer utilities {
   /* Text gradient */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-light to-primary-DEFAULT bg-clip-text text-transparent;
+    background: linear-gradient(to right, var(--primary-purple), var(--primary-purple-dark));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   /* Glass effect */
   .glass {
-    @apply bg-background-card/80 backdrop-blur-lg;
+    background-color: rgba(24, 24, 27, 0.8);
+    backdrop-filter: blur(16px);
   }
 
   /* Glow effect */
   .glow {
-    @apply shadow-purple-glow;
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
   }
 
   /* Animated gradient background */
   .gradient-bg {
-    @apply bg-gradient-to-br from-primary-light/10 via-background-primary to-primary-DEFAULT/10;
+    background: linear-gradient(to bottom right, rgba(147, 51, 234, 0.1), var(--background-primary), rgba(124, 58, 237, 0.1));
     background-size: 200% 200%;
     animation: gradient-shift 3s ease infinite;
   }
 
   /* Loading skeleton */
   .skeleton {
-    @apply bg-background-hover animate-pulse rounded;
+    background-color: var(--background-hover);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    border-radius: 0.5rem;
   }
 
   /* Hide scrollbar */
