@@ -70,7 +70,7 @@ export default function EditQuotePage({ params }: PageProps) {
       </div>
 
       <QuoteForm 
-        initialData={initialData} 
+        initialData={initialData || undefined} 
         quoteId={quoteId}
         onSubmit={handleSubmit} 
       />
