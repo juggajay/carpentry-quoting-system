@@ -51,7 +51,7 @@ export default async function QuotesPage() {
             </div>
             <h3 className="text-lg font-semibold text-gray-100">Unable to Load Quotes</h3>
             <p className="text-gray-400 max-w-md mx-auto">
-              We're having trouble connecting to the database. Please check your connection and try again.
+              We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <Button onClick={() => window.location.reload()} className="mt-4">
               Retry
