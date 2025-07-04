@@ -3,15 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 transform active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none",
+  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900",
   {
     variants: {
       variant: {
-        primary: "bg-primary-light hover:bg-primary-DEFAULT hover:scale-102 hover:brightness-110 text-white shadow-sm",
-        secondary: "bg-background-card hover:bg-background-hover hover:scale-102 text-text-primary border border-border-default",
-        ghost: "hover:bg-background-hover hover:scale-102 text-text-secondary hover:text-text-primary",
-        destructive: "bg-error hover:bg-error/90 hover:scale-102 hover:brightness-110 text-white shadow-sm",
-        outline: "border border-border-default bg-transparent hover:bg-background-hover hover:scale-102 text-text-primary",
+        primary: "bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg",
+        secondary: "bg-gray-700 hover:bg-gray-600 text-gray-100 border border-gray-600 shadow-sm hover:shadow-md",
+        ghost: "hover:bg-gray-700/50 text-gray-300 hover:text-gray-100",
+        destructive: "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg",
+        outline: "border border-gray-600 bg-transparent hover:bg-gray-700/50 text-gray-100 shadow-sm hover:shadow-md",
       },
       size: {
         sm: "h-8 px-3 text-sm",

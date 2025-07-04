@@ -3,63 +3,88 @@ import { PrismaClient } from "@prisma/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { PlusIcon, EyeIcon } from "@heroicons/react/24/outline";
+import PageContainer from "@/components/layout/PageContainer";
+import ContentCard from "@/components/layout/ContentCard";
+import { PlusIcon, EyeIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const prisma = new PrismaClient();
 
 async function getQuotes() {
-  const { userId } = await auth();
-  if (!userId) return [];
+  try {
+    const { userId } = await auth();
+    if (!userId) return [];
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
 
-  if (!user) return [];
+    if (!user) return [];
 
-  const quotes = await prisma.quote.findMany({
-    where: { userId: user.id },
-    include: {
-      client: true,
-      _count: {
-        select: { items: true },
+    const quotes = await prisma.quote.findMany({
+      where: { userId: user.id },
+      include: {
+        client: true,
+        _count: {
+          select: { items: true },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    });
 
-  return quotes;
+    return quotes;
+  } catch (error) {
+    console.error("Error fetching quotes:", error);
+    return null;
+  }
 }
 
 export default async function QuotesPage() {
   const quotes = await getQuotes();
 
+  if (quotes === null) {
+    return (
+      <PageContainer title="Quotes">
+        <ContentCard className="text-center py-12">
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-100">Unable to Load Quotes</h3>
+            <p className="text-gray-400 max-w-md mx-auto">
+              We're having trouble connecting to the database. Please check your connection and try again.
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Retry
+            </Button>
+          </div>
+        </ContentCard>
+      </PageContainer>
+    );
+  }
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">Quotes</h1>
-          <p className="text-text-secondary">
-            Manage and view all your quotes
-          </p>
-        </div>
+    <PageContainer
+      title="Quotes"
+      description="Manage and view all your quotes"
+      actions={
         <Link href="/quotes/new">
           <Button>
             <PlusIcon className="w-4 h-4 mr-2" />
             New Quote
           </Button>
         </Link>
-      </div>
+      }
+    >
 
       {quotes.length === 0 ? (
-        <Card>
+        <ContentCard>
           <CardContent className="py-12 text-center">
             <p className="text-text-secondary mb-4">No quotes yet</p>
             <Link href="/import">
               <Button variant="secondary">Import Your First Quote</Button>
             </Link>
           </CardContent>
-        </Card>
+        </ContentCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {quotes.map((quote) => (
@@ -115,6 +140,6 @@ export default async function QuotesPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -7,17 +7,21 @@
 
 /* Custom CSS Variables */
 :root {
-  --background-primary: #0A0A0B;
-  --background-secondary: #0F0F0F;
-  --background-card: #18181B;
-  --background-hover: #27272A;
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --text-muted: #71717A;
-  --border-default: #27272A;
-  --border-light: #3F3F46;
+  --background-primary: #111827;
+  --background-secondary: #1F2937;
+  --background-card: #374151;
+  --background-hover: #4B5563;
+  --text-primary: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --border-default: #374151;
+  --border-light: #4B5563;
   --primary-purple: #9333EA;
   --primary-purple-dark: #7C3AED;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Base Styles */

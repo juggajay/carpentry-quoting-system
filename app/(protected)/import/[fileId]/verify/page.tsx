@@ -2,6 +2,10 @@ import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import VerificationLayout from "./verification-layout";
+import PageContainer from "@/components/layout/PageContainer";
+import ContentCard from "@/components/layout/ContentCard";
+import { Button } from "@/components/ui/Button";
+import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const prisma = new PrismaClient();
 
@@ -18,38 +22,60 @@ export default async function VerifyPage({
 }: {
   params: Promise<{ fileId: string }>;
 }) {
-  const resolvedParams = await params;
-  const { userId } = await auth();
-  if (!userId) return notFound();
+  try {
+    const resolvedParams = await params;
+    const { userId } = await auth();
+    if (!userId) return notFound();
 
-  // Get user
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+    // Get user
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
 
-  if (!user) return notFound();
+    if (!user) return notFound();
 
-  // Get file
-  const file = await prisma.uploadedFile.findUnique({
-    where: { 
-      id: resolvedParams.fileId,
-      userId: user.id,
-    },
-  });
+    // Get file
+    const file = await prisma.uploadedFile.findUnique({
+      where: { 
+        id: resolvedParams.fileId,
+        userId: user.id,
+      },
+    });
 
-  if (!file || file.status !== "PENDING_VERIFICATION") {
-    return notFound();
+    if (!file || file.status !== "PENDING_VERIFICATION") {
+      return notFound();
+    }
+
+    // Parse extracted items
+    const extractedItems = Array.isArray(file.extractedItems) 
+      ? (file.extractedItems as unknown as ExtractedItem[])
+      : [];
+
+    return (
+      <VerificationLayout
+        file={file}
+        extractedItems={extractedItems}
+      />
+    );
+  } catch (error) {
+    console.error("Error loading file for verification:", error);
+    return (
+      <PageContainer title="Verify Import">
+        <ContentCard className="text-center py-12">
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-100">Unable to Load File</h3>
+            <p className="text-gray-400 max-w-md mx-auto">
+              We encountered an error while loading the file for verification. Please try again.
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Retry
+            </Button>
+          </div>
+        </ContentCard>
+      </PageContainer>
+    );
   }
-
-  // Parse extracted items
-  const extractedItems = Array.isArray(file.extractedItems) 
-    ? (file.extractedItems as unknown as ExtractedItem[])
-    : [];
-
-  return (
-    <VerificationLayout
-      file={file}
-      extractedItems={extractedItems}
-    />
-  );
 }

@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import PageContainer from "@/components/layout/PageContainer";
+import ContentCard from "@/components/layout/ContentCard";
 import { 
   DocumentTextIcon, 
   UsersIcon, 
@@ -15,25 +17,26 @@ import {
 const prisma = new PrismaClient();
 
 async function getDashboardData() {
-  const { userId } = await auth();
-  if (!userId) return null;
+  try {
+    const { userId } = await auth();
+    if (!userId) return null;
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
 
-  if (!user) return null;
+    if (!user) return null;
 
-  // Get stats
-  const [
-    totalQuotes,
-    acceptedQuotes,
-    totalClients,
-    recentQuotes,
-    recentFiles,
-    currentMonthQuotes,
-    lastMonthQuotes,
-  ] = await Promise.all([
+    // Get stats
+    const [
+      totalQuotes,
+      acceptedQuotes,
+      totalClients,
+      recentQuotes,
+      recentFiles,
+      currentMonthQuotes,
+      lastMonthQuotes,
+    ] = await Promise.all([
     prisma.quote.count({ where: { userId: user.id } }),
     prisma.quote.count({ where: { userId: user.id, status: "ACCEPTED" } }),
     prisma.client.count({ where: { userId: user.id } }),
@@ -83,23 +86,41 @@ async function getDashboardData() {
     recentQuotes,
     recentFiles,
   };
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    return null;
+  }
 }
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
 
   if (!data) {
-    return <div>Loading...</div>;
+    return (
+      <PageContainer title="Dashboard">
+        <ContentCard className="text-center py-12">
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-100">Unable to Load Dashboard</h3>
+            <p className="text-gray-400 max-w-md mx-auto">
+              We're having trouble connecting to the database. Please check your connection and try again.
+            </p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Retry
+            </Button>
+          </div>
+        </ContentCard>
+      </PageContainer>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Dashboard</h1>
-        <p className="text-text-secondary">
-          Welcome back! Here&apos;s an overview of your activity.
-        </p>
-      </div>
+    <PageContainer
+      title="Dashboard"
+      description="Welcome back! Here's an overview of your activity."
+    >
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -147,7 +168,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <ContentCard
+        title="Overview"
+        description="Key metrics and performance"
+        variant="ghost"
+        noPadding
+      >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -203,7 +230,8 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </ContentCard>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -307,6 +335,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageContainer>
   );
 }
