@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { RetryButton } from "@/components/ui/RetryButton";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
 import { 
@@ -92,6 +93,8 @@ async function getDashboardData() {
   }
 }
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const data = await getDashboardData();
 
@@ -107,9 +110,7 @@ export default async function DashboardPage() {
             <p className="text-gray-400 max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
-            <Button onClick={() => window.location.reload()} className="mt-4">
-              Retry
-            </Button>
+            <RetryButton className="mt-4" />
           </div>
         </ContentCard>
       </PageContainer>

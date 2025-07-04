@@ -5,6 +5,7 @@ import VerificationLayout from "./verification-layout";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
 import { Button } from "@/components/ui/Button";
+import { RetryButton } from "@/components/ui/RetryButton";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 const prisma = new PrismaClient();
@@ -16,6 +17,8 @@ interface ExtractedItem {
   unitPrice: number;
   total: number;
 }
+
+export const dynamic = 'force-dynamic';
 
 export default async function VerifyPage({
   params,
@@ -70,9 +73,7 @@ export default async function VerifyPage({
             <p className="text-gray-400 max-w-md mx-auto">
               We encountered an error while loading the file for verification. Please try again.
             </p>
-            <Button onClick={() => window.location.reload()} className="mt-4">
-              Retry
-            </Button>
+            <RetryButton className="mt-4" />
           </div>
         </ContentCard>
       </PageContainer>

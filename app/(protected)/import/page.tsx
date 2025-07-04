@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { EyeIcon } from "@heroicons/react/24/outline";
 
+export const dynamic = 'force-dynamic';
+
 async function RecentUploads() {
   const files = await getUploadedFiles();
   
