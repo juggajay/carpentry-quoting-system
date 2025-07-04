@@ -12,7 +12,8 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const currentUser = await clerkClient.users.getUser(userId);
+    const clerk = await clerkClient();
+    const currentUser = await clerk.users.getUser(userId);
     
     // Ensure user exists in our database
     const user = await prisma.user.upsert({
