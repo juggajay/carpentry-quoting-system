@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import QuoteForm from "@/features/quote-builder/components/QuoteForm";
+import QuoteForm, { type QuoteFormData } from "@/features/quote-builder/components/QuoteForm";
 import { createQuote } from "@/features/quote-builder/actions";
 import { toast } from "sonner";
 
 export default function NewQuotePage() {
   const router = useRouter();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: QuoteFormData) => {
     const result = await createQuote(data);
     
     if (result.success) {

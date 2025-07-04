@@ -97,7 +97,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-3xl font-bold text-text-primary mb-2">Dashboard</h1>
         <p className="text-text-secondary">
-          Welcome back! Here's an overview of your activity.
+          Welcome back! Here&apos;s an overview of your activity.
         </p>
       </div>
 

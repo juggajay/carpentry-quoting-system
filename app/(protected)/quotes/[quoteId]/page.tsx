@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
-import QuoteForm from "@/features/quote-builder/components/QuoteForm";
+import QuoteForm, { type QuoteFormData } from "@/features/quote-builder/components/QuoteForm";
 import { loadQuote, saveQuote } from "@/features/quote-builder/actions";
 import { toast } from "sonner";
 
@@ -14,15 +14,15 @@ interface PageProps {
 export default function EditQuotePage({ params }: PageProps) {
   const { quoteId } = use(params);
   const router = useRouter();
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState<QuoteFormData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchQuote = async () => {
       const result = await loadQuote(quoteId);
       
-      if (result.success) {
-        setInitialData(result.data);
+      if (result.success && result.data) {
+        setInitialData(result.data as QuoteFormData);
       } else {
         toast.error(result.error || "Failed to load quote");
         router.push("/quotes");
@@ -34,7 +34,7 @@ export default function EditQuotePage({ params }: PageProps) {
     fetchQuote();
   }, [quoteId, router]);
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: QuoteFormData) => {
     const result = await saveQuote(quoteId, data);
     
     if (result.success) {

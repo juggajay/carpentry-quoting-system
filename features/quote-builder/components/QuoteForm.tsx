@@ -12,7 +12,7 @@ import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 
-interface QuoteFormData {
+export interface QuoteFormData {
   title: string;
   description: string;
   clientId: string;
@@ -31,7 +31,7 @@ interface QuoteFormData {
   }>;
 }
 
-interface QuoteFormProps {
+export interface QuoteFormProps {
   initialData?: Partial<QuoteFormData>;
   quoteId?: string;
   onSubmit: (data: QuoteFormData) => Promise<void>;
