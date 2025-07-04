@@ -18,8 +18,8 @@ export function useAutoSave({
   delay = 1000,
 }: UseAutoSaveProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
-  const lastSavedDataRef = useRef<string>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedDataRef = useRef<string | null>(null);
 
   const debouncedData = useDebounce(data, delay);
 
