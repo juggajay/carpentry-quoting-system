@@ -29,7 +29,7 @@ export async function saveQuote(quoteId: string, data: any) {
 
     // Calculate totals
     const subtotal = data.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
-    const tax = subtotal * 0.0825;
+    const tax = subtotal * 0.10; // 10% GST for Australia
     const total = subtotal + tax;
 
     // Update quote in transaction
@@ -123,33 +123,36 @@ export async function createQuote(data: any) {
         client = await prisma.client.create({
           data: {
             name: data.clientName,
-            email: data.clientEmail,
-            phone: data.clientPhone,
+            email: data.clientEmail || '',
+            phone: data.clientPhone || '',
             userId: user.id,
           },
         });
       }
     }
 
-    // Generate quote number
-    const quoteCount = await prisma.quote.count({
-      where: { userId: user.id },
-    });
-    const quoteNumber = `Q-${new Date().getFullYear()}-${String(quoteCount + 1).padStart(4, "0")}`;
+    // Generate quote number if not provided
+    let quoteNumber = data.quoteNumber;
+    if (!quoteNumber) {
+      const quoteCount = await prisma.quote.count({
+        where: { userId: user.id },
+      });
+      quoteNumber = `Q-${new Date().getFullYear()}-${String(quoteCount + 1).padStart(4, "0")}`;
+    }
 
     // Calculate totals
     const subtotal = data.items?.reduce((sum: number, item: any) => sum + (item.total || 0), 0) || 0;
-    const tax = subtotal * 0.0825;
+    const tax = subtotal * 0.10; // 10% GST for Australia
     const total = subtotal + tax;
 
     // Create quote
     const quote = await prisma.quote.create({
       data: {
         quoteNumber,
-        title: data.title,
-        description: data.description,
-        notes: data.notes,
-        termsConditions: data.termsConditions,
+        title: data.projectTitle || data.title || 'Untitled Quote',
+        description: data.projectDescription || data.description || '',
+        notes: data.notes || '',
+        termsConditions: data.additionalTerms || data.termsConditions || '',
         validUntil: data.validUntil ? new Date(data.validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         subtotal,
         tax,
