@@ -7,26 +7,23 @@
 
 /* Custom CSS Variables - Updated for your design system */
 :root {
-  /* Backgrounds */
+  --background-primary: #0A0A0B;   /* NOT #111827 */
+  --background-secondary: #121214;  /* NOT #1F2937 */
+  --background-card: #1A1A1D;      /* NOT #374151 */
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --border-default: #2A2A2E;       /* NOT #374151 */
+  
+  /* Legacy mappings for compatibility */
   --bg-primary: #0A0A0B;
   --bg-secondary: #121214;
   --bg-tertiary: #1A1A1D;
   --bg-hover: #2A2A2E;
-  
-  /* Text */
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
   --text-tertiary: #71717A;
-  
-  /* Borders */
   --border: #2A2A2E;
   --border-hover: #3A3A3F;
-  
-  /* Primary Color */
   --primary: #22C55E;
   --primary-hover: #16A34A;
-  
-  /* Status Colors */
   --success: #10B981;
   --warning: #F59E0B;
   --error: #EF4444;

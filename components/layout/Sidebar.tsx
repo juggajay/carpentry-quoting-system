@@ -16,7 +16,7 @@ export default function Sidebar() {
       initial={{ width: isExpanded ? 256 : 80 }}
       animate={{ width: isExpanded ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-bg-secondary border-r border-border shadow-xl"
+      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-[#121214] border-r border-[#2A2A2E] shadow-xl"
     >
       {/* Logo / Brand */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
