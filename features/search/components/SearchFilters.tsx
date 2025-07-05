@@ -86,7 +86,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
       {/* Main Search Bar */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" />
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none">🔍</span>
           <Input
             type="text"
             placeholder="Search quotes, clients, or items..."
