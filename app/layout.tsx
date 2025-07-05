@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import UserSync from "@/components/UserSync";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,9 @@ export default function RootLayout({
       <html lang="en">
         <body className="antialiased">
           <QueryProvider>
-            {children}
+            <UserSync>
+              {children}
+            </UserSync>
           </QueryProvider>
           <Toaster 
             position="top-right"
