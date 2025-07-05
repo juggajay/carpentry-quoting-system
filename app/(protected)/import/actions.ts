@@ -1,5 +1,6 @@
-import { prisma } from "@/lib/prisma";
 "use server";
+
+import { prisma } from "@/lib/prisma";
 
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
