@@ -97,7 +97,7 @@ function SortableLineItem({
           {...listeners}
           aria-label={`Reorder item ${index + 1}`}
         >
-          <Bars3Icon className="w-5 h-5 text-text-muted" />
+          <Bars3Icon className="w-5 h-5 text-muted" />
         </button>
       </div>
 
@@ -155,7 +155,7 @@ function SortableLineItem({
             valueAsNumber: true,
           })}
           readOnly
-          className="bg-bg-secondary/50"
+          className="bg-background-secondary/50"
         />
       </div>
       <div className="col-span-1 flex items-center justify-center pt-2">
@@ -164,7 +164,7 @@ function SortableLineItem({
           size="icon"
           variant="ghost"
           onClick={onRemove}
-          className="text-text-muted hover:text-error"
+          className="text-muted hover:text-error"
         >
           <TrashIcon className="w-4 h-4" />
         </Button>
@@ -217,7 +217,7 @@ export default function LineItemsManager({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="grid grid-cols-12 gap-2 text-sm font-medium text-text-secondary px-2">
+      <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground px-2">
         <div className="col-span-1"></div>
         <div className="col-span-4">Description</div>
         <div className="col-span-2">Quantity</div>

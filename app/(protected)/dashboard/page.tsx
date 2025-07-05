@@ -108,11 +108,11 @@ export default async function DashboardPage() {
       <PageContainer title="Dashboard">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-6 h-6 text-red-500" />
+            <div className="mx-auto w-12 h-12 bg-error/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-6 h-6 text-error" />
             </div>
-            <h3 className="text-lg font-semibold text-text-primary">Unable to Load Dashboard</h3>
-            <p className="text-text-muted max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-foreground">Unable to Load Dashboard</h3>
+            <p className="text-muted max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <RetryButton className="mt-4" />
@@ -137,8 +137,8 @@ export default async function DashboardPage() {
                 <PlusIcon className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">New Quote</h3>
-                <p className="text-sm text-text-muted">Create a new quote</p>
+                <h3 className="font-semibold text-foreground">New Quote</h3>
+                <p className="text-sm text-muted">Create a new quote</p>
               </div>
             </CardContent>
           </Card>
@@ -151,8 +151,8 @@ export default async function DashboardPage() {
                 <DocumentArrowUpIcon className="w-6 h-6 text-success" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Import PDF</h3>
-                <p className="text-sm text-text-muted">Import from PDF</p>
+                <h3 className="font-semibold text-foreground">Import PDF</h3>
+                <p className="text-sm text-muted">Import from PDF</p>
               </div>
             </CardContent>
           </Card>
@@ -165,8 +165,8 @@ export default async function DashboardPage() {
                 <DocumentTextIcon className="w-6 h-6 text-secondary" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Search Quotes</h3>
-                <p className="text-sm text-text-muted">Find existing quotes</p>
+                <h3 className="font-semibold text-foreground">Search Quotes</h3>
+                <p className="text-sm text-muted">Find existing quotes</p>
               </div>
             </CardContent>
           </Card>
@@ -179,12 +179,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-muted">Total Quotes</p>
-                <p className="text-2xl font-bold text-text-primary">
+                <p className="text-sm text-muted">Total Quotes</p>
+                <p className="text-2xl font-bold text-foreground">
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-8 h-8 text-text-tertiary" />
+              <DocumentTextIcon className="w-8 h-8 text-muted" />
             </div>
           </CardContent>
         </Card>
@@ -193,7 +193,7 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-muted">Accepted</p>
+                <p className="text-sm text-muted">Accepted</p>
                 <p className="text-2xl font-bold text-success">
                   {data.stats.acceptedQuotes}
                 </p>
@@ -207,12 +207,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-muted">Total Clients</p>
-                <p className="text-2xl font-bold text-text-primary">
+                <p className="text-sm text-muted">Total Clients</p>
+                <p className="text-2xl font-bold text-foreground">
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-text-tertiary" />
+              <UsersIcon className="w-8 h-8 text-muted" />
             </div>
           </CardContent>
         </Card>
@@ -221,7 +221,7 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-muted">Monthly Growth</p>
+                <p className="text-sm text-muted">Monthly Growth</p>
                 <p className="text-2xl font-bold text-primary">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
@@ -247,20 +247,20 @@ export default async function DashboardPage() {
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-bg-tertiary/50 transition-colors">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-background-tertiary/50 transition-colors">
                       <div className="flex-1">
-                        <p className="font-medium text-text-primary">
+                        <p className="font-medium text-foreground">
                           {quote.quoteNumber}
                         </p>
-                        <p className="text-sm text-text-muted">
+                        <p className="text-sm text-muted">
                           {quote.client?.name || "No client"} • {quote.title}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-text-primary">
+                        <p className="font-medium text-foreground">
                           ${quote.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-text-muted">
+                        <p className="text-xs text-muted">
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -291,12 +291,12 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-bg-tertiary/50 transition-colors">
+                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-background-tertiary/50 transition-colors">
                     <div className="flex-1">
-                      <p className="font-medium text-text-primary truncate">
+                      <p className="font-medium text-foreground truncate">
                         {file.fileName}
                       </p>
-                      <p className="text-sm text-text-secondary">
+                      <p className="text-sm text-muted-foreground">
                         {(file.fileSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -312,7 +312,7 @@ export default async function DashboardPage() {
                       >
                         {file.status}
                       </span>
-                      <p className="text-xs text-text-tertiary mt-1">
+                      <p className="text-xs text-muted mt-1">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </p>
                     </div>

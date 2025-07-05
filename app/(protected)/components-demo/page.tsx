@@ -30,8 +30,8 @@ export default function ComponentsDemoPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Component Library</h1>
-        <p className="text-text-secondary">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Component Library</h1>
+        <p className="text-muted-foreground">
           Core UI components with animations and micro-interactions
         </p>
       </div>
@@ -97,7 +97,7 @@ export default function ComponentsDemoPage() {
             <CardDescription>This card scales on hover</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-text-secondary">
+            <p className="text-muted-foreground">
               Hover over this card to see the scale and shadow effect.
             </p>
           </CardContent>
@@ -109,7 +109,7 @@ export default function ComponentsDemoPage() {
             <CardDescription>No hover effects</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-text-secondary">
+            <p className="text-muted-foreground">
               This card has hover effects disabled.
             </p>
           </CardContent>
@@ -121,7 +121,7 @@ export default function ComponentsDemoPage() {
             <CardDescription>With custom styling</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-text-secondary">
+            <p className="text-muted-foreground">
               Cards can be customized with different colors.
             </p>
           </CardContent>

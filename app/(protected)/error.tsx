@@ -18,15 +18,15 @@ export default function Error({
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center space-y-4 p-8">
-        <h2 className="text-2xl font-bold text-text-primary">
+        <h2 className="text-2xl font-bold text-foreground">
           Something went wrong!
         </h2>
-        <p className="text-text-secondary max-w-md">
+        <p className="text-muted-foreground max-w-md">
           We encountered an error while loading this page. This might be due to a
           database connection issue or authentication problem.
         </p>
         {error.digest && (
-          <p className="text-sm text-text-muted">
+          <p className="text-sm text-muted">
             Error digest: {error.digest}
           </p>
         )}

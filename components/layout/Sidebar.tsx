@@ -12,14 +12,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <motion.aside
+    <motion.div
       initial={{ width: isExpanded ? 256 : 80 }}
       animate={{ width: isExpanded ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-[#121214] border-r border-[#2A2A2E] shadow-xl"
+      className="h-screen bg-background-secondary border-r border-border flex flex-col"
     >
-      {/* Logo / Brand */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+      {/* Logo */}
+      <div className="h-16 flex items-center justify-center border-b border-border">
         <AnimatePresence mode="wait">
           {isExpanded ? (
             <motion.h1
@@ -27,8 +27,7 @@ export default function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, delay: 0.1 }}
-              className="text-xl font-bold text-text-primary"
+              className="text-xl font-bold"
             >
               CarpentryQS
             </motion.h1>
@@ -38,18 +37,17 @@ export default function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md"
+              className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
             >
-              <span className="text-bg-primary font-bold text-lg">C</span>
+              <span className="text-background font-bold text-lg">C</span>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
-        <ul className="space-y-1">
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
           {navigationLinks.map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href;
@@ -59,25 +57,21 @@ export default function Sidebar() {
                 <Link
                   href={link.href}
                   className={`
-                    group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200
+                    flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
                     ${isActive 
-                      ? "bg-primary text-bg-primary shadow-md" 
-                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
+                      ? "bg-primary text-background" 
+                      : "text-muted-foreground hover:bg-background-tertiary hover:text-foreground"
                     }
                   `}
                 >
-                  <Icon className={`
-                    w-5 h-5 flex-shrink-0 transition-colors duration-200
-                    ${isActive ? "text-bg-primary" : "text-text-secondary group-hover:text-text-primary"}
-                  `} />
-                  <AnimatePresence mode="wait">
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <AnimatePresence>
                     {isExpanded && (
                       <motion.span
                         initial={{ opacity: 0, width: 0 }}
                         animate={{ opacity: 1, width: "auto" }}
                         exit={{ opacity: 0, width: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden"
+                        className="overflow-hidden whitespace-nowrap"
                       >
                         {link.name}
                       </motion.span>
@@ -90,19 +84,19 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* Expand/Collapse Toggle */}
-      <div className="p-3 border-t border-border">
+      {/* Toggle Button */}
+      <div className="p-4 border-t border-border">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full p-2 rounded-lg bg-bg-tertiary hover:bg-bg-hover transition-colors duration-200 flex items-center justify-center"
+          className="w-full p-2 rounded-lg bg-background-tertiary hover:bg-background transition-colors flex items-center justify-center"
         >
           {isExpanded ? (
-            <ChevronLeftIcon className="w-5 h-5 text-text-secondary" />
+            <ChevronLeftIcon className="w-5 h-5" />
           ) : (
-            <ChevronRightIcon className="w-5 h-5 text-text-secondary" />
+            <ChevronRightIcon className="w-5 h-5" />
           )}
         </button>
       </div>
-    </motion.aside>
+    </motion.div>
   );
 }

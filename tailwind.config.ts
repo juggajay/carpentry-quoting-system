@@ -11,32 +11,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Primary brand color
-        primary: "#22C55E", // Green for CTAs
-        "primary-hover": "#16A34A",
-        
-        // Background colors - using your exact design system
-        "bg-primary": "#0A0A0B",
-        "bg-secondary": "#121214", 
-        "bg-tertiary": "#1A1A1D",
-        "bg-hover": "#2A2A2E",
-        
-        // Text colors
-        "text-primary": "#FAFAFA",
-        "text-secondary": "#A1A1AA",
-        "text-tertiary": "#71717A",
-        
-        // Border colors
-        border: "#2A2A2E",
-        "border-hover": "#3A3A3F",
-        
-        // Status colors
-        success: "#10B981",
-        warning: "#F59E0B",
-        error: "#EF4444",
-        info: "#3B82F6",
+        // Use CSS variables for consistency
+        background: {
+          DEFAULT: "var(--background)",
+          secondary: "var(--background-secondary)",
+          tertiary: "var(--background-tertiary)",
+        },
+        foreground: "var(--foreground)",
+        primary: {
+          DEFAULT: "var(--primary)",
+          hover: "var(--primary-hover)",
+        },
+        border: "var(--border)",
+        muted: {
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
+        },
       },
-      // Rest of your config remains the same...
     },
   },
   plugins: [],

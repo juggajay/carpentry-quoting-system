@@ -47,11 +47,11 @@ export default async function QuotesPage() {
       <PageContainer title="Quotes">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+            <div className="mx-auto w-16 h-16 bg-error/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-error" />
             </div>
-            <h3 className="text-lg font-semibold text-text-primary">Unable to Load Quotes</h3>
-            <p className="text-text-secondary max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-foreground">Unable to Load Quotes</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <RetryButton className="mt-4" />
@@ -79,12 +79,12 @@ export default async function QuotesPage() {
         <ContentCard>
           <CardContent className="py-12 text-center">
             <div className="max-w-md mx-auto space-y-4">
-              <div className="mx-auto w-12 h-12 bg-bg-secondary rounded-full flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-text-tertiary" />
+              <div className="mx-auto w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center">
+                <DocumentTextIcon className="w-6 h-6 text-muted" />
               </div>
               <div>
-                <p className="text-text-primary font-medium mb-1">No quotes yet</p>
-                <p className="text-text-secondary text-sm mb-4">
+                <p className="text-foreground font-medium mb-1">No quotes yet</p>
+                <p className="text-muted-foreground text-sm mb-4">
                   Get started by importing a PDF or creating a new quote
                 </p>
               </div>
@@ -126,20 +126,20 @@ export default async function QuotesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm text-text-secondary">{quote.title}</p>
+                  <p className="text-sm text-muted-foreground">{quote.title}</p>
                   <div className="flex justify-between text-sm">
-                    <span className="text-text-tertiary">Items:</span>
-                    <span className="text-text-primary">{quote._count.items}</span>
+                    <span className="text-muted">Items:</span>
+                    <span className="text-foreground">{quote._count.items}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-tertiary text-sm">Total:</span>
-                    <span className="text-lg font-semibold text-text-primary">
+                    <span className="text-muted text-sm">Total:</span>
+                    <span className="text-lg font-semibold text-foreground">
                       ${quote.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-border">
-                  <span className="text-xs text-text-tertiary">
+                  <span className="text-xs text-muted">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
                   <Link href={`/quotes/${quote.id}`}>

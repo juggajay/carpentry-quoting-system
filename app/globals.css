@@ -2,98 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Inter font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-/* Custom CSS Variables - Updated for your design system */
-:root {
-  --background-primary: #0A0A0B;   /* NOT #111827 */
-  --background-secondary: #121214;  /* NOT #1F2937 */
-  --background-card: #1A1A1D;      /* NOT #374151 */
-  --text-primary: #FAFAFA;
-  --text-secondary: #A1A1AA;
-  --border-default: #2A2A2E;       /* NOT #374151 */
-  
-  /* Legacy mappings for compatibility */
-  --bg-primary: #0A0A0B;
-  --bg-secondary: #121214;
-  --bg-tertiary: #1A1A1D;
-  --bg-hover: #2A2A2E;
-  --text-tertiary: #71717A;
-  --border: #2A2A2E;
-  --border-hover: #3A3A3F;
-  --primary: #22C55E;
-  --primary-hover: #16A34A;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --error: #EF4444;
-  --info: #3B82F6;
-}
-
-/* Base Styles */
 @layer base {
-  html {
-    @apply antialiased;
+  :root {
+    --background: #0A0A0B;
+    --background-secondary: #121214;
+    --background-tertiary: #1A1A1D;
+    --foreground: #FAFAFA;
+    
+    --muted: #71717A;
+    --muted-foreground: #A1A1AA;
+    
+    --primary: #22C55E;
+    --primary-hover: #16A34A;
+    
+    --border: #2A2A2E;
+    
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --info: #3B82F6;
+  }
+  
+  * {
+    border-color: var(--border);
   }
   
   body {
-    @apply bg-bg-primary text-text-primary;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  
-  /* Focus styles */
-  :focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-bg-primary;
-  }
-  
-  /* Selection */
-  ::selection {
-    @apply bg-primary/20 text-text-primary;
-  }
-  
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    @apply w-2 h-2;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-bg-secondary rounded-full;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border rounded-full hover:bg-border-hover;
-  }
-}
-
-/* Component Styles */
-@layer components {
-  /* Status pills */
-  .pill-draft {
-    @apply bg-text-tertiary/20 text-text-tertiary;
-  }
-  
-  .pill-pending {
-    @apply bg-warning/20 text-warning;
-  }
-  
-  .pill-approved {
-    @apply bg-success/20 text-success;
-  }
-  
-  .pill-rejected {
-    @apply bg-error/20 text-error;
-  }
-}
-
-/* Utility Extensions */
-@layer utilities {
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent;
-  }
-  
-  /* Loading skeleton */
-  .skeleton {
-    @apply bg-gradient-to-r from-bg-secondary via-bg-tertiary to-bg-secondary bg-[length:200%_100%] animate-pulse;
+    @apply bg-background text-foreground;
   }
 }

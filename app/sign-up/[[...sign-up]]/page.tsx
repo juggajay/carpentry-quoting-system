@@ -2,22 +2,22 @@ import { SignUp } from "@clerk/nextjs";
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-primary">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <SignUp 
         appearance={{
           elements: {
             formButtonPrimary: 
-              "bg-primary-light hover:bg-bg-primary-DEFAULT text-white transition-colors",
+              "bg-primary-light hover:bg-primary text-white transition-colors",
             card: "bg-background-card border border-border-default",
-            headerTitle: "text-text-primary",
-            headerSubtitle: "text-text-secondary",
+            headerTitle: "text-foreground",
+            headerSubtitle: "text-muted-foreground",
             socialButtonsBlockButton: 
-              "bg-bg-secondary border-border-default hover:bg-background-hover text-text-primary transition-colors",
-            formFieldLabel: "text-text-secondary",
+              "bg-background-secondary border-border-default hover:bg-background-hover text-foreground transition-colors",
+            formFieldLabel: "text-muted-foreground",
             formFieldInput: 
-              "bg-bg-secondary border-border-default text-text-primary focus:border-primary-light",
+              "bg-background-secondary border-border-default text-foreground focus:border-primary-light",
             footerActionLink: "text-primary-light hover:text-primary-DEFAULT",
-            identityPreviewText: "text-text-secondary",
+            identityPreviewText: "text-muted-foreground",
             identityPreviewEditButtonIcon: "text-primary-light",
           },
           variables: {

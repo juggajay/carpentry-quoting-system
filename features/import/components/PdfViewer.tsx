@@ -38,7 +38,7 @@ export default function PdfViewer({ pdfUrl, highlightArea }: PdfViewerProps) {
   // In a real implementation, we would use a PDF rendering library
   // For now, we'll display an iframe and overlay highlights
   return (
-    <div ref={containerRef} className="relative h-full bg-bg-secondary rounded-lg overflow-hidden">
+    <div ref={containerRef} className="relative h-full bg-background-secondary rounded-lg overflow-hidden">
       {/* PDF Display */}
       <iframe
         src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
@@ -94,7 +94,7 @@ export default function PdfViewer({ pdfUrl, highlightArea }: PdfViewerProps) {
 
           <table className="w-full text-sm mb-8">
             <thead>
-              <tr className="border-b-2 border-gray-300">
+              <tr className="border-b-2 border-muted-foreground">
                 <th className="text-left py-2">Item Description</th>
                 <th className="text-center py-2">Qty</th>
                 <th className="text-center py-2">Unit</th>
@@ -103,21 +103,21 @@ export default function PdfViewer({ pdfUrl, highlightArea }: PdfViewerProps) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-200">
+              <tr className="border-b border-border">
                 <td className="py-2">2x4 Lumber - 8ft Premium Grade</td>
                 <td className="text-center py-2">50</td>
                 <td className="text-center py-2">pieces</td>
                 <td className="text-right py-2">$8.99</td>
                 <td className="text-right py-2">$449.50</td>
               </tr>
-              <tr className="border-b border-gray-200">
+              <tr className="border-b border-border">
                 <td className="py-2">2x6 Lumber - 10ft</td>
                 <td className="text-center py-2">30</td>
                 <td className="text-center py-2">pieces</td>
                 <td className="text-right py-2">$14.75</td>
                 <td className="text-right py-2">$442.50</td>
               </tr>
-              <tr className="border-b border-gray-200">
+              <tr className="border-b border-border">
                 <td className="py-2">Plywood Sheet - 4x8 3/4"</td>
                 <td className="text-center py-2">20</td>
                 <td className="text-center py-2">sheets</td>

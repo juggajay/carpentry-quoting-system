@@ -32,13 +32,13 @@ async function RecentUploads() {
           {pendingFiles.map((file) => (
             <div
               key={file.id}
-              className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg"
+              className="flex items-center justify-between p-3 bg-background-secondary rounded-lg"
             >
               <div>
-                <p className="text-sm font-medium text-text-primary">
+                <p className="text-sm font-medium text-foreground">
                   {file.fileName}
                 </p>
-                <p className="text-xs text-text-secondary">
+                <p className="text-xs text-muted-foreground">
                   Uploaded {new Date(file.createdAt).toLocaleDateString()}
                 </p>
               </div>
@@ -60,10 +60,10 @@ export default function ImportPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text-primary mb-2">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
           Import Quotes
         </h1>
-        <p className="text-text-secondary">
+        <p className="text-muted-foreground">
           Upload PDF quotes to extract and import data automatically
         </p>
       </div>
@@ -85,8 +85,8 @@ export default function ImportPage() {
           <Card>
             <CardContent className="py-8">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-bg-tertiary rounded w-3/4" />
-                <div className="h-4 bg-bg-tertiary rounded w-1/2" />
+                <div className="h-4 bg-background-tertiary rounded w-3/4" />
+                <div className="h-4 bg-background-tertiary rounded w-1/2" />
               </div>
             </CardContent>
           </Card>

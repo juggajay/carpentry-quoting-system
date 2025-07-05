@@ -63,8 +63,8 @@ export default function EditQuotePage({ params }: PageProps) {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Edit Quote</h1>
-        <p className="text-text-secondary">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Edit Quote</h1>
+        <p className="text-muted-foreground">
           Make changes to your quote with auto-save enabled
         </p>
       </div>

@@ -50,7 +50,7 @@ export default function SearchResults({
       <Card>
         <CardContent className="py-12 text-center">
           <p className="text-error mb-2">Failed to load quotes</p>
-          <p className="text-text-secondary text-sm">
+          <p className="text-muted-foreground text-sm">
             Please try again or check your connection
           </p>
         </CardContent>
@@ -63,12 +63,12 @@ export default function SearchResults({
       <Card>
         <CardContent className="py-12 text-center">
           <div className="max-w-md mx-auto space-y-4">
-            <div className="mx-auto w-12 h-12 bg-bg-secondary rounded-full flex items-center justify-center">
-              <DocumentDuplicateIcon className="w-6 h-6 text-text-tertiary" />
+            <div className="mx-auto w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center">
+              <DocumentDuplicateIcon className="w-6 h-6 text-muted" />
             </div>
             <div>
-              <p className="text-text-primary font-medium mb-1">No quotes found</p>
-              <p className="text-text-secondary text-sm">
+              <p className="text-foreground font-medium mb-1">No quotes found</p>
+              <p className="text-muted-foreground text-sm">
                 Try adjusting your search criteria or filters
               </p>
             </div>
@@ -113,22 +113,22 @@ export default function SearchResults({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm text-text-secondary line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
                     {quote.title}
                   </p>
                   <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">Items:</span>
-                    <span className="text-text-primary">{quote._count.items}</span>
+                    <span className="text-muted">Items:</span>
+                    <span className="text-foreground">{quote._count.items}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-muted text-sm">Total:</span>
-                    <span className="text-lg font-semibold text-text-primary">
+                    <span className="text-muted text-sm">Total:</span>
+                    <span className="text-lg font-semibold text-foreground">
                       ${quote.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-border">
-                  <span className="text-xs text-text-muted">
+                  <span className="text-xs text-muted">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
                   <div className="flex gap-2">

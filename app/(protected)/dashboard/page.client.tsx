@@ -12,8 +12,8 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Dashboard</h1>
-        <p className="text-text-secondary">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
+        <p className="text-muted-foreground">
           Welcome back! Here&apos;s an overview of your activity.
         </p>
       </div>
@@ -27,8 +27,8 @@ export default function DashboardPage() {
                 <PlusIcon className="w-6 h-6 text-primary-light" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">New Quote</h3>
-                <p className="text-sm text-text-secondary">Create a new quote</p>
+                <h3 className="font-semibold text-foreground">New Quote</h3>
+                <p className="text-sm text-muted-foreground">Create a new quote</p>
               </div>
             </CardContent>
           </Card>
@@ -41,8 +41,8 @@ export default function DashboardPage() {
                 <DocumentArrowUpIcon className="w-6 h-6 text-success" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Import PDF</h3>
-                <p className="text-sm text-text-secondary">Import from PDF</p>
+                <h3 className="font-semibold text-foreground">Import PDF</h3>
+                <p className="text-sm text-muted-foreground">Import from PDF</p>
               </div>
             </CardContent>
           </Card>
@@ -55,8 +55,8 @@ export default function DashboardPage() {
                 <DocumentTextIcon className="w-6 h-6 text-info" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Search Quotes</h3>
-                <p className="text-sm text-text-secondary">Find existing quotes</p>
+                <h3 className="font-semibold text-foreground">Search Quotes</h3>
+                <p className="text-sm text-muted-foreground">Find existing quotes</p>
               </div>
             </CardContent>
           </Card>
@@ -70,10 +70,10 @@ export default function DashboardPage() {
           <CardDescription>Database connection needs to be configured</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-text-secondary mb-4">
+          <p className="text-muted-foreground mb-4">
             To use all features, please configure your database connection in Vercel:
           </p>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-text-secondary">
+          <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
             <li>Set up a PostgreSQL database (Supabase, Neon, or Vercel Postgres)</li>
             <li>Add the DATABASE_URL environment variable in Vercel settings</li>
             <li>Redeploy your application</li>

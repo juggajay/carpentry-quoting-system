@@ -11,7 +11,7 @@ export default function SaveStatusIndicator({ status }: SaveStatusIndicatorProps
     idle: {
       icon: null,
       text: "Editing",
-      className: "text-text-muted",
+      className: "text-muted",
     },
     saving: {
       icon: <ArrowPathIcon className="w-4 h-4 animate-spin" />,

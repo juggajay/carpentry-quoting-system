@@ -169,7 +169,7 @@ export default function UploadZone() {
           ${
             isDragActive
               ? "border-primary bg-primary/5"
-              : "border-border hover:border-border-hover bg-bg-tertiary/50 hover:bg-bg-tertiary"
+              : "border-border hover:border-border bg-background-tertiary/50 hover:bg-background-tertiary"
           }
         `}
       >
@@ -178,16 +178,16 @@ export default function UploadZone() {
           {isDragActive ? (
             <>
               <ArrowUpTrayIcon className="w-12 h-12 text-primary animate-bounce" />
-              <p className="text-lg font-medium text-text-primary">Drop your PDF here</p>
+              <p className="text-lg font-medium text-foreground">Drop your PDF here</p>
             </>
           ) : (
             <>
-              <DocumentIcon className="w-12 h-12 text-text-tertiary" />
+              <DocumentIcon className="w-12 h-12 text-muted" />
               <div>
-                <p className="text-lg font-medium text-text-primary">
+                <p className="text-lg font-medium text-foreground">
                   Drag and drop PDF quotes here
                 </p>
-                <p className="text-sm text-text-secondary mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   or click to browse (max 10MB)
                 </p>
               </div>

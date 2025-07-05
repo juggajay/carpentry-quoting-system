@@ -63,11 +63,11 @@ export default async function VerifyPage({
       <PageContainer title="Verify Import">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+            <div className="mx-auto w-16 h-16 bg-error/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-error" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-100">Unable to Load File</h3>
-            <p className="text-gray-400 max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-foreground">Unable to Load File</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
               We encountered an error while loading the file for verification. Please try again.
             </p>
             <RetryButton className="mt-4" />

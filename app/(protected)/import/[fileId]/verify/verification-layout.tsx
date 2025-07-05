@@ -48,10 +48,10 @@ export default function VerificationLayout({ file, extractedItems }: Verificatio
   return (
     <div className="h-[calc(100vh-8rem)]">
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-text-primary">
+        <h1 className="text-2xl font-bold text-foreground">
           Verify Extracted Data
         </h1>
-        <p className="text-text-secondary">
+        <p className="text-muted-foreground">
           Review and correct the extracted information before importing
         </p>
       </div>

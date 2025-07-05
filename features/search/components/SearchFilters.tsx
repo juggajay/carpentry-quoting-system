@@ -87,7 +87,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
       {/* Main Search Bar */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted pointer-events-none" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted pointer-events-none" />
           <Input
             type="text"
             placeholder="Search quotes, clients, or items..."
@@ -120,10 +120,10 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="bg-bg-tertiary border border-border rounded-lg p-4 space-y-4">
+            <div className="bg-background-tertiary border border-border rounded-lg p-4 space-y-4">
               {/* Date Range */}
               <div>
-                <label className="text-sm font-medium text-text-secondary mb-2 block">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
                   Date Range
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -150,7 +150,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
 
               {/* Status Filter */}
               <div>
-                <label className="text-sm font-medium text-text-secondary mb-2 block">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
                   Status
                 </label>
                 <select
@@ -159,7 +159,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
                     setStatus(e.target.value);
                     updateSearchParams({ status: e.target.value });
                   }}
-                  className="w-full h-10 px-3 rounded-lg border border-border bg-bg-secondary text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-bg-bg-primary focus:border-primary-600 hover:border-border-light hover:bg-bg-tertiary transition-all duration-200"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-background-secondary text-foreground focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-background focus:border-primary-600 hover:border-border hover:bg-background-tertiary transition-all duration-200"
                 >
                   <option value="">All Statuses</option>
                   <option value="DRAFT">Draft</option>
@@ -173,7 +173,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
 
               {/* Amount Range */}
               <div>
-                <label className="text-sm font-medium text-text-secondary mb-2 block">
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
                   Amount Range
                 </label>
                 <div className="grid grid-cols-2 gap-2">

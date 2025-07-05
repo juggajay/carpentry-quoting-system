@@ -17,17 +17,17 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-16 px-4"
     >
-      <div className="w-16 h-16 bg-bg-tertiary rounded-full flex items-center justify-center mb-4">
-        <div className="w-10 h-10 text-text-tertiary">
+      <div className="w-16 h-16 bg-background-tertiary rounded-full flex items-center justify-center mb-4">
+        <div className="w-10 h-10 text-muted">
           {icon}
         </div>
       </div>
-      <h3 className="text-lg font-semibold text-text-primary mb-2">{title}</h3>
-      <p className="text-text-secondary text-center max-w-md mb-6">{description}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-muted-foreground text-center max-w-md mb-6">{description}</p>
       {action && (
         <button
           onClick={action.onClick}
-          className="px-6 py-2 bg-primary hover:bg-primary-hover text-bg-primary font-medium rounded-lg transition-colors duration-200"
+          className="px-6 py-2 bg-primary hover:bg-primary-hover text-background font-medium rounded-lg transition-colors duration-200"
         >
           {action.label}
         </button>

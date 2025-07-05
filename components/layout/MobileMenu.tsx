@@ -27,7 +27,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 flex">
@@ -58,9 +58,9 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </div>
               </Transition.Child>
               
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-800 px-6 pb-4 shadow-xl">
-                <div className="flex h-16 shrink-0 items-center border-b border-gray-700">
-                  <h1 className="text-xl font-bold text-gray-100">CarpentryQS</h1>
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background-secondary px-6 pb-4 shadow-xl">
+                <div className="flex h-16 shrink-0 items-center border-b border-border">
+                  <h1 className="text-xl font-bold text-foreground">CarpentryQS</h1>
                 </div>
                 
                 <nav className="flex flex-1 flex-col">
@@ -77,14 +77,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                             className={`
                               group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-semibold transition-all duration-200
                               ${isActive 
-                                ? "bg-purple-600 text-white shadow-md" 
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                                ? "bg-primary text-white shadow-md" 
+                                : "text-muted-foreground hover:bg-background-tertiary hover:text-foreground"
                               }
                             `}
                           >
                             <Icon className={`
                               h-6 w-6 shrink-0
-                              ${isActive ? "text-white" : "text-gray-400 group-hover:text-white"}
+                              ${isActive ? "text-white" : "text-muted group-hover:text-foreground"}
                             `} />
                             {link.name}
                           </Link>

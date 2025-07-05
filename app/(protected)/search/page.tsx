@@ -59,10 +59,10 @@ export default function SearchPage() {
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Search Quotes
           </h1>
-          <p className="text-text-secondary">
+          <p className="text-muted-foreground">
             Find quotes by client, items, or reference number
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function SearchPage() {
       <SearchFilters onFiltersChange={handleFiltersChange} />
 
       {data && (
-        <div className="text-sm text-text-secondary">
+        <div className="text-sm text-muted-foreground">
           Found {data.pagination.totalCount} quotes
         </div>
       )}

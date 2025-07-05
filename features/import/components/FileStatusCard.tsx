@@ -96,13 +96,13 @@ export default function FileStatusCard({ file, onRemove }: FileStatusCardProps) 
         ${file.status === "failed" ? "border-error/50" : "border-border-default"}
       `}
     >
-      <DocumentIcon className="w-8 h-8 text-text-muted flex-shrink-0" />
+      <DocumentIcon className="w-8 h-8 text-muted flex-shrink-0" />
       
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-text-primary truncate">
+        <p className="text-sm font-medium text-foreground truncate">
           {file.name}
         </p>
-        <p className="text-xs text-text-secondary mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {formatFileSize(file.size)} • {getStatusText()}
         </p>
       </div>
@@ -115,7 +115,7 @@ export default function FileStatusCard({ file, onRemove }: FileStatusCardProps) 
             size="icon"
             variant="ghost"
             onClick={onRemove}
-            className="text-text-muted hover:text-error"
+            className="text-muted hover:text-error"
           >
             <TrashIcon className="w-4 h-4" />
           </Button>

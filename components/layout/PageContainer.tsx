@@ -30,12 +30,12 @@ export default function PageContainer({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             {title && (
-              <h1 className="text-h2 sm:text-h1 text-text-primary">
+              <h1 className="text-h2 sm:text-h1 text-foreground">
                 {title}
               </h1>
             )}
             {description && (
-              <p className="mt-1 text-body-sm sm:text-body text-text-secondary">
+              <p className="mt-1 text-body-sm sm:text-body text-muted-foreground">
                 {description}
               </p>
             )}

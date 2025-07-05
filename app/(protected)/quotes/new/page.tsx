@@ -22,8 +22,8 @@ export default function NewQuotePage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-text-primary mb-2">Create New Quote</h1>
-        <p className="text-text-secondary">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Create New Quote</h1>
+        <p className="text-muted-foreground">
           Build and customize your quote with real-time calculations
         </p>
       </div>

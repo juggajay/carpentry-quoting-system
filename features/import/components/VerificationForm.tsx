@@ -112,7 +112,7 @@ export default function VerificationForm({
       {/* Client Information */}
       <Card>
         <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold text-text-primary mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
             Client Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -145,7 +145,7 @@ export default function VerificationForm({
       <Card>
         <CardContent className="pt-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-text-primary">
+            <h3 className="text-lg font-semibold text-foreground">
               Line Items
             </h3>
             <Button
@@ -234,7 +234,7 @@ export default function VerificationForm({
                       valueAsNumber: true,
                     })}
                     readOnly
-                    className="bg-bg-secondary/50"
+                    className="bg-background-secondary/50"
                     onFocus={() => handleFieldFocus(index, "total")}
                     onBlur={handleFieldBlur}
                   />
@@ -245,7 +245,7 @@ export default function VerificationForm({
                     size="icon"
                     variant="ghost"
                     onClick={() => remove(index)}
-                    className="text-text-muted hover:text-error"
+                    className="text-muted hover:text-error"
                   >
                     <TrashIcon className="w-4 h-4" />
                   </Button>
@@ -259,20 +259,20 @@ export default function VerificationForm({
             <div className="flex justify-end space-y-1 text-sm">
               <div className="w-48">
                 <div className="flex justify-between py-1">
-                  <span className="text-text-secondary">Subtotal:</span>
-                  <span className="text-text-primary font-medium">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="text-foreground font-medium">
                     ${subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span className="text-text-secondary">Tax (8.25%):</span>
-                  <span className="text-text-primary font-medium">
+                  <span className="text-muted-foreground">Tax (8.25%):</span>
+                  <span className="text-foreground font-medium">
                     ${tax.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-t border-border-default">
-                  <span className="text-text-primary font-semibold">Total:</span>
-                  <span className="text-text-primary font-semibold text-lg">
+                  <span className="text-foreground font-semibold">Total:</span>
+                  <span className="text-foreground font-semibold text-lg">
                     ${total.toFixed(2)}
                   </span>
                 </div>
