@@ -4,7 +4,6 @@ import UploadZone from "@/features/import/components/UploadZone";
 import { getUploadedFiles } from "./actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { EyeIcon } from "@heroicons/react/24/outline";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +43,7 @@ async function RecentUploads() {
               </div>
               <Link href={`/import/${file.id}/verify`}>
                 <Button size="sm" variant="secondary">
-                  <EyeIcon className="w-4 h-4 mr-2" />
+                  <span className="mr-2">👁</span>
                   Verify
                 </Button>
               </Link>

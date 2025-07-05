@@ -5,7 +5,6 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent } from "@/components/ui/Card";
-import { TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import CopyToQuoteButton from "../components/CopyToQuoteButton";
 
@@ -162,8 +161,7 @@ export default function VerificationForm({
                 })
               }
             >
-              <PlusIcon className="w-4 h-4 mr-1" />
-              Add Item
+              + Add Item
             </Button>
           </div>
 
@@ -247,7 +245,7 @@ export default function VerificationForm({
                     onClick={() => remove(index)}
                     className="text-muted hover:text-error"
                   >
-                    <TrashIcon className="w-4 h-4" />
+                    <span>🗑</span>
                   </Button>
                 </div>
               </div>

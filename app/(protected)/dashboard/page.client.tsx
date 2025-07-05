@@ -2,11 +2,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
-import { 
-  DocumentTextIcon, 
-  PlusIcon,
-  DocumentArrowUpIcon
-} from "@heroicons/react/24/outline";
 
 export default function DashboardPage() {
   return (
@@ -24,7 +19,7 @@ export default function DashboardPage() {
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
               <div className="p-3 bg-primary-light/10 rounded-lg">
-                <PlusIcon className="w-6 h-6 text-primary-light" />
+                <span className="text-2xl">+</span>
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">New Quote</h3>
@@ -38,7 +33,7 @@ export default function DashboardPage() {
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
               <div className="p-3 bg-success/10 rounded-lg">
-                <DocumentArrowUpIcon className="w-6 h-6 text-success" />
+                <span className="text-2xl">📄↑</span>
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">Import PDF</h3>
@@ -52,7 +47,7 @@ export default function DashboardPage() {
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
               <div className="p-3 bg-info/10 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-info" />
+                <span className="text-2xl">📄</span>
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">Search Quotes</h3>

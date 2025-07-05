@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SearchFiltersProps {
@@ -100,7 +99,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
           variant={showAdvanced || hasActiveFilters ? "primary" : "secondary"}
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
-          <FunnelIcon className="w-5 h-5 mr-2" />
+          <span className="mr-2">≡</span>
           Filters
           {hasActiveFilters && (
             <span className="ml-2 bg-primary-600/20 text-xs px-1.5 py-0.5 rounded-full">
@@ -208,7 +207,7 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
                     size="sm"
                     onClick={clearFilters}
                   >
-                    <XMarkIcon className="w-4 h-4 mr-2" />
+                    <span className="mr-2">×</span>
                     Clear All Filters
                   </Button>
                 </div>

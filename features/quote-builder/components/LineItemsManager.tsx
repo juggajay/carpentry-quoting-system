@@ -22,11 +22,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { 
-  TrashIcon, 
-  PlusIcon, 
-  Bars3Icon 
-} from "@heroicons/react/24/outline";
 import { type QuoteFormData } from "./QuoteForm";
 
 interface LineItem {
@@ -97,7 +92,7 @@ function SortableLineItem({
           {...listeners}
           aria-label={`Reorder item ${index + 1}`}
         >
-          <Bars3Icon className="w-5 h-5 text-muted" />
+          <span className="text-muted">☰</span>
         </button>
       </div>
 
@@ -166,7 +161,7 @@ function SortableLineItem({
           onClick={onRemove}
           className="text-muted hover:text-error"
         >
-          <TrashIcon className="w-4 h-4" />
+          <span>🗑</span>
         </Button>
       </div>
     </div>
@@ -259,7 +254,7 @@ export default function LineItemsManager({
         onClick={addNewItem}
         className="w-full"
       >
-        <PlusIcon className="w-4 h-4 mr-2" />
+        <span className="mr-2">+</span>
         Add Line Item
       </Button>
 

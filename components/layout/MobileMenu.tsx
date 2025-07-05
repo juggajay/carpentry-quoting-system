@@ -2,7 +2,6 @@
 
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navigationLinks } from "@/lib/constants";
@@ -53,7 +52,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
                   <button type="button" className="-m-2.5 p-2.5" onClick={onClose}>
                     <span className="sr-only">Close sidebar</span>
-                    <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                    <span className="text-white text-xl" aria-hidden="true">×</span>
                   </button>
                 </div>
               </Transition.Child>
@@ -66,7 +65,6 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <nav className="flex flex-1 flex-col">
                   <ul className="flex flex-1 flex-col gap-y-2">
                     {navigationLinks.map((link) => {
-                      const Icon = link.icon;
                       const isActive = pathname === link.href;
                       
                       return (
@@ -82,10 +80,6 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                               }
                             `}
                           >
-                            <Icon className={`
-                              h-6 w-6 shrink-0
-                              ${isActive ? "text-white" : "text-slate-400 group-hover:text-white"}
-                            `} />
                             {link.name}
                           </Link>
                         </li>

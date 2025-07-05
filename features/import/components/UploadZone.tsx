@@ -2,7 +2,6 @@
 
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ArrowUpTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { prepareUpload, updateFileAfterUpload, processUploadedPdf } from "@/app/(protected)/import/actions";
 import FileStatusCard from "./FileStatusCard";
@@ -177,12 +176,12 @@ export default function UploadZone() {
         <div className="flex flex-col items-center space-y-4">
           {isDragActive ? (
             <>
-              <ArrowUpTrayIcon className="w-12 h-12 text-green-500 animate-bounce" />
+              <span className="text-4xl animate-bounce">↑</span>
               <p className="text-lg font-medium text-white">Drop your PDF here</p>
             </>
           ) : (
             <>
-              <DocumentIcon className="w-12 h-12 text-slate-400" />
+              <span className="text-4xl">📄</span>
               <div>
                 <p className="text-lg font-medium text-white">
                   Drag and drop PDF quotes here

@@ -1,7 +1,6 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { BellIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 
 interface HeaderProps {
@@ -30,7 +29,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             className="lg:hidden p-2 rounded-lg hover:bg-slate-800 transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
-            <Bars3Icon className="w-6 h-6 text-slate-400" />
+            <span className="text-slate-400 text-xl">☰</span>
           </button>
           
           {/* Page Title */}
@@ -45,7 +44,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             className="p-2 rounded-lg hover:bg-slate-800 transition-colors duration-200 relative"
             aria-label="Notifications"
           >
-            <BellIcon className="w-5 h-5 text-slate-400" />
+            <span className="text-slate-400">🔔</span>
             <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           </button>
           

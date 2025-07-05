@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { cn } from "@/lib/utils";
 
 const Modal = DialogPrimitive.Root;
@@ -68,7 +67,7 @@ const ModalContent = React.forwardRef<
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 transition-all hover:opacity-100 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:pointer-events-none p-2">
-            <XMarkIcon className="h-5 w-5 text-slate-400" />
+            <span className="text-slate-400 text-xl">×</span>
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

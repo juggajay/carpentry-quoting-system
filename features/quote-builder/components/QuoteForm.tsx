@@ -9,7 +9,6 @@ import LineItemsManager from "./LineItemsManager";
 import SaveStatusIndicator from "./SaveStatusIndicator";
 import { useAutoSave } from "../hooks/useAutoSave";
 import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 
 export interface QuoteFormData {
@@ -208,7 +207,6 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
                 variant="secondary"
                 onClick={pasteClipboardItems}
               >
-                <ClipboardDocumentListIcon className="w-4 h-4 mr-2" />
                 Paste {clipboardCount} Items
               </Button>
             )}

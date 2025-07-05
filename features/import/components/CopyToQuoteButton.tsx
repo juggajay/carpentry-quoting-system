@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
 import { toast } from "sonner";
 
@@ -31,8 +30,7 @@ export default function CopyToQuoteButton({ items }: CopyToQuoteButtonProps) {
 
   return (
     <Button variant="secondary" onClick={handleCopy}>
-      <ClipboardDocumentListIcon className="w-4 h-4 mr-2" />
-      Copy to Quote
+      📋 Copy to Quote
       {currentCount > 0 && (
         <span className="ml-2 px-1.5 py-0.5 text-xs bg-primary-light/20 text-primary-light rounded-full">
           {currentCount}

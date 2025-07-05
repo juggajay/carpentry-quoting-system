@@ -1,13 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import {
-  DocumentIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowPathIcon,
-  TrashIcon,
-} from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
 
 interface FileStatusCardProps {
@@ -63,11 +56,11 @@ export default function FileStatusCard({ file, onRemove }: FileStatusCardProps) 
           </div>
         );
       case "processing":
-        return <ArrowPathIcon className="w-8 h-8 text-primary-light animate-spin" />;
+        return <span className="text-2xl animate-spin">↻</span>;
       case "completed":
-        return <CheckCircleIcon className="w-8 h-8 text-success" />;
+        return <span className="text-2xl text-success">✓</span>;
       case "failed":
-        return <XCircleIcon className="w-8 h-8 text-error" />;
+        return <span className="text-2xl text-error">✗</span>;
     }
   };
 
@@ -96,7 +89,7 @@ export default function FileStatusCard({ file, onRemove }: FileStatusCardProps) 
         ${file.status === "failed" ? "border-error/50" : "border-border-default"}
       `}
     >
-      <DocumentIcon className="w-8 h-8 text-muted flex-shrink-0" />
+      <span className="text-2xl flex-shrink-0">📄</span>
       
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
@@ -117,7 +110,7 @@ export default function FileStatusCard({ file, onRemove }: FileStatusCardProps) 
             onClick={onRemove}
             className="text-muted hover:text-error"
           >
-            <TrashIcon className="w-4 h-4" />
+            <span>🗑</span>
           </Button>
         )}
       </div>

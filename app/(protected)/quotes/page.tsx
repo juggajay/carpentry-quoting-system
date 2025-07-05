@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
-import { PlusIcon, EyeIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 
 async function getQuotes() {
   try {
@@ -48,7 +47,7 @@ export default async function QuotesPage() {
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
             <div className="mx-auto w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-red-600" />
+              <span className="text-2xl">📄</span>
             </div>
             <h3 className="text-lg font-semibold text-white">Unable to Load Quotes</h3>
             <p className="text-slate-400 max-w-md mx-auto">
@@ -68,8 +67,7 @@ export default async function QuotesPage() {
       actions={
         <Link href="/quotes/new">
           <Button>
-            <PlusIcon className="w-4 h-4 mr-2" />
-            New Quote
+            + New Quote
           </Button>
         </Link>
       }
@@ -80,7 +78,7 @@ export default async function QuotesPage() {
           <CardContent className="py-12 text-center">
             <div className="max-w-md mx-auto space-y-4">
               <div className="mx-auto w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-slate-400" />
+                <span className="text-xl">📄</span>
               </div>
               <div>
                 <p className="text-white font-medium mb-1">No quotes yet</p>
@@ -144,7 +142,6 @@ export default async function QuotesPage() {
                   </span>
                   <Link href={`/quotes/${quote.id}`}>
                     <Button size="sm" variant="secondary">
-                      <EyeIcon className="w-4 h-4 mr-1" />
                       View
                     </Button>
                   </Link>

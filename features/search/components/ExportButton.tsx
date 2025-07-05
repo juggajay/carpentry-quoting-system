@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { toast } from "sonner";
 import { exportSearchResults } from "../actions";
 
@@ -59,8 +58,7 @@ export default function ExportButton({ filters, disabled }: ExportButtonProps) {
       loading={isExporting}
       disabled={disabled || isExporting}
     >
-      <ArrowDownTrayIcon className="w-4 h-4 mr-2" />
-      Export CSV
+      ↓ Export CSV
     </Button>
   );
 }

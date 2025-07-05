@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { navigationLinks } from "@/lib/constants";
 import { useSidebar } from "@/lib/contexts/sidebar-context";
 
@@ -49,7 +48,6 @@ export default function Sidebar() {
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {navigationLinks.map((link) => {
-            const Icon = link.icon;
             const isActive = pathname === link.href;
             
             return (
@@ -64,7 +62,6 @@ export default function Sidebar() {
                     }
                   `}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.span
@@ -90,11 +87,9 @@ export default function Sidebar() {
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center justify-center"
         >
-          {isExpanded ? (
-            <ChevronLeftIcon className="w-5 h-5" />
-          ) : (
-            <ChevronRightIcon className="w-5 h-5" />
-          )}
+          <span className="text-lg">
+            {isExpanded ? "◀" : "▶"}
+          </span>
         </button>
       </div>
     </motion.div>

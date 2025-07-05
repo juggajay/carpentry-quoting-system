@@ -5,7 +5,6 @@ import VerificationLayout from "./verification-layout";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
 import { RetryButton } from "@/components/ui/RetryButton";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
 
 interface ExtractedItem {
   description: string;
@@ -64,7 +63,7 @@ export default async function VerifyPage({
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
             <div className="mx-auto w-16 h-16 bg-error/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-error" />
+              <span className="text-3xl">📄</span>
             </div>
             <h3 className="text-lg font-semibold text-foreground">Unable to Load File</h3>
             <p className="text-muted-foreground max-w-md mx-auto">

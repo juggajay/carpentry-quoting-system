@@ -2,14 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import EmptyState from "@/components/ui/EmptyState";
-import { DocumentTextIcon, DocumentArrowUpIcon } from "@heroicons/react/24/outline";
 
 export function EmptyQuotesState() {
   const router = useRouter();
   
   return (
     <EmptyState
-      icon={<DocumentTextIcon />}
+      icon={<span className="text-4xl">📄</span>}
       title="No quotes yet"
       description="Create your first quote to get started"
       action={{
@@ -25,7 +24,7 @@ export function EmptyFilesState() {
   
   return (
     <EmptyState
-      icon={<DocumentArrowUpIcon />}
+      icon={<span className="text-4xl">📄↑</span>}
       title="No files imported"
       description="Import PDF quotes to get started"
       action={{

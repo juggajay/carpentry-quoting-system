@@ -1,4 +1,3 @@
-import { CheckCircleIcon, ArrowPathIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -14,17 +13,17 @@ export default function SaveStatusIndicator({ status }: SaveStatusIndicatorProps
       className: "text-muted",
     },
     saving: {
-      icon: <ArrowPathIcon className="w-4 h-4 animate-spin" />,
+      icon: <span className="animate-spin">↻</span>,
       text: "Saving...",
       className: "text-primary-light",
     },
     saved: {
-      icon: <CheckCircleIcon className="w-4 h-4" />,
+      icon: <span>✓</span>,
       text: "All changes saved",
       className: "text-success",
     },
     error: {
-      icon: <ExclamationTriangleIcon className="w-4 h-4" />,
+      icon: <span>⚠</span>,
       text: "Error saving",
       className: "text-error",
     },

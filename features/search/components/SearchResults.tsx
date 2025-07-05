@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { EyeIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import SkeletonCard from "@/components/ui/skeletons/SkeletonCard";
 
 interface Quote {
@@ -64,7 +63,7 @@ export default function SearchResults({
         <CardContent className="py-12 text-center">
           <div className="max-w-md mx-auto space-y-4">
             <div className="mx-auto w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center">
-              <DocumentDuplicateIcon className="w-6 h-6 text-muted" />
+              <span className="text-2xl">📋</span>
             </div>
             <div>
               <p className="text-foreground font-medium mb-1">No quotes found</p>
@@ -138,11 +137,11 @@ export default function SearchResults({
                       onClick={() => onCopyItems(quote.id)}
                       title="Copy items to clipboard"
                     >
-                      <DocumentDuplicateIcon className="w-4 h-4" />
+                      <span>📋</span>
                     </Button>
                     <Link href={`/quotes/${quote.id}`}>
                       <Button size="sm" variant="secondary">
-                        <EyeIcon className="w-4 h-4 mr-1" />
+                        <span className="mr-1">👁</span>
                         View
                       </Button>
                     </Link>
