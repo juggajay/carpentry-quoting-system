@@ -10,7 +10,7 @@ export default function UserSync({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoaded && isSignedIn && !isSynced) {
-      fetch("/sync-user")
+      fetch("/api/sync-user")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to sync user");
           return res.json();
