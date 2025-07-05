@@ -7,14 +7,6 @@ import { RetryButton } from "@/components/ui/RetryButton";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
 import { EmptyQuotesState, EmptyFilesState } from "./DashboardEmptyStates";
-import { 
-  DocumentTextIcon, 
-  UsersIcon, 
-  ArrowUpIcon,
-  ArrowTrendingUpIcon,
-  PlusIcon,
-  DocumentArrowUpIcon
-} from "@heroicons/react/24/outline";
 
 async function getDashboardData() {
   try {
@@ -109,7 +101,7 @@ export default async function DashboardPage() {
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
             <div className="mx-auto w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-6 h-6 text-red-600" />
+              <span className="text-red-600 text-2xl">⚠️</span>
             </div>
             <h3 className="text-lg font-semibold text-white">Unable to Load Dashboard</h3>
             <p className="text-slate-400 max-w-md mx-auto">
@@ -131,106 +123,33 @@ export default async function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/quotes/new">
-          <Card hover className="h-full">
-            <CardContent className="flex items-center space-x-4">
-              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
-                <PlusIcon className="w-6 h-6 text-green-500" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white">New Quote</h3>
-                <p className="text-sm text-slate-400">Create a new quote</p>
-              </div>
+          <Card hover className="h-full md:col-span-1">
+            <CardContent className="text-center">
+              <h3 className="font-semibold text-white text-lg">New Quote</h3>
+              <p className="text-sm text-slate-400 mt-1">Create a new quote</p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="flex items-center space-x-4">
-              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
-                <DocumentArrowUpIcon className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white">Import PDF</h3>
-                <p className="text-sm text-slate-400">Import from PDF</p>
-              </div>
+            <CardContent className="text-center">
+              <h3 className="font-semibold text-white">Import PDF</h3>
+              <p className="text-sm text-slate-400 mt-1">Import from PDF</p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="flex items-center space-x-4">
-              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-slate-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white">Search Quotes</h3>
-                <p className="text-sm text-slate-400">Find existing quotes</p>
-              </div>
+            <CardContent className="text-center">
+              <h3 className="font-semibold text-white">Search Quotes</h3>
+              <p className="text-sm text-slate-400 mt-1">Find existing quotes</p>
             </CardContent>
           </Card>
         </Link>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Total Quotes</p>
-                <p className="text-2xl font-bold text-white">
-                  {data.stats.totalQuotes}
-                </p>
-              </div>
-              <DocumentTextIcon className="w-6 h-6 text-slate-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Accepted</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {data.stats.acceptedQuotes}
-                </p>
-              </div>
-              <ArrowUpIcon className="w-6 h-6 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Total Clients</p>
-                <p className="text-2xl font-bold text-white">
-                  {data.stats.totalClients}
-                </p>
-              </div>
-              <UsersIcon className="w-6 h-6 text-slate-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-400">Monthly Growth</p>
-                <p className="text-2xl font-bold text-green-500">
-                  {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
-                </p>
-              </div>
-              <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        </div>
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
