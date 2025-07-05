@@ -11,7 +11,54 @@ import { createQuote } from "@/features/quote-builder/actions";
 import { toast } from "sonner";
 
 interface QuoteFormData {
-  // All the project details from step 1
+  // Company fields
+  companyName?: string;
+  abn?: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  companyAddress?: string;
+  
+  // Client fields
+  clientId: string;
+  clientName: string;
+  clientCompany?: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientAddress?: string;
+  siteAddress?: string;
+  
+  // Quote details
+  quoteNumber?: string;
+  quoteDate?: string;
+  projectType?: string;
+  projectTitle?: string;
+  projectDescription?: string;
+  specialNotes?: string;
+  
+  // Terms
+  paymentTerms?: string;
+  paymentSchedule?: string;
+  warrantyPeriod?: string;
+  additionalTerms?: string;
+  
+  // Existing fields
+  title: string;
+  description: string;
+  validUntil: string;
+  notes: string;
+  termsConditions: string;
+  items: Array<{
+    type?: "custom" | "material" | "labor";
+    materialId?: string;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    total: number;
+  }>;
+}
+
+interface ProjectDetails {
   companyName: string;
   abn: string;
   companyPhone: string;
@@ -30,31 +77,22 @@ interface QuoteFormData {
   projectTitle: string;
   projectDescription: string;
   specialNotes?: string;
-  
-  // Line items
-  items: Array<{
-    type?: "custom" | "material" | "labor";
-    materialId?: string;
-    description: string;
-    quantity: number;
-    unit: string;
-    unitPrice: number;
-    total: number;
-  }>;
-  
-  // Terms
-  paymentTerms?: string;
-  warrantyPeriod?: string;
-  paymentSchedule?: string;
 }
 
 export default function QuoteItemsPage() {
   const router = useRouter();
-  const [projectDetails, setProjectDetails] = useState<any>(null);
+  const [projectDetails, setProjectDetails] = useState<ProjectDetails | null>(null);
   const [loading, setLoading] = useState(true);
   
   const form = useForm<QuoteFormData>({
     defaultValues: {
+      // Required fields with defaults
+      clientId: "",
+      title: "",
+      description: "",
+      validUntil: "",
+      notes: "",
+      termsConditions: "",
       items: [{
         type: "custom",
         description: "",
@@ -81,10 +119,16 @@ export default function QuoteItemsPage() {
     const details = JSON.parse(savedDetails);
     setProjectDetails(details);
     
-    // Merge with form data
+    // Merge with form data and set required fields
     Object.keys(details).forEach(key => {
-      form.setValue(key as any, details[key]);
+      form.setValue(key as keyof QuoteFormData, details[key]);
     });
+    
+    // Set required fields based on project details
+    form.setValue('title', details.projectTitle || 'Untitled Quote');
+    form.setValue('description', details.projectDescription || '');
+    form.setValue('validUntil', details.validUntil || '');
+    form.setValue('clientId', ''); // Will be set when creating the quote
     
     setLoading(false);
   }, [form, router]);

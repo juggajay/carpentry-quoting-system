@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { MaterialSelectorPanel } from "@/components/quote/MaterialSelectorPanel";
 import { type QuoteFormData } from "./QuoteForm";
+import { Material } from "@/types";
 import { useState } from "react";
 
 interface LineItem {
@@ -83,7 +84,7 @@ function SortableLineItem({
   const unitError = itemErrors?.[index]?.unit?.message as string | undefined;
   const unitPriceError = itemErrors?.[index]?.unitPrice?.message as string | undefined;
 
-  const handleMaterialSelect = (materials: any[]) => {
+  const handleMaterialSelect = (materials: Material[]) => {
     if (materials.length > 0) {
       const material = materials[0];
       setValue(`items.${index}.materialId`, material.id);
