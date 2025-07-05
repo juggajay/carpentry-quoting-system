@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
+import { EmptyQuotesState, EmptyFilesState } from "./DashboardEmptyStates";
 import { 
   DocumentTextIcon, 
   UsersIcon, 
@@ -241,14 +242,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentQuotes.length === 0 ? (
-              <div className="text-center py-8 space-y-3">
-                <div className="mx-auto w-10 h-10 bg-bg-secondary rounded-full flex items-center justify-center">
-                  <DocumentTextIcon className="w-5 h-5 text-text-tertiary" />
-                </div>
-                <p className="text-text-secondary text-sm">
-                  No quotes yet. Create your first quote!
-                </p>
-              </div>
+              <EmptyQuotesState />
             ) : (
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
@@ -293,14 +287,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentFiles.length === 0 ? (
-              <div className="text-center py-8 space-y-3">
-                <div className="mx-auto w-10 h-10 bg-bg-secondary rounded-full flex items-center justify-center">
-                  <DocumentArrowUpIcon className="w-5 h-5 text-text-tertiary" />
-                </div>
-                <p className="text-text-secondary text-sm">
-                  No files imported yet.
-                </p>
-              </div>
+              <EmptyFilesState />
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (

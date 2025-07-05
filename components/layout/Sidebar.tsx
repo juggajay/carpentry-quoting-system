@@ -16,7 +16,7 @@ export default function Sidebar() {
       initial={{ width: isExpanded ? 256 : 80 }}
       animate={{ width: isExpanded ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-bg-secondary border-r border-border"
+      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-bg-secondary border-r border-border shadow-xl"
     >
       {/* Logo / Brand */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
@@ -28,7 +28,7 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="text-xl font-semibold text-text-primary"
+              className="text-xl font-bold text-text-primary"
             >
               CarpentryQS
             </motion.h1>
@@ -39,9 +39,9 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
+              className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-md"
             >
-              <span className="text-text-inverse font-bold text-lg">C</span>
+              <span className="text-bg-primary font-bold text-lg">C</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -61,23 +61,23 @@ export default function Sidebar() {
                   className={`
                     group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? "bg-primary/10 text-primary border border-primary/20" 
+                      ? "bg-primary text-bg-primary shadow-md" 
                       : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                     }
                   `}
                 >
                   <Icon className={`
-                    w-6 h-6 flex-shrink-0 transition-colors duration-200
-                    ${isActive ? "text-primary" : "text-text-tertiary group-hover:text-text-primary"}
+                    w-5 h-5 flex-shrink-0 transition-colors duration-200
+                    ${isActive ? "text-bg-primary" : "text-text-secondary group-hover:text-text-primary"}
                   `} />
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     {isExpanded && (
                       <motion.span
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -10 }}
-                        transition={{ duration: 0.2, delay: 0.1 }}
-                        className="ml-3 truncate font-medium"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden"
                       >
                         {link.name}
                       </motion.span>
@@ -90,12 +90,11 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* Toggle Button */}
+      {/* Expand/Collapse Toggle */}
       <div className="p-3 border-t border-border">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-center p-2.5 rounded-lg bg-bg-tertiary hover:bg-white/5 transition-colors duration-200 border border-border hover:border-border-hover"
-          aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          className="w-full p-2 rounded-lg bg-bg-tertiary hover:bg-bg-hover transition-colors duration-200 flex items-center justify-center"
         >
           {isExpanded ? (
             <ChevronLeftIcon className="w-5 h-5 text-text-secondary" />
