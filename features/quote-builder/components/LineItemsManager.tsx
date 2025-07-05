@@ -22,9 +22,13 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { MaterialSelectorPanel } from "@/components/quote/MaterialSelectorPanel";
 import { type QuoteFormData } from "./QuoteForm";
+import { useState } from "react";
 
 interface LineItem {
+  type?: "custom" | "material" | "labor";
+  materialId?: string;
   description: string;
   quantity: number;
   unit: string;
@@ -50,6 +54,7 @@ function SortableLineItem({
   onRemove: () => void;
   onUpdate: () => void;
 }) {
+  const [showMaterialSelector, setShowMaterialSelector] = useState(false);
   const {
     attributes,
     listeners,
@@ -65,7 +70,11 @@ function SortableLineItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const { register, formState: { errors } } = form;
+  const { register, formState: { errors }, watch, setValue } = form;
+  
+  // Watch current item values
+  const currentItem = watch(`items.${index}`);
+  const itemType = currentItem?.type || "custom";
   
   // Safely access nested errors
   const itemErrors = errors.items as any;
@@ -73,6 +82,19 @@ function SortableLineItem({
   const quantityError = itemErrors?.[index]?.quantity?.message as string | undefined;
   const unitError = itemErrors?.[index]?.unit?.message as string | undefined;
   const unitPriceError = itemErrors?.[index]?.unitPrice?.message as string | undefined;
+
+  const handleMaterialSelect = (materials: any[]) => {
+    if (materials.length > 0) {
+      const material = materials[0];
+      setValue(`items.${index}.materialId`, material.id);
+      setValue(`items.${index}.description`, material.name);
+      setValue(`items.${index}.unitPrice`, material.pricePerUnit);
+      setValue(`items.${index}.unit`, material.unit);
+      setValue(`items.${index}.total`, currentItem.quantity * material.pricePerUnit);
+      onUpdate();
+      setShowMaterialSelector(false);
+    }
+  };
 
   return (
     <div
@@ -96,15 +118,51 @@ function SortableLineItem({
         </button>
       </div>
 
-      {/* Form Fields */}
-      <div className="col-span-4">
-        <Input
-          placeholder="Description"
-          {...register(`items.${index}.description`, {
-            required: "Description is required",
-          })}
-          error={descriptionError}
-        />
+      {/* Item Type Selection */}
+      <div className="col-span-1">
+        <select
+          {...register(`items.${index}.type`)}
+          className="w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600"
+        >
+          <option value="custom">Custom</option>
+          <option value="material">Material</option>
+          <option value="labor">Labor</option>
+        </select>
+      </div>
+
+      {/* Description Field with Material Browse Button */}
+      <div className="col-span-3">
+        {itemType === "material" ? (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Click Browse to select material"
+              {...register(`items.${index}.description`, {
+                required: "Description is required",
+              })}
+              error={descriptionError}
+              readOnly
+              className="cursor-pointer"
+              onClick={() => setShowMaterialSelector(true)}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setShowMaterialSelector(true)}
+              className="px-3 whitespace-nowrap"
+            >
+              Browse
+            </Button>
+          </div>
+        ) : (
+          <Input
+            placeholder="Description"
+            {...register(`items.${index}.description`, {
+              required: "Description is required",
+            })}
+            error={descriptionError}
+          />
+        )}
       </div>
       <div className="col-span-2">
         <Input
@@ -139,6 +197,7 @@ function SortableLineItem({
             onChange: onUpdate,
           })}
           error={unitPriceError}
+          readOnly={itemType === "material"}
         />
       </div>
       <div className="col-span-1">
@@ -150,7 +209,7 @@ function SortableLineItem({
             valueAsNumber: true,
           })}
           readOnly
-          className="bg-background-secondary/50"
+          className="bg-slate-800/50"
         />
       </div>
       <div className="col-span-1 flex items-center justify-center pt-2">
@@ -159,11 +218,19 @@ function SortableLineItem({
           size="icon"
           variant="ghost"
           onClick={onRemove}
-          className="text-muted hover:text-error"
+          className="text-slate-400 hover:text-red-500"
         >
           <span>🗑</span>
         </Button>
       </div>
+
+      {/* Material Selector Panel */}
+      <MaterialSelectorPanel
+        isOpen={showMaterialSelector}
+        onClose={() => setShowMaterialSelector(false)}
+        onSelect={handleMaterialSelect}
+        multiple={false}
+      />
     </div>
   );
 }
@@ -201,6 +268,7 @@ export default function LineItemsManager({
 
   const addNewItem = () => {
     append({
+      type: "custom",
       description: "",
       quantity: 1,
       unit: "each",
@@ -212,9 +280,10 @@ export default function LineItemsManager({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="grid grid-cols-12 gap-2 text-sm font-medium text-muted-foreground px-2">
+      <div className="grid grid-cols-12 gap-2 text-sm font-medium text-slate-400 px-2">
         <div className="col-span-1"></div>
-        <div className="col-span-4">Description</div>
+        <div className="col-span-1">Type</div>
+        <div className="col-span-3">Description</div>
         <div className="col-span-2">Quantity</div>
         <div className="col-span-1">Unit</div>
         <div className="col-span-2">Unit Price</div>
