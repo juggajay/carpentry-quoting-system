@@ -132,8 +132,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/quotes/new">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-green-500/10 rounded-lg">
+            <CardContent className="flex items-center space-x-4">
+              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
                 <PlusIcon className="w-6 h-6 text-green-500" />
               </div>
               <div>
@@ -146,8 +146,8 @@ export default async function DashboardPage() {
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-green-600/10 rounded-lg">
+            <CardContent className="flex items-center space-x-4">
+              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
                 <DocumentArrowUpIcon className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -160,8 +160,8 @@ export default async function DashboardPage() {
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-slate-600/10 rounded-lg">
+            <CardContent className="flex items-center space-x-4">
+              <div className="p-2 bg-slate-800 rounded-lg w-10 h-10 flex items-center justify-center">
                 <DocumentTextIcon className="w-6 h-6 text-slate-600" />
               </div>
               <div>
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Total Quotes</p>
@@ -184,13 +184,13 @@ export default async function DashboardPage() {
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-8 h-8 text-slate-400" />
+              <DocumentTextIcon className="w-6 h-6 text-slate-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Accepted</p>
@@ -198,13 +198,13 @@ export default async function DashboardPage() {
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-8 h-8 text-green-600" />
+              <ArrowUpIcon className="w-6 h-6 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Total Clients</p>
@@ -212,13 +212,13 @@ export default async function DashboardPage() {
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-slate-400" />
+              <UsersIcon className="w-6 h-6 text-slate-400" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400">Monthly Growth</p>
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-8 h-8 text-green-500" />
+              <ArrowTrendingUpIcon className="w-6 h-6 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -269,7 +269,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-3 pt-3 border-t border-border">
+            <div className="mt-3 pt-3 border-t border-slate-700">
               <Link href="/quotes">
                 <Button variant="ghost" className="w-full">
                   View All Quotes
