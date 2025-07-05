@@ -1,9 +1,26 @@
 @import "tailwindcss";
 
+/* IMMEDIATE DARK THEME - THIS MUST WORK */
+html, body {
+  background: #0A0A0B !important;
+  color: #FAFAFA !important;
+}
+
 /* Import Inter font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* DARK THEME STYLES - If you see white background, these styles are not loading */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #0A0A0B !important;
+  color: #FAFAFA !important;
+}
+
 body {
   background-color: #0A0A0B !important;
   color: #FAFAFA !important;
@@ -13,15 +30,12 @@ body {
   min-height: 100vh;
 }
 
-/* Override any default styles */
-html {
-  background-color: #0A0A0B !important;
+/* Force dark background on all elements */
+main, div, section, article, aside, header, footer, nav {
+  background-color: inherit;
+  color: inherit;
 }
 
-/* Test that CSS is loading */
-* {
-  box-sizing: border-box;
-}
 
 /* Design System CSS Variables */
 :root {

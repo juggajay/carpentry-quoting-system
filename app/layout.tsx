@@ -17,8 +17,29 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="bg-bg-primary">
-        <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
+      <html lang="en" className="bg-bg-primary" style={{ backgroundColor: '#0A0A0B' }}>
+        <body 
+          className="min-h-screen bg-bg-primary text-text-primary antialiased"
+          style={{ 
+            backgroundColor: '#0A0A0B', 
+            color: '#FAFAFA',
+            minHeight: '100vh' 
+          }}
+        >
+          <style dangerouslySetInnerHTML={{ __html: `
+            html, body {
+              background-color: #0A0A0B !important;
+              color: #FAFAFA !important;
+            }
+            .bg-bg-primary { background-color: #0A0A0B !important; }
+            .bg-bg-secondary { background-color: #121214 !important; }
+            .bg-bg-tertiary { background-color: #1A1A1D !important; }
+            .text-text-primary { color: #FAFAFA !important; }
+            .text-text-secondary { color: #A1A1AA !important; }
+            .text-primary { color: #22C55E !important; }
+            .bg-primary { background-color: #22C55E !important; }
+            .border-border { border-color: #2A2A2E !important; }
+          ` }} />
           <QueryProvider>
             <UserSync>
               {children}
