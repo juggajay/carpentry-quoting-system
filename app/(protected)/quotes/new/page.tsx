@@ -37,6 +37,7 @@ export default function NewQuotePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ProjectDetailsForm>({
+    mode: "onChange", // This will show validation errors as user types
     defaultValues: {
       // Company fields
       companyName: "",
@@ -80,6 +81,10 @@ export default function NewQuotePage() {
     }
   }, (errors) => {
     console.log('Step 1 - Form validation errors:', errors);
+    console.log('Step 1 - Error details:', Object.entries(errors).map(([field, error]) => ({
+      field,
+      message: error?.message || 'Unknown error'
+    })));
     setIsSubmitting(false);
   });
 
@@ -96,11 +101,18 @@ export default function NewQuotePage() {
           <div className="mt-4 p-4 bg-slate-800 rounded-lg text-sm">
             <p className="text-slate-400 mb-2">Debug Info:</p>
             <p className="text-white">Form Valid: {form.formState.isValid ? 'Yes' : 'No'}</p>
+            <p className="text-white">Is Validating: {form.formState.isValidating ? 'Yes' : 'No'}</p>
+            <p className="text-white">Is Submitting: {form.formState.isSubmitting ? 'Yes' : 'No'}</p>
             <p className="text-white">Errors: {Object.keys(form.formState.errors).length}</p>
             {Object.keys(form.formState.errors).length > 0 && (
-              <pre className="text-red-400 mt-2 text-xs">
-                {JSON.stringify(form.formState.errors, null, 2)}
-              </pre>
+              <div className="mt-2">
+                <p className="text-red-400 mb-1">Validation Errors:</p>
+                {Object.entries(form.formState.errors).map(([field, error]) => (
+                  <p key={field} className="text-red-300 text-xs">
+                    • {field}: {error?.message || 'Required'}
+                  </p>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -276,13 +288,29 @@ export default function NewQuotePage() {
           <Button type="button" variant="secondary" onClick={() => router.push('/quotes')}>
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            onClick={() => console.log('Continue button clicked', form.formState.errors)}
-          >
-            {isSubmitting ? 'Processing...' : 'Continue to Line Items →'}
-          </Button>
+          <div className="flex gap-2">
+            {/* Temporary bypass button for testing */}
+            {process.env.NODE_ENV === 'development' && (
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  console.log('Bypassing validation for testing');
+                  const formData = form.getValues();
+                  sessionStorage.setItem('quoteProjectDetails', JSON.stringify(formData));
+                  router.push('/quotes/new/items');
+                }}
+              >
+                Skip Validation (Dev)
+              </Button>
+            )}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Processing...' : 'Continue to Line Items →'}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
