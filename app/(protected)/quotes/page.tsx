@@ -78,10 +78,25 @@ export default async function QuotesPage() {
       {quotes.length === 0 ? (
         <ContentCard>
           <CardContent className="py-12 text-center">
-            <p className="text-text-secondary mb-4">No quotes yet</p>
-            <Link href="/import">
-              <Button variant="secondary">Import Your First Quote</Button>
-            </Link>
+            <div className="max-w-md mx-auto space-y-4">
+              <div className="mx-auto w-12 h-12 bg-bg-secondary rounded-full flex items-center justify-center">
+                <DocumentTextIcon className="w-6 h-6 text-text-tertiary" />
+              </div>
+              <div>
+                <p className="text-text-primary font-medium mb-1">No quotes yet</p>
+                <p className="text-text-secondary text-sm mb-4">
+                  Get started by importing a PDF or creating a new quote
+                </p>
+              </div>
+              <div className="flex gap-3 justify-center">
+                <Link href="/import">
+                  <Button variant="secondary">Import PDF</Button>
+                </Link>
+                <Link href="/quotes/new">
+                  <Button variant="primary">Create Quote</Button>
+                </Link>
+              </div>
+            </div>
           </CardContent>
         </ContentCard>
       ) : (

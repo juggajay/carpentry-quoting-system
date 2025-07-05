@@ -107,7 +107,7 @@ export default async function DashboardPage() {
       <PageContainer title="Dashboard">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+            <div className="mx-auto w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
               <DocumentTextIcon className="w-6 h-6 text-red-500" />
             </div>
             <h3 className="text-lg font-semibold text-text-primary">Unable to Load Dashboard</h3>
@@ -126,9 +126,9 @@ export default async function DashboardPage() {
       title="Dashboard"
       description="Welcome back! Here's an overview of your activity."
     >
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="space-y-8">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/quotes/new">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
@@ -170,10 +170,10 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-      </div>
+        </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -229,10 +229,10 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
 
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Quotes */}
         <Card>
           <CardHeader>
@@ -241,9 +241,14 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentQuotes.length === 0 ? (
-              <p className="text-text-muted text-center py-4">
-                No quotes yet. Create your first quote!
-              </p>
+              <div className="text-center py-8 space-y-3">
+                <div className="mx-auto w-10 h-10 bg-bg-secondary rounded-full flex items-center justify-center">
+                  <DocumentTextIcon className="w-5 h-5 text-text-tertiary" />
+                </div>
+                <p className="text-text-secondary text-sm">
+                  No quotes yet. Create your first quote!
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
@@ -288,9 +293,14 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentFiles.length === 0 ? (
-              <p className="text-text-muted text-center py-4">
-                No files imported yet.
-              </p>
+              <div className="text-center py-8 space-y-3">
+                <div className="mx-auto w-10 h-10 bg-bg-secondary rounded-full flex items-center justify-center">
+                  <DocumentArrowUpIcon className="w-5 h-5 text-text-tertiary" />
+                </div>
+                <p className="text-text-secondary text-sm">
+                  No files imported yet.
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (
@@ -332,6 +342,7 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </PageContainer>
   );

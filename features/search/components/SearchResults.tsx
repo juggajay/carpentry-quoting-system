@@ -62,11 +62,16 @@ export default function SearchResults({
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <div className="max-w-md mx-auto">
-            <p className="text-text-secondary mb-2">No quotes found</p>
-            <p className="text-text-muted text-sm">
-              Try adjusting your search criteria or filters
-            </p>
+          <div className="max-w-md mx-auto space-y-4">
+            <div className="mx-auto w-12 h-12 bg-bg-secondary rounded-full flex items-center justify-center">
+              <DocumentDuplicateIcon className="w-6 h-6 text-text-tertiary" />
+            </div>
+            <div>
+              <p className="text-text-primary font-medium mb-1">No quotes found</p>
+              <p className="text-text-secondary text-sm">
+                Try adjusting your search criteria or filters
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -94,12 +99,12 @@ export default function SearchResults({
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       quote.status === "DRAFT"
-                        ? "bg-background-hover text-text-secondary"
+                        ? "bg-status-draft-bg text-status-draft-text"
                         : quote.status === "SENT"
-                        ? "bg-info/10 text-info"
+                        ? "bg-status-pending-bg text-status-pending-text"
                         : quote.status === "ACCEPTED"
-                        ? "bg-success/10 text-success"
-                        : "bg-error/10 text-error"
+                        ? "bg-status-approved-bg text-status-approved-text"
+                        : "bg-status-rejected-bg text-status-rejected-text"
                     }`}
                   >
                     {quote.status}
@@ -122,7 +127,7 @@ export default function SearchResults({
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-border-default">
+                <div className="flex justify-between items-center pt-4 border-t border-border">
                   <span className="text-xs text-text-muted">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
