@@ -1,10 +1,9 @@
+import { prisma } from "@/lib/prisma";
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-const prisma = new PrismaClient();
 
 export async function saveQuote(quoteId: string, data: any) {
   try {

@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -14,8 +14,6 @@ import {
   PlusIcon,
   DocumentArrowUpIcon
 } from "@heroicons/react/24/outline";
-
-const prisma = new PrismaClient();
 
 async function getDashboardData() {
   try {

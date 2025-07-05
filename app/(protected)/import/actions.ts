@@ -1,12 +1,11 @@
+import { prisma } from "@/lib/prisma";
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
-import { PrismaClient, Prisma } from "@prisma/client";
 import { FileStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-const prisma = new PrismaClient();
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

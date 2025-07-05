@@ -1,6 +1,6 @@
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
 
 export async function GET() {
   const checks = {
@@ -24,7 +24,6 @@ export async function GET() {
 
   // Check Database
   try {
-    const prisma = new PrismaClient();
     await prisma.$connect();
     await prisma.$disconnect();
     checks.checks.database = true;

@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import VerificationLayout from "./verification-layout";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
 import { RetryButton } from "@/components/ui/RetryButton";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
-
-const prisma = new PrismaClient();
 
 interface ExtractedItem {
   description: string;

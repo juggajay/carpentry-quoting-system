@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const prisma = new PrismaClient({
-    log: ['query', 'error', 'warn'],
-  });
 
   try {
     // Test basic connection
