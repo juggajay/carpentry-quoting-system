@@ -135,12 +135,12 @@ export default async function DashboardPage() {
               <div className="p-3 bg-primary/10 rounded-lg">
                 <PlusIcon className="w-6 h-6 text-primary" />
               </div>
-              <CardContent>
+              <div>
                 <h3 className="font-semibold text-text-primary">New Quote</h3>
                 <p className="text-sm text-text-muted">Create a new quote</p>
               </div>
             </CardContent>
-                  </Card>
+          </Card>
         </Link>
 
         <Link href="/import">
@@ -149,12 +149,12 @@ export default async function DashboardPage() {
               <div className="p-3 bg-success/10 rounded-lg">
                 <DocumentArrowUpIcon className="w-6 h-6 text-success" />
               </div>
-              <CardContent>
+              <div>
                 <h3 className="font-semibold text-text-primary">Import PDF</h3>
                 <p className="text-sm text-text-muted">Import from PDF</p>
               </div>
             </CardContent>
-                  </Card>
+          </Card>
         </Link>
 
         <Link href="/search">
@@ -163,12 +163,12 @@ export default async function DashboardPage() {
               <div className="p-3 bg-secondary/10 rounded-lg">
                 <DocumentTextIcon className="w-6 h-6 text-secondary" />
               </div>
-              <CardContent>
+              <div>
                 <h3 className="font-semibold text-text-primary">Search Quotes</h3>
                 <p className="text-sm text-text-muted">Find existing quotes</p>
               </div>
             </CardContent>
-                  </Card>
+          </Card>
         </Link>
       </div>
 
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <CardContent>
+              <div>
                 <p className="text-sm text-text-muted">Total Quotes</p>
                 <p className="text-2xl font-bold text-text-primary">
                   {data.stats.totalQuotes}
@@ -186,12 +186,12 @@ export default async function DashboardPage() {
               <DocumentTextIcon className="w-8 h-8 text-text-tertiary" />
             </div>
           </CardContent>
-                </Card>
+        </Card>
 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <CardContent>
+              <div>
                 <p className="text-sm text-text-muted">Accepted</p>
                 <p className="text-2xl font-bold text-success">
                   {data.stats.acceptedQuotes}
@@ -200,12 +200,12 @@ export default async function DashboardPage() {
               <ArrowUpIcon className="w-8 h-8 text-success" />
             </div>
           </CardContent>
-                </Card>
+        </Card>
 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <CardContent>
+              <div>
                 <p className="text-sm text-text-muted">Total Clients</p>
                 <p className="text-2xl font-bold text-text-primary">
                   {data.stats.totalClients}
@@ -214,12 +214,12 @@ export default async function DashboardPage() {
               <UsersIcon className="w-8 h-8 text-text-tertiary" />
             </div>
           </CardContent>
-                </Card>
+        </Card>
 
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <CardContent>
+              <div>
                 <p className="text-sm text-text-muted">Monthly Growth</p>
                 <p className="text-2xl font-bold text-primary">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
               <ArrowTrendingUpIcon className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
-                </Card>
+        </Card>
       </div>
 
       {/* Recent Activity */}
@@ -277,8 +277,8 @@ export default async function DashboardPage() {
                 </Button>
               </Link>
             </div>
-          </div>
-                </Card>
+          </CardContent>
+        </Card>
 
         {/* Recent Uploads */}
         <Card>
@@ -330,8 +330,8 @@ export default async function DashboardPage() {
                 </Button>
               </Link>
             </div>
-          </div>
-                </Card>
+          </CardContent>
+        </Card>
       </div>
     </PageContainer>
   );
