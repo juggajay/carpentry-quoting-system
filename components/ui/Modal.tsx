@@ -18,7 +18,7 @@ const ModalOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
+      "fixed inset-0 z-50 bg-bg-overlay backdrop-blur-md",
       className
     )}
     {...props}
@@ -49,27 +49,25 @@ const ModalContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-[600px] translate-x-[-50%] translate-y-[-50%] gap-4",
         className
       )}
       {...props}
       asChild
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
         transition={{ 
-          type: "spring",
-          damping: 25,
-          stiffness: 300,
-          duration: 0.2 
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1]
         }}
-        className="bg-background-card border border-border-default rounded-lg p-6 shadow-xl"
+        className="bg-bg-tertiary border border-border rounded-2xl p-6 shadow-2xl w-[90vw] max-w-[600px]"
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none data-[state=open]:bg-background-secondary">
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 transition-all hover:opacity-100 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-bg-bg-tertiary disabled:pointer-events-none p-2">
             <XMarkIcon className="h-5 w-5 text-text-secondary" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
@@ -115,7 +113,7 @@ const ModalTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight text-text-primary",
+      "text-h3 text-text-primary",
       className
     )}
     {...props}
@@ -129,7 +127,7 @@ const ModalDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-text-secondary", className)}
+    className={cn("text-body-sm text-text-secondary mt-2", className)}
     {...props}
   />
 ));

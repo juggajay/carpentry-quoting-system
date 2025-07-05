@@ -234,7 +234,7 @@ export default function VerificationForm({
                       valueAsNumber: true,
                     })}
                     readOnly
-                    className="bg-background-secondary/50"
+                    className="bg-bg-secondary/50"
                     onFocus={() => handleFieldFocus(index, "total")}
                     onBlur={handleFieldBlur}
                   />

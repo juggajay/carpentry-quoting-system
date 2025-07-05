@@ -180,7 +180,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             <textarea
               {...form.register("description")}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-border-default bg-background-secondary text-text-primary resize-none focus:outline-none focus:border-primary-light"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-bg-secondary text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-bg-bg-primary focus:border-primary-600 hover:border-border-light hover:bg-bg-tertiary transition-all duration-200"
             />
           </div>
           <Input
@@ -257,7 +257,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               {...form.register("notes")}
               rows={3}
               placeholder="Internal notes (not shown to client)"
-              className="w-full px-3 py-2 rounded-lg border border-border-default bg-background-secondary text-text-primary resize-none focus:outline-none focus:border-primary-light"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-bg-secondary text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-bg-bg-primary focus:border-primary-600 hover:border-border-light hover:bg-bg-tertiary transition-all duration-200"
             />
           </div>
           <div>
@@ -268,7 +268,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               {...form.register("termsConditions")}
               rows={4}
               placeholder="Payment terms, delivery conditions, etc."
-              className="w-full px-3 py-2 rounded-lg border border-border-default bg-background-secondary text-text-primary resize-none focus:outline-none focus:border-primary-light"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-bg-secondary text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-bg-bg-primary focus:border-primary-600 hover:border-border-light hover:bg-bg-tertiary transition-all duration-200"
             />
           </div>
         </CardContent>

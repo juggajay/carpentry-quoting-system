@@ -32,7 +32,7 @@ async function RecentUploads() {
           {pendingFiles.map((file) => (
             <div
               key={file.id}
-              className="flex items-center justify-between p-3 bg-background-secondary rounded-lg"
+              className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg"
             >
               <div>
                 <p className="text-sm font-medium text-text-primary">

@@ -16,10 +16,10 @@ export default function Sidebar() {
       initial={{ width: isExpanded ? 256 : 80 }}
       animate={{ width: isExpanded ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-gray-800 border-r border-gray-700 shadow-xl"
+      className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-bg-secondary border-r border-border"
     >
       {/* Logo / Brand */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-700">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-border">
         <AnimatePresence mode="wait">
           {isExpanded ? (
             <motion.h1
@@ -28,7 +28,7 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="text-xl font-bold text-gray-100"
+              className="text-h3 text-text-primary"
             >
               CarpentryQS
             </motion.h1>
@@ -39,9 +39,9 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-md"
+              className="w-10 h-10 bg-bg-primary rounded-lg flex items-center justify-center"
             >
-              <span className="text-white font-bold text-lg">C</span>
+              <span className="text-text-inverse font-bold text-lg">C</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -61,14 +61,14 @@ export default function Sidebar() {
                   className={`
                     group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? "bg-purple-600 text-white shadow-md" 
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      ? "bg-bg-primary/10 text-primary border border-primary/20" 
+                      : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
                     }
                   `}
                 >
                   <Icon className={`
                     w-6 h-6 flex-shrink-0 transition-colors duration-200
-                    ${isActive ? "text-white" : "text-gray-400 group-hover:text-white"}
+                    ${isActive ? "text-primary" : "text-text-tertiary group-hover:text-text-primary"}
                   `} />
                   <AnimatePresence>
                     {isExpanded && (
@@ -91,16 +91,16 @@ export default function Sidebar() {
       </nav>
 
       {/* Toggle Button */}
-      <div className="p-3 border-t border-gray-700">
+      <div className="p-3 border-t border-border">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-center p-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors duration-200 shadow-md"
+          className="w-full flex items-center justify-center p-2.5 rounded-lg bg-bg-tertiary hover:bg-white/5 transition-colors duration-200 border border-border hover:border-border-hover"
           aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
         >
           {isExpanded ? (
-            <ChevronLeftIcon className="w-5 h-5 text-gray-300" />
+            <ChevronLeftIcon className="w-5 h-5 text-text-secondary" />
           ) : (
-            <ChevronRightIcon className="w-5 h-5 text-gray-300" />
+            <ChevronRightIcon className="w-5 h-5 text-text-secondary" />
           )}
         </button>
       </div>

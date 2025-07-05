@@ -29,10 +29,11 @@ export default function RootLayout({
             theme="dark"
             toastOptions={{
               style: {
-                background: 'var(--background-card)',
+                background: 'var(--bg-tertiary)',
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border-default)',
               },
+              className: 'shadow-lg',
             }}
           />
         </body>

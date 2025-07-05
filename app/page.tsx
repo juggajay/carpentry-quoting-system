@@ -10,7 +10,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background-primary flex items-center justify-center">
+    <div className="min-h-screen bg-bg-primary flex items-center justify-center">
       <div className="max-w-4xl mx-auto px-8 text-center">
         <h1 className="text-5xl font-bold text-text-primary mb-6 text-gradient">
           Carpentry Quoting System
@@ -22,7 +22,7 @@ export default async function Home() {
         <div className="flex gap-4 justify-center">
           <Link
             href="/sign-in"
-            className="px-6 py-3 bg-primary-light hover:bg-primary-DEFAULT text-white rounded-lg transition-all duration-200 transform hover:scale-105"
+            className="px-6 py-3 bg-primary-light hover:bg-bg-primary-DEFAULT text-white rounded-lg transition-all duration-200 transform hover:scale-105"
           >
             Sign In
           </Link>

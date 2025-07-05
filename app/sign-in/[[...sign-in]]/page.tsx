@@ -2,20 +2,20 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background-primary">
+    <div className="min-h-screen flex items-center justify-center bg-bg-primary">
       <SignIn 
         appearance={{
           elements: {
             formButtonPrimary: 
-              "bg-primary-light hover:bg-primary-DEFAULT text-white transition-colors",
+              "bg-primary-light hover:bg-bg-primary-DEFAULT text-white transition-colors",
             card: "bg-background-card border border-border-default",
             headerTitle: "text-text-primary",
             headerSubtitle: "text-text-secondary",
             socialButtonsBlockButton: 
-              "bg-background-secondary border-border-default hover:bg-background-hover text-text-primary transition-colors",
+              "bg-bg-secondary border-border-default hover:bg-background-hover text-text-primary transition-colors",
             formFieldLabel: "text-text-secondary",
             formFieldInput: 
-              "bg-background-secondary border-border-default text-text-primary focus:border-primary-light",
+              "bg-bg-secondary border-border-default text-text-primary focus:border-primary-light",
             footerActionLink: "text-primary-light hover:text-primary-DEFAULT",
             identityPreviewText: "text-text-secondary",
             identityPreviewEditButtonIcon: "text-primary-light",

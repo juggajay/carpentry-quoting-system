@@ -3,21 +3,27 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900",
+  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-bg-primary",
   {
     variants: {
       variant: {
-        primary: "bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg",
-        secondary: "bg-gray-700 hover:bg-gray-600 text-gray-100 border border-gray-600 shadow-sm hover:shadow-md",
-        ghost: "hover:bg-gray-700/50 text-gray-300 hover:text-gray-100",
-        destructive: "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg",
-        outline: "border border-gray-600 bg-transparent hover:bg-gray-700/50 text-gray-100 shadow-sm hover:shadow-md",
+        primary: "bg-bg-primary hover:bg-bg-primary-hover text-text-inverse shadow-md hover:shadow-lg hover:-translate-y-[1px]",
+        secondary: "bg-transparent border border-border-hover hover:border-text-tertiary hover:bg-white/5 text-text-primary",
+        ghost: "hover:bg-white/5 text-text-secondary hover:text-text-primary",
+        destructive: "bg-danger hover:bg-danger-hover text-text-primary shadow-md hover:shadow-lg",
+        outline: "border border-border bg-transparent hover:bg-white/5 hover:border-border-hover text-text-primary",
+        success: "bg-success hover:bg-success-dark text-text-primary shadow-md hover:shadow-lg",
+        warning: "bg-warning hover:bg-warning-dark text-text-inverse shadow-md hover:shadow-lg",
       },
       size: {
+        xs: "h-7 px-2.5 text-xs",
         sm: "h-8 px-3 text-sm",
         md: "h-10 px-4 text-sm",
         lg: "h-12 px-6 text-base",
+        xl: "h-14 px-8 text-lg",
         icon: "h-10 w-10",
+        "icon-sm": "h-8 w-8",
+        "icon-xs": "h-7 w-7",
       },
     },
     defaultVariants: {

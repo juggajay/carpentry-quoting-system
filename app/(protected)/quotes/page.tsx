@@ -97,12 +97,12 @@ export default async function QuotesPage() {
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       quote.status === "DRAFT"
-                        ? "bg-background-hover text-text-secondary"
+                        ? "bg-status-draft-bg text-status-draft-text"
                         : quote.status === "SENT"
-                        ? "bg-info/10 text-info"
+                        ? "bg-status-pending-bg text-status-pending-text"
                         : quote.status === "ACCEPTED"
-                        ? "bg-success/10 text-success"
-                        : "bg-error/10 text-error"
+                        ? "bg-status-approved-bg text-status-approved-text"
+                        : "bg-status-rejected-bg text-status-rejected-text"
                     }`}
                   >
                     {quote.status}
@@ -113,18 +113,18 @@ export default async function QuotesPage() {
                 <div className="space-y-2 mb-4">
                   <p className="text-sm text-text-secondary">{quote.title}</p>
                   <div className="flex justify-between text-sm">
-                    <span className="text-text-muted">Items:</span>
+                    <span className="text-text-tertiary">Items:</span>
                     <span className="text-text-primary">{quote._count.items}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-text-muted text-sm">Total:</span>
+                    <span className="text-text-tertiary text-sm">Total:</span>
                     <span className="text-lg font-semibold text-text-primary">
                       ${quote.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-border-default">
-                  <span className="text-xs text-text-muted">
+                <div className="flex justify-between items-center pt-4 border-t border-border">
+                  <span className="text-xs text-text-tertiary">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
                   <Link href={`/quotes/${quote.id}`}>

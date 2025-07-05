@@ -5,36 +5,30 @@
 /* Import Inter font */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Custom CSS Variables */
+/* Design System CSS Variables */
 :root {
-  --background-primary: #111827;
-  --background-secondary: #1F2937;
-  --background-card: #374151;
-  --background-hover: #4B5563;
-  --text-primary: #F9FAFB;
-  --text-secondary: #D1D5DB;
-  --text-muted: #9CA3AF;
-  --border-default: #374151;
-  --border-light: #4B5563;
-  --primary-purple: #9333EA;
-  --primary-purple-dark: #7C3AED;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* Primary Colors */
+  --bg-primary: #0A0A0B;
+  --bg-secondary: #121214;
+  --bg-tertiary: #1A1A1D;
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --accent-primary: #22C55E;
+  --border-default: #2A2A2E;
 }
 
 /* Base Styles */
 @layer base {
   * {
-    border-color: var(--border-default);
+    border-color: #2A2A2E; /* Default border color */
   }
   
   body {
-    background-color: var(--background-primary);
-    color: var(--text-primary);
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-bg-primary text-text-primary;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: "cv11", "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Smooth scrolling */
@@ -44,33 +38,52 @@
 
   /* Focus styles */
   :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 4px var(--primary-purple);
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-bg-bg-primary;
   }
 
   /* Selection styles */
   ::selection {
-    background-color: rgba(147, 51, 234, 0.2);
-    color: var(--text-primary);
+    @apply bg-bg-primary/20 text-text-primary;
   }
 
   /* Scrollbar styles */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    @apply w-2 h-2;
   }
 
   ::-webkit-scrollbar-track {
-    background-color: var(--background-secondary);
+    @apply bg-bg-secondary rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: var(--border-light);
-    border-radius: 9999px;
+    @apply bg-border-hover rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-muted);
+    @apply bg-border-light;
+  }
+  
+  /* Headings */
+  h1 {
+    @apply text-h1;
+  }
+  
+  h2 {
+    @apply text-h2;
+  }
+  
+  h3 {
+    @apply text-h3;
+  }
+  
+  /* Links */
+  a {
+    @apply text-primary hover:text-primary-hover transition-colors;
+  }
+  
+  /* Disabled elements */
+  [disabled] {
+    @apply opacity-50 cursor-not-allowed;
   }
 }
 
@@ -78,35 +91,17 @@
 @layer utilities {
   /* Text gradient */
   .text-gradient {
-    background: linear-gradient(to right, var(--primary-purple), var(--primary-purple-dark));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    @apply bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent;
   }
 
   /* Glass effect */
   .glass {
-    background-color: rgba(24, 24, 27, 0.8);
-    backdrop-filter: blur(16px);
+    @apply bg-bg-tertiary/80 backdrop-blur-lg border border-border/50;
   }
 
-  /* Glow effect */
-  .glow {
-    box-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
-  }
-
-  /* Animated gradient background */
-  .gradient-bg {
-    background: linear-gradient(to bottom right, rgba(147, 51, 234, 0.1), var(--background-primary), rgba(124, 58, 237, 0.1));
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-  }
-
-  /* Loading skeleton */
+  /* Loading skeleton with shimmer */
   .skeleton {
-    background-color: var(--background-hover);
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    border-radius: 0.5rem;
+    @apply bg-gradient-to-r from-bg-bg-secondary via-bg-bg-tertiary to-bg-bg-secondary bg-[length:200%_100%] animate-shimmer rounded-lg;
   }
 
   /* Hide scrollbar */
@@ -118,42 +113,97 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  /* Divider line */
+  .divider {
+    @apply h-px bg-border;
+  }
+  
+  /* Focus ring */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-bg-primary;
+  }
 }
 
-/* Component specific animations */
+/* Component specific styles */
 @layer components {
-  /* Button hover effects */
-  .btn-hover {
-    transition: all 0.2s;
-    &:hover {
-      transform: scale(1.02);
-      filter: brightness(1.1);
-    }
-    &:active {
-      transform: scale(0.98);
-    }
+  /* Button base - matches design spec */
+  .btn {
+    @apply inline-flex items-center justify-center font-medium rounded-lg px-6 py-3 transition-all duration-200 focus-ring disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  /* Button primary - green CTA */
+  .btn-primary {
+    @apply bg-bg-primary hover:bg-bg-primary-hover text-text-inverse shadow-md hover:shadow-lg hover:-translate-y-[1px] active:scale-[0.98];
+  }
+  
+  /* Button secondary - transparent with border */
+  .btn-secondary {
+    @apply bg-transparent border border-border-hover hover:border-text-tertiary hover:bg-white/5 text-text-primary;
+  }
+  
+  /* Button ghost */
+  .btn-ghost {
+    @apply hover:bg-white/5 text-text-secondary hover:text-text-primary;
   }
 
-  /* Card hover effects */
+  /* Card base - matches design spec */
+  .card {
+    @apply bg-bg-tertiary border border-border rounded-lg p-6 shadow-card transition-all duration-200;
+  }
+  
+  /* Card hover */
   .card-hover {
-    transition: all 0.3s;
-    &:hover {
-      transform: scale(1.02);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
+    @apply hover:border-border-hover hover:scale-[1.01] hover:shadow-card-hover cursor-pointer;
   }
 
-  /* Input focus effects */
-  .input-focus {
-    transition: all 0.2s;
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 4px var(--primary-purple);
-    }
+  /* Input base - matches design spec */
+  .input {
+    @apply h-12 bg-bg-secondary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary 
+           focus:border-primary focus:shadow-focus transition-all duration-200;
   }
 
-  /* Sidebar transition */
-  .sidebar-transition {
-    transition: all 0.3s;
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 bg-bg-overlay backdrop-blur-sm;
+  }
+  
+  /* Modal content */
+  .modal-content {
+    @apply bg-bg-tertiary border border-border rounded-2xl shadow-2xl max-w-[600px] w-[90vw];
+  }
+
+  /* Status pills - matches design spec */
+  .pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .pill-draft {
+    @apply bg-status-draft-bg text-status-draft-text;
+  }
+  
+  .pill-pending {
+    @apply bg-status-pending-bg text-status-pending-text;
+  }
+  
+  .pill-approved {
+    @apply bg-status-approved-bg text-status-approved-text;
+  }
+  
+  .pill-rejected {
+    @apply bg-status-rejected-bg text-status-rejected-text;
+  }
+
+  /* Table styles */
+  .table-header {
+    @apply bg-bg-secondary text-caption uppercase text-text-secondary;
+  }
+  
+  .table-row {
+    @apply border-b border-border hover:bg-white/[0.02] transition-colors;
+  }
+  
+  .table-row:nth-child(even) {
+    @apply bg-white/[0.02];
   }
 }

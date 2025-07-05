@@ -155,7 +155,7 @@ function SortableLineItem({
             valueAsNumber: true,
           })}
           readOnly
-          className="bg-background-secondary/50"
+          className="bg-bg-secondary/50"
         />
       </div>
       <div className="col-span-1 flex items-center justify-center pt-2">

@@ -38,7 +38,7 @@ export default function PdfViewer({ pdfUrl, highlightArea }: PdfViewerProps) {
   // In a real implementation, we would use a PDF rendering library
   // For now, we'll display an iframe and overlay highlights
   return (
-    <div ref={containerRef} className="relative h-full bg-background-secondary rounded-lg overflow-hidden">
+    <div ref={containerRef} className="relative h-full bg-bg-secondary rounded-lg overflow-hidden">
       {/* PDF Display */}
       <iframe
         src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}

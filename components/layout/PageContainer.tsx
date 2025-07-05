@@ -22,7 +22,7 @@ export default function PageContainer({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={`space-y-3 ${className}`}
     >
       {/* Page Header */}
@@ -30,12 +30,12 @@ export default function PageContainer({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             {title && (
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-100">
+              <h1 className="text-h2 sm:text-h1 text-text-primary">
                 {title}
               </h1>
             )}
             {description && (
-              <p className="mt-1 text-sm sm:text-base text-gray-400">
+              <p className="mt-1 text-body-sm sm:text-body text-text-secondary">
                 {description}
               </p>
             )}
