@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
-import { FileStatus, Prisma } from "@prisma/client";
+import { FileStatus, Prisma, Unit } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 
@@ -334,7 +334,7 @@ export async function saveVerifiedData(
       const quoteItems = items.map((item, index) => ({
         description: item.description,
         quantity: item.quantity,
-        unit: item.unit,
+        unit: item.unit as Unit,
         unitPrice: item.unitPrice,
         total: item.total,
         sortOrder: index,

@@ -24,6 +24,8 @@ model User {
   clients         Client[]
   quotes          Quote[]
   uploadedFiles   UploadedFile[]
+  materials       Material[]
+  laborRates      LaborRate[]
 
   @@index([clerkId])
   @@index([email])
@@ -84,21 +86,29 @@ model Quote {
 
 // QuoteItem model - individual line items in a quote
 model QuoteItem {
-  id          String   @id @default(uuid())
+  id          String    @id @default(cuid())
   description String
   quantity    Float
-  unit        String
+  unit        Unit      @default(EA)
   unitPrice   Float
   total       Float
+  itemType    ItemType  @default(CUSTOM)
   notes       String?
-  sortOrder   Int      @default(0)
-  quoteId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  sortOrder   Int       @default(0)
+  
   // Relations
-  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-
+  quoteId     String
+  quote       Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  // Optional relations to materials/labor
+  materialId  String?
+  material    Material? @relation(fields: [materialId], references: [id])
+  laborRateId String?
+  laborRate   LaborRate? @relation(fields: [laborRateId], references: [id])
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
   @@index([quoteId])
   @@index([sortOrder])
 }
@@ -158,4 +168,66 @@ enum FileStatus {
   PENDING_VERIFICATION
   VERIFIED
   FAILED
+}
+
+enum Unit {
+  EA    // Each
+  LM    // Linear Metre
+  SQM   // Square Metre
+  HR    // Hour (for labor)
+  DAY   // Day rate
+  PACK  // Pack
+  KG    // Kilogram
+  L     // Litre
+}
+
+enum ItemType {
+  CUSTOM
+  MATERIAL
+  LABOR
+}
+
+// Material model - stores materials catalog
+model Material {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  sku           String?  @unique
+  supplier      String
+  unit          Unit     @default(EA)
+  pricePerUnit  Float
+  gstInclusive  Boolean  @default(true)
+  category      String   // Timber, Hardware, Fixings, etc.
+  inStock       Boolean  @default(true)
+  lastUpdated   DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  quoteItems    QuoteItem[]
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  @@index([category])
+  @@index([name])
+}
+
+// LaborRate model - stores labor rates
+model LaborRate {
+  id            String   @id @default(cuid())
+  title         String   // Carpenter, Leading Hand, Apprentice
+  level         String?  // Level 1-4
+  baseRate      Float    // Per hour rate
+  saturdayRate  Float    // 1.5x typically
+  sundayRate    Float    // 2x typically
+  loadedRate    Float    // With oncosts (super, insurance, etc)
+  description   String?
+  effectiveDate DateTime
+  createdAt     DateTime @default(now())
+  
+  // Relations
+  quoteItems    QuoteItem[]
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  @@index([title])
 }
