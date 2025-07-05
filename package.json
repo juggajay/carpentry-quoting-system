@@ -7,7 +7,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed-materials": "ts-node prisma/seed-materials.ts",
+    "copy-materials": "tsx prisma/copy-materials.ts",
+    "copy-all-materials": "tsx prisma/copy-all-materials.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.23.2",

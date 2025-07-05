@@ -193,22 +193,24 @@ model Material {
   name          String
   description   String?
   sku           String?  @unique
-  supplier      String
+  supplier      String?
   unit          Unit     @default(EA)
-  pricePerUnit  Float
-  gstInclusive  Boolean  @default(true)
-  category      String   // Timber, Hardware, Fixings, etc.
-  inStock       Boolean  @default(true)
-  lastUpdated   DateTime @updatedAt
+  pricePerUnit  Float    @map("pricePerUnit")
+  gstInclusive  Boolean  @default(true) @map("gstInclusive")
+  category      String?  // Timber, Hardware, Fixings, etc.
+  inStock       Boolean  @default(true) @map("inStock")
+  notes         String?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   // Relations
   quoteItems    QuoteItem[]
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
   
   @@index([category])
   @@index([name])
+  @@index([userId])
 }
 
 // LaborRate model - stores labor rates

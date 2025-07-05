@@ -22,6 +22,8 @@ export interface QuoteFormData {
   notes: string;
   termsConditions: string;
   items: Array<{
+    type?: "custom" | "material" | "labor";
+    materialId?: string;
     description: string;
     quantity: number;
     unit: string;
