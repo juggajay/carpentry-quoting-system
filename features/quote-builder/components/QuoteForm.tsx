@@ -174,13 +174,13 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             error={form.formState.errors.title?.message}
           />
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">
               Description
             </label>
             <textarea
               {...form.register("description")}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background-secondary text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-background focus:border-primary-600 hover:border-border hover:bg-background-tertiary transition-all duration-200"
+              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
             />
           </div>
           <Input
@@ -218,22 +218,22 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
           <LineItemsManager form={form} onLineUpdate={updateLineTotal} />
           
           {/* Totals */}
-          <div className="mt-6 pt-6 border-t border-border-default">
+          <div className="mt-6 pt-6 border-t border-slate-700">
             <div className="flex justify-end">
               <div className="w-64 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal:</span>
-                  <span className="text-foreground font-medium">
+                  <span className="text-slate-400">Subtotal:</span>
+                  <span className="text-white font-medium">
                     ${subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax (8.25%):</span>
-                  <span className="text-foreground font-medium">
+                  <span className="text-slate-400">Tax (8.25%):</span>
+                  <span className="text-white font-medium">
                     ${tax.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-lg font-semibold pt-2 border-t border-border-default">
+                <div className="flex justify-between text-lg font-semibold pt-2 border-t border-slate-700">
                   <span>Total:</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
@@ -250,25 +250,25 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">
               Notes
             </label>
             <textarea
               {...form.register("notes")}
               rows={3}
               placeholder="Internal notes (not shown to client)"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background-secondary text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-background focus:border-primary-600 hover:border-border hover:bg-background-tertiary transition-all duration-200"
+              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">
               Terms & Conditions
             </label>
             <textarea
               {...form.register("termsConditions")}
               rows={4}
               placeholder="Payment terms, delivery conditions, etc."
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background-secondary text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 focus:ring-offset-background focus:border-primary-600 hover:border-border hover:bg-background-tertiary transition-all duration-200"
+              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
             />
           </div>
         </CardContent>

@@ -23,9 +23,9 @@ export default function ContentCard({
   variant = "default",
 }: ContentCardProps) {
   const variants = {
-    default: "bg-background-tertiary border-border shadow-card hover:shadow-card-hover hover:border-border",
+    default: "bg-slate-800 border-slate-700 shadow-lg hover:shadow-xl hover:border-slate-600",
     ghost: "bg-transparent border-transparent",
-    bordered: "bg-transparent border-border hover:border-border",
+    bordered: "bg-transparent border-slate-700 hover:border-slate-600",
   };
 
   return (
@@ -41,15 +41,15 @@ export default function ContentCard({
     >
       {/* Card Header */}
       {(title || description || actions) && (
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 border-b border-slate-700">
           <div>
             {title && (
-              <h2 className="text-h3 text-foreground">
+              <h2 className="text-lg font-semibold text-white">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="mt-1 text-body-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-slate-400">
                 {description}
               </p>
             )}

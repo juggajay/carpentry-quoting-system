@@ -1,6 +1,6 @@
 export default function SkeletonCard() {
   return (
-    <div className="bg-background-tertiary border border-border rounded-lg p-6 animate-pulse">
+    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 animate-pulse">
       <div className="flex justify-between items-start mb-4">
         <div className="space-y-2">
           <div className="h-5 w-24 bg-neutral-800 rounded" />
@@ -21,7 +21,7 @@ export default function SkeletonCard() {
         </div>
       </div>
       
-      <div className="flex justify-between items-center pt-4 mt-4 border-t border-border">
+      <div className="flex justify-between items-center pt-4 mt-4 border-t border-slate-700">
         <div className="h-3 w-24 bg-neutral-800 rounded" />
         <div className="h-8 w-20 bg-neutral-800 rounded" />
       </div>

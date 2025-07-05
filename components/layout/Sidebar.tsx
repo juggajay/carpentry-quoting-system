@@ -16,10 +16,10 @@ export default function Sidebar() {
       initial={{ width: isExpanded ? 256 : 80 }}
       animate={{ width: isExpanded ? 256 : 80 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="h-screen bg-background-secondary border-r border-border flex flex-col"
+      className="h-screen bg-slate-900 border-r border-slate-800 flex flex-col"
     >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-center border-b border-border">
+      <div className="h-16 flex items-center justify-center border-b border-slate-800">
         <AnimatePresence mode="wait">
           {isExpanded ? (
             <motion.h1
@@ -37,9 +37,9 @@ export default function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"
+              className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center"
             >
-              <span className="text-background font-bold text-lg">C</span>
+              <span className="text-slate-950 font-bold text-lg">C</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -59,8 +59,8 @@ export default function Sidebar() {
                   className={`
                     flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
                     ${isActive 
-                      ? "bg-primary text-background" 
-                      : "text-muted-foreground hover:bg-background-tertiary hover:text-foreground"
+                      ? "bg-green-500 text-slate-950" 
+                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }
                   `}
                 >
@@ -85,10 +85,10 @@ export default function Sidebar() {
       </nav>
 
       {/* Toggle Button */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-slate-800">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full p-2 rounded-lg bg-background-tertiary hover:bg-background transition-colors flex items-center justify-center"
+          className="w-full p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors flex items-center justify-center"
         >
           {isExpanded ? (
             <ChevronLeftIcon className="w-5 h-5" />

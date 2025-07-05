@@ -108,11 +108,11 @@ export default async function DashboardPage() {
       <PageContainer title="Dashboard">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-12 h-12 bg-error/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-6 h-6 text-error" />
+            <div className="mx-auto w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-6 h-6 text-red-600" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">Unable to Load Dashboard</h3>
-            <p className="text-muted max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-white">Unable to Load Dashboard</h3>
+            <p className="text-slate-400 max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <RetryButton className="mt-4" />
@@ -133,12 +133,12 @@ export default async function DashboardPage() {
         <Link href="/quotes/new">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <PlusIcon className="w-6 h-6 text-primary" />
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <PlusIcon className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">New Quote</h3>
-                <p className="text-sm text-muted">Create a new quote</p>
+                <h3 className="font-semibold text-white">New Quote</h3>
+                <p className="text-sm text-slate-400">Create a new quote</p>
               </div>
             </CardContent>
           </Card>
@@ -147,12 +147,12 @@ export default async function DashboardPage() {
         <Link href="/import">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-success/10 rounded-lg">
-                <DocumentArrowUpIcon className="w-6 h-6 text-success" />
+              <div className="p-3 bg-green-600/10 rounded-lg">
+                <DocumentArrowUpIcon className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Import PDF</h3>
-                <p className="text-sm text-muted">Import from PDF</p>
+                <h3 className="font-semibold text-white">Import PDF</h3>
+                <p className="text-sm text-slate-400">Import from PDF</p>
               </div>
             </CardContent>
           </Card>
@@ -161,12 +161,12 @@ export default async function DashboardPage() {
         <Link href="/search">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-secondary/10 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-secondary" />
+              <div className="p-3 bg-slate-600/10 rounded-lg">
+                <DocumentTextIcon className="w-6 h-6 text-slate-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Search Quotes</h3>
-                <p className="text-sm text-muted">Find existing quotes</p>
+                <h3 className="font-semibold text-white">Search Quotes</h3>
+                <p className="text-sm text-slate-400">Find existing quotes</p>
               </div>
             </CardContent>
           </Card>
@@ -179,12 +179,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted">Total Quotes</p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-sm text-slate-400">Total Quotes</p>
+                <p className="text-2xl font-bold text-white">
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-8 h-8 text-muted" />
+              <DocumentTextIcon className="w-8 h-8 text-slate-400" />
             </div>
           </CardContent>
         </Card>
@@ -193,12 +193,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted">Accepted</p>
-                <p className="text-2xl font-bold text-success">
+                <p className="text-sm text-slate-400">Accepted</p>
+                <p className="text-2xl font-bold text-green-600">
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-8 h-8 text-success" />
+              <ArrowUpIcon className="w-8 h-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -207,12 +207,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted">Total Clients</p>
-                <p className="text-2xl font-bold text-foreground">
+                <p className="text-sm text-slate-400">Total Clients</p>
+                <p className="text-2xl font-bold text-white">
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-muted" />
+              <UsersIcon className="w-8 h-8 text-slate-400" />
             </div>
           </CardContent>
         </Card>
@@ -221,12 +221,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted">Monthly Growth</p>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-sm text-slate-400">Monthly Growth</p>
+                <p className="text-2xl font-bold text-green-500">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-8 h-8 text-primary" />
+              <ArrowTrendingUpIcon className="w-8 h-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -247,20 +247,20 @@ export default async function DashboardPage() {
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-background-tertiary/50 transition-colors">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800/50 transition-colors">
                       <div className="flex-1">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-white">
                           {quote.quoteNumber}
                         </p>
-                        <p className="text-sm text-muted">
+                        <p className="text-sm text-slate-400">
                           {quote.client?.name || "No client"} • {quote.title}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-white">
                           ${quote.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted">
+                        <p className="text-xs text-slate-400">
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -291,12 +291,12 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-background-tertiary/50 transition-colors">
+                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800/50 transition-colors">
                     <div className="flex-1">
-                      <p className="font-medium text-foreground truncate">
+                      <p className="font-medium text-white truncate">
                         {file.fileName}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-slate-400">
                         {(file.fileSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -304,15 +304,15 @@ export default async function DashboardPage() {
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
                           file.status === "VERIFIED"
-                            ? "bg-status-approved-bg text-status-approved-text"
+                            ? "bg-green-600/20 text-green-600"
                             : file.status === "FAILED"
-                            ? "bg-status-rejected-bg text-status-rejected-text"
-                            : "bg-status-draft-bg text-status-draft-text"
+                            ? "bg-red-600/20 text-red-600"
+                            : "bg-slate-600/20 text-slate-400"
                         }`}
                       >
                         {file.status}
                       </span>
-                      <p className="text-xs text-muted mt-1">
+                      <p className="text-xs text-slate-400 mt-1">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-3 pt-3 border-t border-border">
+            <div className="mt-3 pt-3 border-t border-slate-700">
               <Link href="/import">
                 <Button variant="ghost" className="w-full">
                   Import New File

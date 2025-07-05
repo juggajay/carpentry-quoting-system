@@ -10,25 +10,25 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="max-w-4xl mx-auto px-8 text-center">
-        <h1 className="text-5xl font-bold text-foreground mb-6">
+        <h1 className="text-5xl font-bold text-white mb-6">
           Carpentry Quoting System
         </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
           Professional quoting system designed for carpentry businesses. 
           Import quotes from PDFs, manage clients, and generate professional proposals.
         </p>
         <div className="flex gap-4 justify-center">
           <Link
             href="/sign-in"
-            className="px-6 py-3 bg-primary hover:bg-primary-hover text-background font-medium rounded-lg transition-all duration-200 transform hover:scale-105"
+            className="px-6 py-3 bg-green-500 hover:bg-green-600 text-slate-950 font-medium rounded-lg transition-all duration-200 transform hover:scale-105"
           >
             Sign In
           </Link>
           <Link
             href="/sign-up"
-            className="px-6 py-3 bg-background-tertiary hover:bg-border text-foreground border border-border rounded-lg transition-all duration-200 transform hover:scale-105"
+            className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg transition-all duration-200 transform hover:scale-105"
           >
             Get Started
           </Link>

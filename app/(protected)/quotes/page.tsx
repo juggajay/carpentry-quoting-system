@@ -47,11 +47,11 @@ export default async function QuotesPage() {
       <PageContainer title="Quotes">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-error/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-error" />
+            <div className="mx-auto w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center">
+              <DocumentTextIcon className="w-8 h-8 text-red-600" />
             </div>
-            <h3 className="text-lg font-semibold text-foreground">Unable to Load Quotes</h3>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-white">Unable to Load Quotes</h3>
+            <p className="text-slate-400 max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <RetryButton className="mt-4" />
@@ -79,12 +79,12 @@ export default async function QuotesPage() {
         <ContentCard>
           <CardContent className="py-12 text-center">
             <div className="max-w-md mx-auto space-y-4">
-              <div className="mx-auto w-12 h-12 bg-background-secondary rounded-full flex items-center justify-center">
-                <DocumentTextIcon className="w-6 h-6 text-muted" />
+              <div className="mx-auto w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center">
+                <DocumentTextIcon className="w-6 h-6 text-slate-400" />
               </div>
               <div>
-                <p className="text-foreground font-medium mb-1">No quotes yet</p>
-                <p className="text-muted-foreground text-sm mb-4">
+                <p className="text-white font-medium mb-1">No quotes yet</p>
+                <p className="text-slate-400 text-sm mb-4">
                   Get started by importing a PDF or creating a new quote
                 </p>
               </div>
@@ -112,12 +112,12 @@ export default async function QuotesPage() {
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       quote.status === "DRAFT"
-                        ? "bg-status-draft-bg text-status-draft-text"
+                        ? "bg-slate-600/20 text-slate-400"
                         : quote.status === "SENT"
-                        ? "bg-status-pending-bg text-status-pending-text"
+                        ? "bg-amber-500/20 text-amber-500"
                         : quote.status === "ACCEPTED"
-                        ? "bg-status-approved-bg text-status-approved-text"
-                        : "bg-status-rejected-bg text-status-rejected-text"
+                        ? "bg-green-600/20 text-green-600"
+                        : "bg-red-600/20 text-red-600"
                     }`}
                   >
                     {quote.status}
@@ -126,20 +126,20 @@ export default async function QuotesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm text-muted-foreground">{quote.title}</p>
+                  <p className="text-sm text-slate-400">{quote.title}</p>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted">Items:</span>
-                    <span className="text-foreground">{quote._count.items}</span>
+                    <span className="text-slate-400">Items:</span>
+                    <span className="text-white">{quote._count.items}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted text-sm">Total:</span>
-                    <span className="text-lg font-semibold text-foreground">
+                    <span className="text-slate-400 text-sm">Total:</span>
+                    <span className="text-lg font-semibold text-white">
                       ${quote.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-border">
-                  <span className="text-xs text-muted">
+                <div className="flex justify-between items-center pt-4 border-t border-slate-700">
+                  <span className="text-xs text-slate-400">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
                   <Link href={`/quotes/${quote.id}`}>
