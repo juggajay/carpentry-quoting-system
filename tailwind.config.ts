@@ -209,6 +209,11 @@ const config: Config = {
         "lg": "12px",
         "xl": "16px",
       },
+      
+      // Ring colors for focus states
+      ringColor: (theme: any) => ({
+        ...theme('colors'),
+      }),
     },
   },
   plugins: [],
