@@ -4,9 +4,12 @@ export interface Material {
   id: string;
   name: string;
   description?: string;
-  category?: string;
+  sku?: string;
   unit: Unit;
   pricePerUnit: number;
+  category?: string;
+  supplier?: string;
+  inStock?: boolean;
 }
 
 export interface LaborRate {

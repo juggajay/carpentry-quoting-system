@@ -40,7 +40,8 @@ export async function GET(request: Request) {
         {
           OR: [
             { name: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } }
+            { description: { contains: search, mode: "insensitive" } },
+            { sku: { contains: search, mode: "insensitive" } }
           ]
         }
       ];
@@ -57,9 +58,12 @@ export async function GET(request: Request) {
         id: true,
         name: true,
         description: true,
+        sku: true,
         unit: true,
         pricePerUnit: true,
         category: true,
+        supplier: true,
+        inStock: true,
       }
     });
 

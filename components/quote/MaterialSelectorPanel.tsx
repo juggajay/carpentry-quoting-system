@@ -56,7 +56,8 @@ export function MaterialSelectorPanel({
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(m => 
         m.name.toLowerCase().includes(search) ||
-        m.description?.toLowerCase().includes(search)
+        m.description?.toLowerCase().includes(search) ||
+        m.sku?.toLowerCase().includes(search)
       );
     }
 
@@ -176,7 +177,7 @@ export function MaterialSelectorPanel({
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">🔍</span>
                 <input
                   type="text"
-                  placeholder="Search materials by name or description..."
+                  placeholder="Search materials by name, SKU, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-emerald-600"
@@ -267,6 +268,7 @@ export function MaterialSelectorPanel({
                               <div className="text-sm text-slate-400 mt-1">{material.description}</div>
                             )}
                             <div className="flex items-center gap-4 mt-2">
+                              {material.sku && <span className="text-sm text-slate-500">{material.sku}</span>}
                               <span className="text-sm font-medium text-emerald-400">
                                 {formatPrice(material.pricePerUnit)}/{material.unit}
                               </span>
