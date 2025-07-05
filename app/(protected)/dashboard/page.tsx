@@ -131,7 +131,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/quotes/new">
           <Card hover className="h-full">
-            <CardContent className="p-4 flex items-center space-x-4">
+            <CardContent className="p-3 flex items-center space-x-3">
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <PlusIcon className="w-6 h-6 text-purple-500" />
               </div>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="p-4 flex items-center space-x-4">
+            <CardContent className="p-3 flex items-center space-x-3">
               <div className="p-3 bg-green-500/10 rounded-lg">
                 <DocumentArrowUpIcon className="w-6 h-6 text-green-500" />
               </div>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="p-4 flex items-center space-x-4">
+            <CardContent className="p-3 flex items-center space-x-3">
               <div className="p-3 bg-blue-500/10 rounded-lg">
                 <DocumentTextIcon className="w-6 h-6 text-blue-500" />
               </div>
@@ -173,19 +173,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <ContentCard
-        title="Overview"
-        description="Key metrics and performance"
-        variant="ghost"
-        noPadding
-      >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Quotes</p>
-                <p className="text-2xl font-bold text-gray-100">
+                <p className="text-xl font-bold text-gray-100">
                   {data.stats.totalQuotes}
                 </p>
               </div>
@@ -199,7 +193,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Accepted</p>
-                <p className="text-2xl font-bold text-green-500">
+                <p className="text-xl font-bold text-green-500">
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
@@ -213,7 +207,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Clients</p>
-                <p className="text-2xl font-bold text-gray-100">
+                <p className="text-xl font-bold text-gray-100">
                   {data.stats.totalClients}
                 </p>
               </div>
@@ -227,7 +221,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Monthly Growth</p>
-                <p className="text-2xl font-bold text-purple-500">
+                <p className="text-xl font-bold text-purple-500">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
@@ -235,18 +229,17 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        </div>
-      </ContentCard>
+      </div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Quotes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Quotes</CardTitle>
-            <CardDescription>Your latest quote activity</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="p-4">
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold text-gray-100">Recent Quotes</h3>
+            <p className="text-sm text-gray-400">Your latest quote activity</p>
+          </div>
+          <div>
             {data.recentQuotes.length === 0 ? (
               <p className="text-gray-400 text-center py-4">
                 No quotes yet. Create your first quote!
@@ -284,16 +277,16 @@ export default async function DashboardPage() {
                 </Button>
               </Link>
             </div>
-          </CardContent>
+          </div>
         </Card>
 
         {/* Recent Uploads */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Imports</CardTitle>
-            <CardDescription>PDF files imported for OCR</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="p-4">
+          <div className="mb-3">
+            <h3 className="text-lg font-semibold text-gray-100">Recent Imports</h3>
+            <p className="text-sm text-gray-400">PDF files imported for OCR</p>
+          </div>
+          <div>
             {data.recentFiles.length === 0 ? (
               <p className="text-gray-400 text-center py-4">
                 No files imported yet.
@@ -337,7 +330,7 @@ export default async function DashboardPage() {
                 </Button>
               </Link>
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </PageContainer>
