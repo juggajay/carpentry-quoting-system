@@ -12,12 +12,39 @@ import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
 import { toast } from "sonner";
 
 export interface QuoteFormData {
-  title: string;
-  description: string;
+  // Company fields
+  companyName?: string;
+  abn?: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  companyAddress?: string;
+  
+  // Client fields
   clientId: string;
   clientName: string;
+  clientCompany?: string;
   clientEmail: string;
   clientPhone: string;
+  clientAddress?: string;
+  siteAddress?: string;
+  
+  // Quote details
+  quoteNumber?: string;
+  quoteDate?: string;
+  projectType?: string;
+  projectTitle?: string;
+  projectDescription?: string;
+  specialNotes?: string;
+  
+  // Terms
+  paymentTerms?: string;
+  paymentSchedule?: string;
+  warrantyPeriod?: string;
+  additionalTerms?: string;
+  
+  // Existing fields
+  title: string;
+  description: string;
   validUntil: string;
   notes: string;
   termsConditions: string;
@@ -41,13 +68,36 @@ export interface QuoteFormProps {
 export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormProps) {
   const form = useForm<QuoteFormData>({
     defaultValues: {
-      title: "",
-      description: "",
+      // Company fields
+      companyName: "",
+      abn: "",
+      companyPhone: "",
+      companyEmail: "",
+      companyAddress: "",
+      // Client fields
       clientId: "",
       clientName: "",
+      clientCompany: "",
       clientEmail: "",
       clientPhone: "",
-      validUntil: "",
+      clientAddress: "",
+      siteAddress: "",
+      // Quote details
+      quoteNumber: `Q-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+      quoteDate: new Date().toISOString().split('T')[0],
+      projectType: "",
+      projectTitle: "",
+      projectDescription: "",
+      specialNotes: "",
+      // Terms
+      paymentTerms: "7 days from invoice",
+      paymentSchedule: "10% deposit upon acceptance\n50% on commencement of work\n40% on completion",
+      warrantyPeriod: "6 months on workmanship",
+      additionalTerms: "All work carried out to Australian Standards.\nVariations must be agreed in writing.\nQuote valid for 30 days.",
+      // Existing fields
+      title: "",
+      description: "",
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       notes: "",
       termsConditions: "",
       items: [
@@ -77,8 +127,9 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
 
   // Calculate totals
   const subtotal = watchedItems?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
-  const tax = subtotal * 0.0825; // 8.25% tax
+  const tax = subtotal * 0.10; // 10% GST for Australia
   const total = subtotal + tax;
+  const deposit = total * 0.10; // 10% deposit
 
   // Update line total when quantity or price changes
   const updateLineTotal = (index: number) => {
@@ -132,32 +183,88 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
         </div>
       )}
 
+      {/* Company Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Business Details</CardTitle>
+          <CardDescription>
+            This information will appear on the quote
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Company Name"
+            {...form.register("companyName")}
+            placeholder="Your business name"
+          />
+          <Input
+            label="ABN"
+            {...form.register("abn")}
+            placeholder="12345678901"
+          />
+          <Input
+            label="Phone"
+            {...form.register("companyPhone")}
+            placeholder="0400 123 456"
+          />
+          <Input
+            label="Email"
+            type="email"
+            {...form.register("companyEmail")}
+            placeholder="info@yourbusiness.com.au"
+          />
+          <div className="md:col-span-2">
+            <Input
+              label="Business Address"
+              {...form.register("companyAddress")}
+              placeholder="123 Main St, Sydney NSW 2000"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Client Information */}
       <Card>
         <CardHeader>
           <CardTitle>Client Information</CardTitle>
           <CardDescription>
-            Enter client details or select from existing clients
+            Who is this quote for?
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Client Name *"
+            {...form.register("clientName", { required: "Client name is required" })}
+            error={form.formState.errors.clientName?.message}
+          />
+          <Input
+            label="Client Company"
+            {...form.register("clientCompany")}
+            placeholder="Optional"
+          />
+          <Input
+            label="Phone"
+            {...form.register("clientPhone")}
+            placeholder="0400 123 456"
+          />
+          <Input
+            label="Email"
+            type="email"
+            {...form.register("clientEmail")}
+            placeholder="client@email.com"
+          />
+          <div className="md:col-span-2">
             <Input
-              label="Client Name"
-              {...form.register("clientName", { required: "Client name is required" })}
-              error={form.formState.errors.clientName?.message}
+              label="Client Address"
+              {...form.register("clientAddress")}
+              placeholder="Client's address"
             />
+          </div>
+          <div className="md:col-span-2">
             <Input
-              label="Email"
-              type="email"
-              {...form.register("clientEmail")}
-              error={form.formState.errors.clientEmail?.message}
-            />
-            <Input
-              label="Phone"
-              type="tel"
-              {...form.register("clientPhone")}
-              error={form.formState.errors.clientPhone?.message}
+              label="Site Address (if different)"
+              {...form.register("siteAddress")}
+              placeholder="Leave blank if same as client address"
             />
           </div>
         </CardContent>
@@ -167,29 +274,84 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
       <Card>
         <CardHeader>
           <CardTitle>Quote Details</CardTitle>
+          <CardDescription>
+            Basic information about this quote
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
-            label="Quote Title"
-            {...form.register("title", { required: "Title is required" })}
-            error={form.formState.errors.title?.message}
+            label="Quote Number"
+            {...form.register("quoteNumber")}
+            readOnly
           />
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Description
-            </label>
-            <textarea
-              {...form.register("description")}
-              rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
-            />
-          </div>
+          <Input
+            label="Quote Date"
+            type="date"
+            {...form.register("quoteDate")}
+          />
           <Input
             label="Valid Until"
             type="date"
             {...form.register("validUntil")}
-            min={new Date().toISOString().split("T")[0]}
           />
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-2">
+              Project Type
+            </label>
+            <select
+              {...form.register("projectType")}
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+            >
+              <option value="">Select type...</option>
+              <option value="new_build">New Build</option>
+              <option value="renovation">Renovation</option>
+              <option value="extension">Extension</option>
+              <option value="repair">Repair</option>
+              <option value="deck">Deck/Outdoor</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Project Description */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Description</CardTitle>
+          <CardDescription>
+            What work will be done?
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Input
+              label="Project Title"
+              {...form.register("projectTitle")}
+              placeholder="e.g., Master Bedroom Extension"
+            />
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-2">
+                Description
+              </label>
+              <textarea
+                {...form.register("projectDescription")}
+                rows={4}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                placeholder="Describe the work to be done..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-2">
+                Special Notes (Optional)
+              </label>
+              <textarea
+                {...form.register("specialNotes")}
+                rows={3}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                placeholder="Any special conditions, access requirements, etc..."
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -220,22 +382,34 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
           {/* Totals */}
           <div className="mt-6 pt-6 border-t border-slate-700">
             <div className="flex justify-end">
-              <div className="w-64 space-y-2">
+              <div className="w-96 space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Subtotal:</span>
                   <span className="text-white font-medium">
                     ${subtotal.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Tax (8.25%):</span>
-                  <span className="text-white font-medium">
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-400">GST (10%):</span>
+                  <span className="text-white">
                     ${tax.toFixed(2)}
                   </span>
                 </div>
+                
                 <div className="flex justify-between text-lg font-semibold pt-2 border-t border-slate-700">
-                  <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Total (inc GST):</span>
+                  <span className="text-green-500">
+                    ${total.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Add deposit line */}
+                <div className="flex items-center justify-between text-sm pt-2">
+                  <span className="text-slate-400">Deposit (10%):</span>
+                  <span className="text-white font-medium">
+                    ${deposit.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -243,34 +417,68 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
         </CardContent>
       </Card>
 
-      {/* Additional Information */}
+      {/* Terms & Conditions */}
       <Card>
         <CardHeader>
-          <CardTitle>Additional Information</CardTitle>
+          <CardTitle>Terms & Conditions</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Notes
-            </label>
-            <textarea
-              {...form.register("notes")}
-              rows={3}
-              placeholder="Internal notes (not shown to client)"
-              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
-            />
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Payment Terms"
+                {...form.register("paymentTerms")}
+                placeholder="e.g., 7 days from invoice"
+              />
+              <Input
+                label="Warranty Period"
+                {...form.register("warrantyPeriod")}
+                placeholder="e.g., 6 months"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-2">
+                Payment Schedule
+              </label>
+              <textarea
+                {...form.register("paymentSchedule")}
+                rows={3}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                placeholder="e.g., 10% deposit, 50% on commencement, 40% on completion"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-2">
+                Additional Terms
+              </label>
+              <textarea
+                {...form.register("additionalTerms")}
+                rows={4}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                placeholder="Any additional terms and conditions..."
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-400 mb-1.5">
-              Terms & Conditions
-            </label>
-            <textarea
-              {...form.register("termsConditions")}
-              rows={4}
-              placeholder="Payment terms, delivery conditions, etc."
-              className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
-            />
-          </div>
+        </CardContent>
+      </Card>
+
+      {/* Internal Notes */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Internal Notes</CardTitle>
+          <CardDescription>
+            Notes for your reference (not shown to client)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <textarea
+            {...form.register("notes")}
+            rows={3}
+            placeholder="Any internal notes about this quote..."
+            className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+          />
         </CardContent>
       </Card>
 
