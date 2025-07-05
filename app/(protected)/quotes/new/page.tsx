@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
@@ -8,46 +9,78 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 interface ProjectDetailsForm {
   // Company fields
-  companyName: string;
-  abn: string;
-  companyPhone: string;
-  companyEmail: string;
-  companyAddress: string;
+  companyName?: string;
+  abn?: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  companyAddress?: string;
   
   // Client fields
-  clientName: string;
+  clientName: string;  // Only this is required
   clientCompany?: string;
-  clientEmail: string;
-  clientPhone: string;
-  clientAddress: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientAddress?: string;
   siteAddress?: string;
   
   // Project details
-  quoteNumber: string;
-  quoteDate: string;
-  validUntil: string;
-  projectType: string;
-  projectTitle: string;
-  projectDescription: string;
+  quoteNumber?: string;
+  quoteDate?: string;
+  validUntil?: string;
+  projectType?: string;
+  projectTitle?: string;
+  projectDescription?: string;
   specialNotes?: string;
 }
 
 export default function NewQuotePage() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ProjectDetailsForm>({
     defaultValues: {
+      // Company fields
+      companyName: "",
+      abn: "",
+      companyPhone: "",
+      companyEmail: "",
+      companyAddress: "",
+      // Client fields  
+      clientName: "",
+      clientCompany: "",
+      clientEmail: "",
+      clientPhone: "",
+      clientAddress: "",
+      siteAddress: "",
+      // Project details
       quoteNumber: `Q-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
       quoteDate: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      projectType: "",
+      projectTitle: "",
+      projectDescription: "",
+      specialNotes: "",
     }
   });
 
   const handleContinue = form.handleSubmit(async (data) => {
-    // Save to session storage
-    sessionStorage.setItem('quoteProjectDetails', JSON.stringify(data));
+    console.log('Step 1 - Form submitted:', data);
+    setIsSubmitting(true);
     
-    // Navigate to line items page
-    router.push('/quotes/new/items');
+    try {
+      // Save to session storage
+      sessionStorage.setItem('quoteProjectDetails', JSON.stringify(data));
+      console.log('Step 1 - Data saved to sessionStorage');
+      
+      // Navigate to line items page
+      router.push('/quotes/new/items');
+      console.log('Step 1 - Navigating to items page');
+    } catch (error) {
+      console.error('Step 1 - Error:', error);
+      setIsSubmitting(false);
+    }
+  }, (errors) => {
+    console.log('Step 1 - Form validation errors:', errors);
+    setIsSubmitting(false);
   });
 
   return (
@@ -57,6 +90,20 @@ export default function NewQuotePage() {
         <p className="text-muted-foreground">
           Enter project and client details
         </p>
+        
+        {/* Debug Info - Remove in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-4 bg-slate-800 rounded-lg text-sm">
+            <p className="text-slate-400 mb-2">Debug Info:</p>
+            <p className="text-white">Form Valid: {form.formState.isValid ? 'Yes' : 'No'}</p>
+            <p className="text-white">Errors: {Object.keys(form.formState.errors).length}</p>
+            {Object.keys(form.formState.errors).length > 0 && (
+              <pre className="text-red-400 mt-2 text-xs">
+                {JSON.stringify(form.formState.errors, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleContinue} className="space-y-6">
@@ -229,8 +276,12 @@ export default function NewQuotePage() {
           <Button type="button" variant="secondary" onClick={() => router.push('/quotes')}>
             Cancel
           </Button>
-          <Button type="submit">
-            Continue to Line Items →
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            onClick={() => console.log('Continue button clicked', form.formState.errors)}
+          >
+            {isSubmitting ? 'Processing...' : 'Continue to Line Items →'}
           </Button>
         </div>
       </form>
