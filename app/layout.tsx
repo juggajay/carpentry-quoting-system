@@ -17,8 +17,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" style={{ backgroundColor: '#0A0A0B' }}>
-        <body className="min-h-screen antialiased" style={{ backgroundColor: '#0A0A0B', color: '#FAFAFA', minHeight: '100vh' }}>
+      <html lang="en" className="bg-bg-primary">
+        <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
           <QueryProvider>
             <UserSync>
               {children}

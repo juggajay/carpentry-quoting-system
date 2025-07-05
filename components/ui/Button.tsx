@@ -3,17 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0B]",
+  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary",
   {
     variants: {
       variant: {
-        primary: "bg-[#22C55E] hover:bg-[#16A34A] text-[#0A0A0B] shadow-md hover:shadow-lg hover:-translate-y-[1px]",
-        secondary: "bg-transparent border border-[#3A3A3F] hover:border-[#71717A] hover:bg-white/5 text-[#FAFAFA]",
-        ghost: "hover:bg-white/5 text-[#A1A1AA] hover:text-[#FAFAFA]",
-        destructive: "bg-[#EF4444] hover:bg-[#DC2626] text-[#FAFAFA] shadow-md hover:shadow-lg",
-        outline: "border border-[#2A2A2E] bg-transparent hover:bg-white/5 hover:border-[#3A3A3F] text-[#FAFAFA]",
-        success: "bg-[#10B981] hover:bg-[#059669] text-[#FAFAFA] shadow-md hover:shadow-lg",
-        warning: "bg-[#F59E0B] hover:bg-[#D97706] text-[#0A0A0B] shadow-md hover:shadow-lg",
+        primary: "bg-primary hover:bg-primary-hover text-text-inverse shadow-md hover:shadow-lg hover:-translate-y-[1px]",
+        secondary: "bg-transparent border border-border-hover hover:border-text-tertiary hover:bg-white/5 text-text-primary",
+        ghost: "hover:bg-white/5 text-text-secondary hover:text-text-primary",
+        destructive: "bg-danger hover:bg-danger-hover text-text-primary shadow-md hover:shadow-lg",
+        outline: "border border-border bg-transparent hover:bg-white/5 hover:border-border-hover text-text-primary",
+        success: "bg-success hover:bg-success-dark text-text-primary shadow-md hover:shadow-lg",
+        warning: "bg-warning hover:bg-warning-dark text-text-inverse shadow-md hover:shadow-lg",
       },
       size: {
         xs: "h-7 px-2.5 text-xs",

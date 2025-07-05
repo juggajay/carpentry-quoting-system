@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
@@ -128,118 +128,118 @@ export default async function DashboardPage() {
     >
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/quotes/new">
           <Card hover className="h-full">
-            <CardContent className="p-2 flex items-center space-x-2">
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <PlusIcon className="w-5 h-5 text-purple-500" />
+            <CardContent className="p-6 flex items-center space-x-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <PlusIcon className="w-6 h-6 text-primary" />
               </div>
-              <div>
+              <CardContent>
                 <h3 className="font-semibold text-text-primary">New Quote</h3>
                 <p className="text-sm text-text-muted">Create a new quote</p>
               </div>
             </CardContent>
-          </Card>
+                  </Card>
         </Link>
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="p-2 flex items-center space-x-2">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <DocumentArrowUpIcon className="w-5 h-5 text-green-500" />
+            <CardContent className="p-6 flex items-center space-x-4">
+              <div className="p-3 bg-success/10 rounded-lg">
+                <DocumentArrowUpIcon className="w-6 h-6 text-success" />
               </div>
-              <div>
+              <CardContent>
                 <h3 className="font-semibold text-text-primary">Import PDF</h3>
                 <p className="text-sm text-text-muted">Import from PDF</p>
               </div>
             </CardContent>
-          </Card>
+                  </Card>
         </Link>
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="p-2 flex items-center space-x-2">
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <DocumentTextIcon className="w-5 h-5 text-blue-500" />
+            <CardContent className="p-6 flex items-center space-x-4">
+              <div className="p-3 bg-secondary/10 rounded-lg">
+                <DocumentTextIcon className="w-6 h-6 text-secondary" />
               </div>
-              <div>
+              <CardContent>
                 <h3 className="font-semibold text-text-primary">Search Quotes</h3>
                 <p className="text-sm text-text-muted">Find existing quotes</p>
               </div>
             </CardContent>
-          </Card>
+                  </Card>
         </Link>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <CardContent>
                 <p className="text-sm text-text-muted">Total Quotes</p>
-                <p className="text-lg font-bold text-text-primary">
+                <p className="text-2xl font-bold text-text-primary">
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-5 h-5 text-text-muted" />
+              <DocumentTextIcon className="w-8 h-8 text-text-tertiary" />
             </div>
           </CardContent>
-        </Card>
+                </Card>
 
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <CardContent>
                 <p className="text-sm text-text-muted">Accepted</p>
-                <p className="text-xl font-bold text-green-500">
+                <p className="text-2xl font-bold text-success">
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-5 h-5 text-green-500" />
+              <ArrowUpIcon className="w-8 h-8 text-success" />
             </div>
           </CardContent>
-        </Card>
+                </Card>
 
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <CardContent>
                 <p className="text-sm text-text-muted">Total Clients</p>
-                <p className="text-lg font-bold text-text-primary">
+                <p className="text-2xl font-bold text-text-primary">
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-5 h-5 text-text-muted" />
+              <UsersIcon className="w-8 h-8 text-text-tertiary" />
             </div>
           </CardContent>
-        </Card>
+                </Card>
 
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <CardContent>
                 <p className="text-sm text-text-muted">Monthly Growth</p>
-                <p className="text-xl font-bold text-purple-500">
+                <p className="text-2xl font-bold text-primary">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-5 h-5 text-purple-500" />
+              <ArrowTrendingUpIcon className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
-        </Card>
+                </Card>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Quotes */}
-        <Card className="p-3">
-          <div className="mb-3">
-            <h3 className="text-lg font-semibold text-text-primary">Recent Quotes</h3>
-            <p className="text-sm text-text-muted">Your latest quote activity</p>
-          </div>
-          <div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Quotes</CardTitle>
+            <CardDescription>Your latest quote activity</CardDescription>
+          </CardHeader>
+          <CardContent>
             {data.recentQuotes.length === 0 ? (
               <p className="text-text-muted text-center py-4">
                 No quotes yet. Create your first quote!
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-2 rounded hover:bg-bg-elevated transition-colors">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-bg-tertiary/50 transition-colors">
                       <div className="flex-1">
                         <p className="font-medium text-text-primary">
                           {quote.quoteNumber}
@@ -278,15 +278,15 @@ export default async function DashboardPage() {
               </Link>
             </div>
           </div>
-        </Card>
+                </Card>
 
         {/* Recent Uploads */}
-        <Card className="p-3">
-          <div className="mb-3">
-            <h3 className="text-lg font-semibold text-text-primary">Recent Imports</h3>
-            <p className="text-sm text-text-muted">PDF files imported for OCR</p>
-          </div>
-          <div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Imports</CardTitle>
+            <CardDescription>PDF files imported for OCR</CardDescription>
+          </CardHeader>
+          <CardContent>
             {data.recentFiles.length === 0 ? (
               <p className="text-text-muted text-center py-4">
                 No files imported yet.
@@ -294,7 +294,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-2 rounded">
+                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-bg-tertiary/50 transition-colors">
                     <div className="flex-1">
                       <p className="font-medium text-text-primary truncate">
                         {file.fileName}
@@ -331,7 +331,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
           </div>
-        </Card>
+                </Card>
       </div>
     </PageContainer>
   );
