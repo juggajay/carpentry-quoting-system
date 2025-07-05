@@ -1,4 +1,5 @@
 // app/api/materials/route.ts
+// Materials API endpoint - supports search, filtering, and global materials
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
