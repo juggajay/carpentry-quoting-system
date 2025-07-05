@@ -1,5 +1,4 @@
 // app/api/materials/route.ts
-// Materials API endpoint - supports search, filtering, and global materials
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
@@ -41,8 +40,7 @@ export async function GET(request: Request) {
         {
           OR: [
             { name: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } },
-            { sku: { contains: search, mode: "insensitive" } }
+            { description: { contains: search, mode: "insensitive" } }
           ]
         }
       ];
@@ -59,12 +57,9 @@ export async function GET(request: Request) {
         id: true,
         name: true,
         description: true,
-        sku: true,
         unit: true,
         pricePerUnit: true,
         category: true,
-        supplier: true,
-        inStock: true,
       }
     });
 
@@ -77,4 +72,3 @@ export async function GET(request: Request) {
     );
   }
 }
-
