@@ -11,6 +11,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Override default colors for dark theme
+        black: "#0A0A0B",
+        white: "#FAFAFA",
+        
         // Primary Brand Colors
         primary: {
           DEFAULT: "#22C55E", // Vibrant green for CTAs
@@ -44,32 +48,26 @@ const config: Config = {
           hover: "#DC2626",
         },
         
-        // Background Colors
-        bg: {
-          primary: "#0A0A0B", // Deep charcoal black
-          secondary: "#121214", // Elevated surface
-          tertiary: "#1A1A1D", // Card backgrounds
-          elevated: "#1F1F23", // Hover states
-          overlay: "rgba(0, 0, 0, 0.8)", // Modal overlays with blur
-        },
+        // Background Colors - flattened for easier use
+        "bg-primary": "#0A0A0B", // Deep charcoal black
+        "bg-secondary": "#121214", // Elevated surface
+        "bg-tertiary": "#1A1A1D", // Card backgrounds
+        "bg-elevated": "#1F1F23", // Hover states
+        "bg-overlay": "rgba(0, 0, 0, 0.8)", // Modal overlays with blur
         
-        // Border Colors
-        border: {
-          DEFAULT: "#2A2A2E", // Subtle borders
-          hover: "#3A3A3F", // Interactive borders
-          light: "#3A3A3F",
-          focus: "#22C55E", // Focus borders using primary
-        },
+        // Border Colors - flattened
+        border: "#2A2A2E", // Default border
+        "border-hover": "#3A3A3F", // Interactive borders
+        "border-light": "#3A3A3F",
+        "border-focus": "#22C55E", // Focus borders using primary
         
-        // Text Colors
-        text: {
-          primary: "#FAFAFA", // High contrast white
-          secondary: "#A1A1AA", // Muted gray
-          tertiary: "#71717A", // Subtle text
-          muted: "#71717A",
-          disabled: "#52525B",
-          inverse: "#0A0A0B", // For light backgrounds
-        },
+        // Text Colors - flattened
+        "text-primary": "#FAFAFA", // High contrast white
+        "text-secondary": "#A1A1AA", // Muted gray
+        "text-tertiary": "#71717A", // Subtle text
+        "text-muted": "#71717A",
+        "text-disabled": "#52525B",
+        "text-inverse": "#0A0A0B", // For light backgrounds
         
         // Status Pill Colors (20% opacity backgrounds)
         status: {
