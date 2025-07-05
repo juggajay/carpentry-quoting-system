@@ -23,7 +23,7 @@ export default function PageContainer({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`space-y-4 ${className}`}
+      className={`space-y-3 ${className}`}
     >
       {/* Page Header */}
       {(title || description || actions) && (

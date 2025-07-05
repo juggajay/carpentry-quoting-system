@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
@@ -128,12 +128,12 @@ export default async function DashboardPage() {
     >
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Link href="/quotes/new">
           <Card hover className="h-full">
-            <CardContent className="p-3 flex items-center space-x-3">
-              <div className="p-3 bg-purple-500/10 rounded-lg">
-                <PlusIcon className="w-6 h-6 text-purple-500" />
+            <CardContent className="p-2 flex items-center space-x-2">
+              <div className="p-2 bg-purple-500/10 rounded-lg">
+                <PlusIcon className="w-5 h-5 text-purple-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-100">New Quote</h3>
@@ -145,9 +145,9 @@ export default async function DashboardPage() {
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="p-3 flex items-center space-x-3">
-              <div className="p-3 bg-green-500/10 rounded-lg">
-                <DocumentArrowUpIcon className="w-6 h-6 text-green-500" />
+            <CardContent className="p-2 flex items-center space-x-2">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <DocumentArrowUpIcon className="w-5 h-5 text-green-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-100">Import PDF</h3>
@@ -159,9 +159,9 @@ export default async function DashboardPage() {
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="p-3 flex items-center space-x-3">
-              <div className="p-3 bg-blue-500/10 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-blue-500" />
+            <CardContent className="p-2 flex items-center space-x-2">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <DocumentTextIcon className="w-5 h-5 text-blue-500" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-100">Search Quotes</h3>
@@ -173,23 +173,23 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Quotes</p>
-                <p className="text-xl font-bold text-gray-100">
+                <p className="text-lg font-bold text-gray-100">
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-6 h-6 text-gray-500" />
+              <DocumentTextIcon className="w-5 h-5 text-gray-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Accepted</p>
@@ -197,27 +197,27 @@ export default async function DashboardPage() {
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-6 h-6 text-green-500" />
+              <ArrowUpIcon className="w-5 h-5 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Clients</p>
-                <p className="text-xl font-bold text-gray-100">
+                <p className="text-lg font-bold text-gray-100">
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-6 h-6 text-gray-500" />
+              <UsersIcon className="w-5 h-5 text-gray-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Monthly Growth</p>
@@ -225,16 +225,16 @@ export default async function DashboardPage() {
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-6 h-6 text-purple-500" />
+              <ArrowTrendingUpIcon className="w-5 h-5 text-purple-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Recent Quotes */}
-        <Card className="p-4">
+        <Card className="p-3">
           <div className="mb-3">
             <h3 className="text-lg font-semibold text-gray-100">Recent Quotes</h3>
             <p className="text-sm text-gray-400">Your latest quote activity</p>
@@ -245,10 +245,10 @@ export default async function DashboardPage() {
                 No quotes yet. Create your first quote!
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <div className="flex items-center justify-between p-2 rounded hover:bg-gray-700 transition-colors">
                       <div className="flex-1">
                         <p className="font-medium text-gray-100">
                           {quote.quoteNumber}
@@ -270,7 +270,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="mt-3 pt-3 border-t border-gray-700">
               <Link href="/quotes">
                 <Button variant="ghost" className="w-full">
                   View All Quotes
@@ -281,7 +281,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Recent Uploads */}
-        <Card className="p-4">
+        <Card className="p-3">
           <div className="mb-3">
             <h3 className="text-lg font-semibold text-gray-100">Recent Imports</h3>
             <p className="text-sm text-gray-400">PDF files imported for OCR</p>
@@ -292,9 +292,9 @@ export default async function DashboardPage() {
                 No files imported yet.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg">
+                  <div key={file.id} className="flex items-center justify-between p-2 rounded">
                     <div className="flex-1">
                       <p className="font-medium text-gray-100 truncate">
                         {file.fileName}
@@ -323,7 +323,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="mt-3 pt-3 border-t border-gray-700">
               <Link href="/import">
                 <Button variant="ghost" className="w-full">
                   Import New File
