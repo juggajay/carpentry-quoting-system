@@ -85,8 +85,8 @@ export default function ImportPage() {
           <Card>
             <CardContent className="py-8">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-background-hover rounded w-3/4" />
-                <div className="h-4 bg-background-hover rounded w-1/2" />
+                <div className="h-4 bg-bg-tertiary rounded w-3/4" />
+                <div className="h-4 bg-bg-tertiary rounded w-1/2" />
               </div>
             </CardContent>
           </Card>

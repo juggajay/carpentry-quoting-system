@@ -50,8 +50,8 @@ export default async function QuotesPage() {
             <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
               <DocumentTextIcon className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-100">Unable to Load Quotes</h3>
-            <p className="text-gray-400 max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-text-primary">Unable to Load Quotes</h3>
+            <p className="text-text-secondary max-w-md mx-auto">
               We&apos;re having trouble connecting to the database. Please check your connection and try again.
             </p>
             <RetryButton className="mt-4" />
