@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="antialiased">
+        <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
           <QueryProvider>
             <UserSync>
               {children}
