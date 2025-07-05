@@ -34,7 +34,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           </button>
           
           {/* Page Title */}
-          <h2 className="text-h3 text-[#FAFAFA]">
+          <h2 className="text-[22px] leading-[1.4] font-medium text-[#FAFAFA]">
             {getPageTitle()}
           </h2>
         </div>

@@ -28,7 +28,7 @@ export default function Sidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="text-h3 text-[#FAFAFA]"
+              className="text-[22px] leading-[1.4] font-medium text-[#FAFAFA]"
             >
               CarpentryQS
             </motion.h1>

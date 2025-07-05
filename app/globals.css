@@ -71,20 +71,31 @@
   
   /* Headings */
   h1 {
-    @apply text-h1;
+    font-size: 36px;
+    line-height: 1.2;
+    font-weight: 600;
   }
   
   h2 {
-    @apply text-h2;
+    font-size: 28px;
+    line-height: 1.3;
+    font-weight: 600;
   }
   
   h3 {
-    @apply text-h3;
+    font-size: 22px;
+    line-height: 1.4;
+    font-weight: 500;
   }
   
   /* Links */
   a {
-    @apply text-primary hover:text-primary-hover transition-colors;
+    color: #22C55E;
+    transition: color 200ms;
+  }
+  
+  a:hover {
+    color: #16A34A;
   }
   
   /* Disabled elements */
@@ -97,7 +108,10 @@
 @layer utilities {
   /* Text gradient */
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent;
+    background: linear-gradient(to right, #22C55E, #16A34A);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* Glass effect */
@@ -123,7 +137,8 @@
   
   /* Divider line */
   .divider {
-    @apply h-px bg-border;
+    height: 1px;
+    background-color: #2A2A2E;
   }
   
   /* Focus ring */
