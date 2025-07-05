@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @layer base {
   :root {
     --background: #0A0A0B;
@@ -27,7 +30,15 @@
     border-color: var(--border);
   }
   
+  html {
+    background-color: #0A0A0B;
+    color: #FAFAFA;
+  }
+  
   body {
+    background-color: #0A0A0B !important;
+    color: #FAFAFA !important;
+    min-height: 100vh;
     @apply bg-background text-foreground;
   }
 }
