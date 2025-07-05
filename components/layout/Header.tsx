@@ -21,20 +21,20 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-bg-primary border-b border-border backdrop-blur-lg bg-opacity-80">
+    <header className="sticky top-0 z-30 h-16 bg-[#0A0A0B] border-b border-[#2A2A2E] backdrop-blur-lg bg-opacity-80">
       <div className="h-full flex items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center space-x-4">
           {/* Mobile menu button */}
           <button
             onClick={onMobileMenuToggle}
-            className="lg:hidden p-2 rounded-lg hover:bg-bg-tertiary transition-colors duration-200"
+            className="lg:hidden p-2 rounded-lg hover:bg-[#1A1A1D] transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
-            <Bars3Icon className="w-6 h-6 text-text-secondary" />
+            <Bars3Icon className="w-6 h-6 text-[#A1A1AA]" />
           </button>
           
           {/* Page Title */}
-          <h2 className="text-h3 text-text-primary">
+          <h2 className="text-h3 text-[#FAFAFA]">
             {getPageTitle()}
           </h2>
         </div>
@@ -42,21 +42,21 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
         <div className="flex items-center space-x-4">
           {/* Notifications */}
           <button 
-            className="p-2 rounded-lg hover:bg-bg-tertiary transition-colors duration-200 relative"
+            className="p-2 rounded-lg hover:bg-[#1A1A1D] transition-colors duration-200 relative"
             aria-label="Notifications"
           >
-            <BellIcon className="w-5 h-5 text-text-secondary" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-bg-primary rounded-full animate-pulse" />
+            <BellIcon className="w-5 h-5 text-[#A1A1AA]" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-[#22C55E] rounded-full animate-pulse" />
           </button>
           
           {/* User Menu */}
           <UserButton 
             appearance={{
               elements: {
-                avatarBox: "w-9 h-9 ring-2 ring-border hover:ring-border-hover transition-all duration-200",
-                userButtonPopoverCard: "bg-bg-tertiary border border-border shadow-xl",
+                avatarBox: "w-9 h-9 ring-2 ring-[#2A2A2E] hover:ring-[#3A3A3F] transition-all duration-200",
+                userButtonPopoverCard: "bg-[#1A1A1D] border border-[#2A2A2E] shadow-xl",
                 userButtonPopoverActionButton: "hover:bg-white/5 transition-colors duration-200",
-                userButtonPopoverActionButtonText: "text-text-primary",
+                userButtonPopoverActionButtonText: "text-[#FAFAFA]",
                 userButtonPopoverFooter: "hidden",
               },
             }}

@@ -16,7 +16,7 @@ function ProtectedLayoutContent({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div className="min-h-screen bg-[#0A0A0B]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <Sidebar />
@@ -38,7 +38,7 @@ function ProtectedLayoutContent({
         <Header onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
         
         {/* Main Content */}
-        <main className="min-h-[calc(100vh-4rem)]">
+        <main className="min-h-[calc(100vh-4rem)] bg-[#0A0A0B]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
             {children}
           </div>
@@ -65,10 +65,10 @@ export default function ProtectedLayout({
   // Show loading spinner while Clerk is determining auth status
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-text-secondary animate-pulse">Loading...</p>
+          <div className="w-12 h-12 border-4 border-[#22C55E] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#A1A1AA] animate-pulse">Loading...</p>
         </div>
       </div>
     );
