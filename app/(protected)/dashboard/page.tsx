@@ -132,12 +132,12 @@ export default async function DashboardPage() {
         <Link href="/quotes/new">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-primary-light/10 rounded-lg">
-                <PlusIcon className="w-6 h-6 text-primary-light" />
+              <div className="p-3 bg-purple-500/10 rounded-lg">
+                <PlusIcon className="w-6 h-6 text-purple-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">New Quote</h3>
-                <p className="text-sm text-text-secondary">Create a new quote</p>
+                <h3 className="font-semibold text-gray-100">New Quote</h3>
+                <p className="text-sm text-gray-400">Create a new quote</p>
               </div>
             </CardContent>
           </Card>
@@ -146,12 +146,12 @@ export default async function DashboardPage() {
         <Link href="/import">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-success/10 rounded-lg">
-                <DocumentArrowUpIcon className="w-6 h-6 text-success" />
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <DocumentArrowUpIcon className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Import PDF</h3>
-                <p className="text-sm text-text-secondary">Import from PDF</p>
+                <h3 className="font-semibold text-gray-100">Import PDF</h3>
+                <p className="text-sm text-gray-400">Import from PDF</p>
               </div>
             </CardContent>
           </Card>
@@ -160,12 +160,12 @@ export default async function DashboardPage() {
         <Link href="/search">
           <Card hover className="h-full">
             <CardContent className="p-6 flex items-center space-x-4">
-              <div className="p-3 bg-info/10 rounded-lg">
-                <DocumentTextIcon className="w-6 h-6 text-info" />
+              <div className="p-3 bg-blue-500/10 rounded-lg">
+                <DocumentTextIcon className="w-6 h-6 text-blue-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-text-primary">Search Quotes</h3>
-                <p className="text-sm text-text-secondary">Find existing quotes</p>
+                <h3 className="font-semibold text-gray-100">Search Quotes</h3>
+                <p className="text-sm text-gray-400">Find existing quotes</p>
               </div>
             </CardContent>
           </Card>
@@ -184,12 +184,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-secondary">Total Quotes</p>
-                <p className="text-2xl font-bold text-text-primary">
+                <p className="text-sm text-gray-400">Total Quotes</p>
+                <p className="text-2xl font-bold text-gray-100">
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-8 h-8 text-text-muted" />
+              <DocumentTextIcon className="w-8 h-8 text-gray-500" />
             </div>
           </CardContent>
         </Card>
@@ -198,12 +198,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-secondary">Accepted</p>
-                <p className="text-2xl font-bold text-success">
+                <p className="text-sm text-gray-400">Accepted</p>
+                <p className="text-2xl font-bold text-green-500">
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-8 h-8 text-success" />
+              <ArrowUpIcon className="w-8 h-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -212,12 +212,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-secondary">Total Clients</p>
-                <p className="text-2xl font-bold text-text-primary">
+                <p className="text-sm text-gray-400">Total Clients</p>
+                <p className="text-2xl font-bold text-gray-100">
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-text-muted" />
+              <UsersIcon className="w-8 h-8 text-gray-500" />
             </div>
           </CardContent>
         </Card>
@@ -226,12 +226,12 @@ export default async function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-text-secondary">Monthly Growth</p>
-                <p className="text-2xl font-bold text-primary-light">
+                <p className="text-sm text-gray-400">Monthly Growth</p>
+                <p className="text-2xl font-bold text-purple-500">
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-8 h-8 text-primary-light" />
+              <ArrowTrendingUpIcon className="w-8 h-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -248,27 +248,27 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentQuotes.length === 0 ? (
-              <p className="text-text-secondary text-center py-8">
+              <p className="text-gray-400 text-center py-8">
                 No quotes yet. Create your first quote!
               </p>
             ) : (
               <div className="space-y-3">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-background-hover transition-colors">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-700 transition-colors">
                       <div className="flex-1">
-                        <p className="font-medium text-text-primary">
+                        <p className="font-medium text-gray-100">
                           {quote.quoteNumber}
                         </p>
-                        <p className="text-sm text-text-secondary">
+                        <p className="text-sm text-gray-400">
                           {quote.client?.name || "No client"} • {quote.title}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-text-primary">
+                        <p className="font-medium text-gray-100">
                           ${quote.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-text-muted">
+                        <p className="text-xs text-gray-500">
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -277,7 +277,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-4 pt-4 border-t border-border-default">
+            <div className="mt-4 pt-4 border-t border-gray-700">
               <Link href="/quotes">
                 <Button variant="ghost" className="w-full">
                   View All Quotes
@@ -295,7 +295,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentFiles.length === 0 ? (
-              <p className="text-text-secondary text-center py-8">
+              <p className="text-gray-400 text-center py-8">
                 No files imported yet.
               </p>
             ) : (
@@ -303,10 +303,10 @@ export default async function DashboardPage() {
                 {data.recentFiles.map((file) => (
                   <div key={file.id} className="flex items-center justify-between p-3 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-text-primary truncate">
+                      <p className="font-medium text-gray-100 truncate">
                         {file.fileName}
                       </p>
-                      <p className="text-sm text-text-secondary">
+                      <p className="text-sm text-gray-400">
                         {(file.fileSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -314,15 +314,15 @@ export default async function DashboardPage() {
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
                           file.status === "VERIFIED"
-                            ? "bg-success/10 text-success"
+                            ? "bg-green-500/10 text-green-500"
                             : file.status === "FAILED"
-                            ? "bg-error/10 text-error"
-                            : "bg-background-hover text-text-secondary"
+                            ? "bg-red-500/10 text-red-500"
+                            : "bg-gray-700 text-gray-400"
                         }`}
                       >
                         {file.status}
                       </span>
-                      <p className="text-xs text-text-muted mt-1">
+                      <p className="text-xs text-gray-500 mt-1">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -330,7 +330,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-4 pt-4 border-t border-border-default">
+            <div className="mt-4 pt-4 border-t border-gray-700">
               <Link href="/import">
                 <Button variant="ghost" className="w-full">
                   Import New File
