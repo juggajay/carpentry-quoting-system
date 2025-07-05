@@ -108,7 +108,7 @@ export default async function DashboardPage() {
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
             <div className="mx-auto w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
-              <DocumentTextIcon className="w-8 h-8 text-red-500" />
+              <DocumentTextIcon className="w-6 h-6 text-red-500" />
             </div>
             <h3 className="text-lg font-semibold text-gray-100">Unable to Load Dashboard</h3>
             <p className="text-gray-400 max-w-md mx-auto">
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/quotes/new">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
+            <CardContent className="p-4 flex items-center space-x-4">
               <div className="p-3 bg-purple-500/10 rounded-lg">
                 <PlusIcon className="w-6 h-6 text-purple-500" />
               </div>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
 
         <Link href="/import">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
+            <CardContent className="p-4 flex items-center space-x-4">
               <div className="p-3 bg-green-500/10 rounded-lg">
                 <DocumentArrowUpIcon className="w-6 h-6 text-green-500" />
               </div>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
 
         <Link href="/search">
           <Card hover className="h-full">
-            <CardContent className="p-6 flex items-center space-x-4">
+            <CardContent className="p-4 flex items-center space-x-4">
               <div className="p-3 bg-blue-500/10 rounded-lg">
                 <DocumentTextIcon className="w-6 h-6 text-blue-500" />
               </div>
@@ -179,9 +179,9 @@ export default async function DashboardPage() {
         variant="ghost"
         noPadding
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Quotes</p>
@@ -189,13 +189,13 @@ export default async function DashboardPage() {
                   {data.stats.totalQuotes}
                 </p>
               </div>
-              <DocumentTextIcon className="w-8 h-8 text-gray-500" />
+              <DocumentTextIcon className="w-6 h-6 text-gray-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Accepted</p>
@@ -203,13 +203,13 @@ export default async function DashboardPage() {
                   {data.stats.acceptedQuotes}
                 </p>
               </div>
-              <ArrowUpIcon className="w-8 h-8 text-green-500" />
+              <ArrowUpIcon className="w-6 h-6 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Clients</p>
@@ -217,13 +217,13 @@ export default async function DashboardPage() {
                   {data.stats.totalClients}
                 </p>
               </div>
-              <UsersIcon className="w-8 h-8 text-gray-500" />
+              <UsersIcon className="w-6 h-6 text-gray-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Monthly Growth</p>
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
                   {data.stats.monthlyGrowth > 0 ? "+" : ""}{data.stats.monthlyGrowth.toFixed(0)}%
                 </p>
               </div>
-              <ArrowTrendingUpIcon className="w-8 h-8 text-purple-500" />
+              <ArrowTrendingUpIcon className="w-6 h-6 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
       </ContentCard>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Quotes */}
         <Card>
           <CardHeader>
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentQuotes.length === 0 ? (
-              <p className="text-gray-400 text-center py-8">
+              <p className="text-gray-400 text-center py-4">
                 No quotes yet. Create your first quote!
               </p>
             ) : (
@@ -295,7 +295,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {data.recentFiles.length === 0 ? (
-              <p className="text-gray-400 text-center py-8">
+              <p className="text-gray-400 text-center py-4">
                 No files imported yet.
               </p>
             ) : (
