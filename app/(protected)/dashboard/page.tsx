@@ -87,6 +87,11 @@ async function getDashboardData() {
   };
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
+    console.error("Error details:", {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return null;
   }
 }
