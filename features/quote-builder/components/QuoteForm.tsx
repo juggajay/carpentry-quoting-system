@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import LineItemsManager from "./LineItemsManager";
-import SaveStatusIndicator from "./SaveStatusIndicator";
-import { useAutoSave } from "../hooks/useAutoSave";
 import { useQuoteClipboard } from "@/lib/store/quote-clipboard-store";
 import { toast } from "sonner";
 
@@ -118,13 +115,6 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
   const { items: clipboardItems, clearItems, getItemCount } = useQuoteClipboard();
   const clipboardCount = getItemCount();
 
-  // Auto-save hook
-  const { saveStatus, triggerSave } = useAutoSave({
-    data: watch(),
-    quoteId,
-    enabled: !!quoteId,
-  });
-
   // Calculate totals
   const subtotal = watchedItems?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
   const tax = subtotal * 0.10; // 10% GST for Australia
@@ -138,7 +128,6 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
     if (item) {
       const newTotal = (item.quantity || 0) * (item.unitPrice || 0);
       setValue(`items.${index}.total`, newTotal);
-      triggerSave();
     }
   };
 
@@ -161,14 +150,8 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
 
     clearItems();
     toast.success(`${clipboardItems.length} items pasted`);
-    triggerSave();
   };
 
-  // Watch for form changes to trigger save
-  useEffect(() => {
-    const subscription = watch(() => triggerSave());
-    return () => subscription.unsubscribe();
-  }, [watch, triggerSave]);
 
   const handleSubmit = form.handleSubmit(async (data) => {
     await onSubmit(data);
@@ -176,12 +159,6 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Save Status */}
-      {quoteId && (
-        <div className="flex justify-end">
-          <SaveStatusIndicator status={saveStatus} />
-        </div>
-      )}
 
       {/* Company Information */}
       <Card>

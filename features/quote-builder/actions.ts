@@ -54,7 +54,7 @@ async function generateUniqueQuoteNumber(userId: string): Promise<string> {
 }
 
 
-export async function saveQuote(quoteId: string, data: any) {
+export async function updateQuote(quoteId: string, data: any) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -115,23 +115,6 @@ export async function saveQuote(quoteId: string, data: any) {
 
       await tx.quoteItem.createMany({
         data: items,
-      });
-
-      // Create version snapshot
-      const versionCount = await tx.quoteVersion.count({
-        where: { quoteId },
-      });
-
-      await tx.quoteVersion.create({
-        data: {
-          quoteId,
-          versionNumber: versionCount + 1,
-          changes: {
-            action: "auto-save",
-            timestamp: new Date(),
-            fields: ["items", "totals"],
-          },
-        },
       });
     });
 

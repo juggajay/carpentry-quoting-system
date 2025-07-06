@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import QuoteForm, { type QuoteFormData } from "@/features/quote-builder/components/QuoteForm";
-import { loadQuote, saveQuote } from "@/features/quote-builder/actions";
+import { loadQuote, updateQuote } from "@/features/quote-builder/actions";
 import { toast } from "sonner";
 
 interface PageProps {
@@ -35,10 +35,11 @@ export default function EditQuotePage({ params }: PageProps) {
   }, [quoteId, router]);
 
   const handleSubmit = async (data: QuoteFormData) => {
-    const result = await saveQuote(quoteId, data);
+    const result = await updateQuote(quoteId, data);
     
     if (result.success) {
       toast.success("Quote updated successfully!");
+      router.push(`/quotes/${quoteId}`);
     } else {
       toast.error(result.error || "Failed to update quote");
     }
@@ -65,7 +66,7 @@ export default function EditQuotePage({ params }: PageProps) {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">Edit Quote</h1>
         <p className="text-muted-foreground">
-          Make changes to your quote with auto-save enabled
+          Make changes to your quote and save when ready
         </p>
       </div>
 
