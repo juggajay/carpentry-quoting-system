@@ -120,6 +120,20 @@ export default async function DashboardPage() {
       description="Welcome back! Here's an overview of your activity."
     >
       <div className="space-y-8">
+        {/* Style Test Section */}
+        <div className="mb-4 p-4 bg-dark-elevated rounded-lg">
+          <h2 className="text-electric-magenta text-2xl font-bold mb-4">Modern UI Style Test</h2>
+          <div className="flex gap-4 flex-wrap">
+            <button className="btn btn-primary">New Quote (Custom CSS)</button>
+            <button className="bg-electric-magenta hover:bg-electric-magenta/90 text-white px-6 py-2 rounded-lg transition-all">New Quote (Tailwind)</button>
+            <div className="p-4 bg-dark-surface rounded">
+              <p className="text-vibrant-cyan">Vibrant Cyan Text</p>
+              <p className="text-lime-green">Lime Green Text</p>
+              <p className="text-royal-blue">Royal Blue Text</p>
+            </div>
+          </div>
+        </div>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link href="/quotes/new">
