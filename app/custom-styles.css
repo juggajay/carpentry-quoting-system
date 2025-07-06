@@ -1,0 +1,214 @@
+/* Modern UI Design System Variables */
+:root {
+  /* Primary Colors */
+  --color-deep-charcoal: #1A1A1A;
+  --color-pure-black: #000000;
+  --color-clean-white: #FFFFFF;
+  
+  /* Accent Colors */
+  --color-electric-magenta: #FF1744;
+  --color-vibrant-cyan: #00E5FF;
+  --color-lime-green: #76FF03;
+  --color-royal-blue: #2962FF;
+  
+  /* System Colors */
+  --color-critical-red: #F44336;
+  --color-warning-orange: #FF9800;
+  --color-success-green: #4CAF50;
+  --color-info-blue: #2196F3;
+  
+  /* Dark Mode Surfaces */
+  --color-dark-surface: #121212;
+  --color-dark-elevated: #1E1E1E;
+  --color-dark-navy: #0A1929;
+}
+
+/* Button Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  padding: 0 1.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--color-royal-blue);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--color-electric-magenta);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid #4B5563;
+  color: #F3F4F6;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-royal-blue);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: rgba(41, 98, 255, 0.1);
+}
+
+/* Card Components */
+.card {
+  background-color: var(--color-dark-elevated);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Form Components */
+.input {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 0.375rem;
+  background-color: var(--color-dark-surface);
+  border: 1px solid #374151;
+  color: white;
+  transition: all 0.2s;
+}
+
+.input::placeholder {
+  color: #6B7280;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-royal-blue);
+  box-shadow: 0 0 0 1px var(--color-royal-blue);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  background-color: var(--color-dark-surface);
+  border: 1px solid #374151;
+  color: white;
+  transition: all 0.2s;
+  resize: vertical;
+}
+
+/* Typography */
+.text-h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.text-h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.text-h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-primary {
+  background-color: var(--color-electric-magenta);
+  color: white;
+}
+
+.badge-success {
+  background-color: var(--color-success-green);
+  color: white;
+}
+
+.badge-info {
+  background-color: var(--color-info-blue);
+  color: white;
+}
+
+.badge-warning {
+  background-color: var(--color-warning-orange);
+  color: white;
+}
+
+/* Alerts */
+.alert {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.alert-success {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-color: var(--color-success-green);
+  color: var(--color-success-green);
+}
+
+.alert-error {
+  background-color: rgba(244, 67, 54, 0.1);
+  border-color: var(--color-critical-red);
+  color: var(--color-critical-red);
+}
+
+.alert-warning {
+  background-color: rgba(255, 152, 0, 0.1);
+  border-color: var(--color-warning-orange);
+  color: var(--color-warning-orange);
+}
+
+.alert-info {
+  background-color: rgba(33, 150, 243, 0.1);
+  border-color: var(--color-info-blue);
+  color: var(--color-info-blue);
+}
