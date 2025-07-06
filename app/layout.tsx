@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import "./globals.css";
+import "./test.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
