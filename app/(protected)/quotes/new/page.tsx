@@ -53,7 +53,7 @@ export default function NewQuotePage() {
       clientAddress: "",
       siteAddress: "",
       // Project details
-      quoteNumber: `Q-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+      quoteNumber: "", // Will be generated server-side
       quoteDate: new Date().toISOString().split('T')[0],
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       projectType: "",
@@ -218,8 +218,10 @@ export default function NewQuotePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 label="Quote Number"
-                {...form.register("quoteNumber")}
+                value="Auto-generated"
                 readOnly
+                className="bg-slate-800 text-slate-400"
+                title="Quote number will be generated when you create the quote"
               />
               <Input
                 label="Quote Date"

@@ -5,6 +5,54 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
+async function generateUniqueQuoteNumber(userId: string): Promise<string> {
+  const currentYear = new Date().getFullYear();
+  
+  // Get the highest quote number for this year
+  const lastQuote = await prisma.quote.findFirst({
+    where: {
+      userId,
+      quoteNumber: {
+        startsWith: `Q-${currentYear}-`
+      }
+    },
+    orderBy: {
+      quoteNumber: 'desc'
+    }
+  });
+
+  let nextNumber = 1;
+  
+  if (lastQuote) {
+    // Extract the number from the last quote (Q-2024-0001 -> 1)
+    const matches = lastQuote.quoteNumber.match(/Q-\d{4}-(\d{4})/);
+    if (matches) {
+      nextNumber = parseInt(matches[1]) + 1;
+    }
+  }
+
+  // Keep trying until we find a unique number (handles race conditions)
+  let attempts = 0;
+  while (attempts < 10) {
+    const quoteNumber = `Q-${currentYear}-${String(nextNumber).padStart(4, '0')}`;
+    
+    // Check if this number already exists
+    const existing = await prisma.quote.findUnique({
+      where: { quoteNumber }
+    });
+    
+    if (!existing) {
+      return quoteNumber;
+    }
+    
+    nextNumber++;
+    attempts++;
+  }
+  
+  // Fallback with timestamp to ensure uniqueness
+  return `Q-${currentYear}-${Date.now()}`;
+}
+
 
 export async function saveQuote(quoteId: string, data: any) {
   try {
@@ -131,14 +179,8 @@ export async function createQuote(data: any) {
       }
     }
 
-    // Generate quote number if not provided
-    let quoteNumber = data.quoteNumber;
-    if (!quoteNumber) {
-      const quoteCount = await prisma.quote.count({
-        where: { userId: user.id },
-      });
-      quoteNumber = `Q-${new Date().getFullYear()}-${String(quoteCount + 1).padStart(4, "0")}`;
-    }
+    // Generate unique sequential quote number
+    const quoteNumber = await generateUniqueQuoteNumber(user.id);
 
     // Calculate totals
     const subtotal = data.items?.reduce((sum: number, item: any) => sum + (item.total || 0), 0) || 0;

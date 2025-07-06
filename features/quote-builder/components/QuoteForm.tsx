@@ -83,7 +83,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
       clientAddress: "",
       siteAddress: "",
       // Quote details
-      quoteNumber: `Q-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+      quoteNumber: "", // Will be generated server-side
       quoteDate: new Date().toISOString().split('T')[0],
       projectType: "",
       projectTitle: "",

@@ -218,7 +218,7 @@ export default function QuoteItemsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-slate-400">Quote #:</span>
-              <span className="ml-2 text-white">{projectDetails.quoteNumber}</span>
+              <span className="ml-2 text-white">{projectDetails.quoteNumber || 'Auto-generated'}</span>
             </div>
             <div>
               <span className="text-slate-400">Date:</span>
