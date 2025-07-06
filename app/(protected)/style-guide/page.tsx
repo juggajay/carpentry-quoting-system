@@ -18,7 +18,7 @@ export default function StyleGuidePage() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 bg-dark-surface text-white">
       {/* Header with Theme Toggle */}
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-h1">Carpentry Quoting System - Style Guide</h1>
