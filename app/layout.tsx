@@ -19,14 +19,21 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.className} bg-slate-950 text-white`}>
+      <html lang="en" data-theme="dark">
+        <body className={`${inter.className} bg-dark-surface text-white`}>
           <QueryProvider>
             {children}
           </QueryProvider>
           <Toaster 
             position="top-right"
             theme="dark"
+            toastOptions={{
+              style: {
+                background: 'var(--color-dark-elevated)',
+                color: 'var(--color-clean-white)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+              },
+            }}
           />
         </body>
       </html>

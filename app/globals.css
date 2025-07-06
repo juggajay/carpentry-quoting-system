@@ -1,3 +1,9 @@
+/* Import Modern UI Design System */
+@import '../styles/variables.css';
+@import '../styles/components.css';
+@import '../styles/utilities.css';
+
+/* Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
