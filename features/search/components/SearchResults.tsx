@@ -98,12 +98,12 @@ export default function SearchResults({
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${
                       quote.status === "DRAFT"
-                        ? "bg-status-draft-bg text-status-draft-text"
+                        ? "bg-gray-600/20 text-gray-400"
                         : quote.status === "SENT"
-                        ? "bg-status-pending-bg text-status-pending-text"
+                        ? "bg-info-blue/20 text-info-blue"
                         : quote.status === "ACCEPTED"
-                        ? "bg-status-approved-bg text-status-approved-text"
-                        : "bg-status-rejected-bg text-status-rejected-text"
+                        ? "bg-success-green/20 text-success-green"
+                        : "bg-critical-red/20 text-critical-red"
                     }`}
                   >
                     {quote.status}
@@ -112,22 +112,22 @@ export default function SearchResults({
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-gray-400 line-clamp-2">
                     {quote.title}
                   </p>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted">Items:</span>
+                    <span className="text-gray-500">Items:</span>
                     <span className="text-foreground">{quote._count.items}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted text-sm">Total:</span>
+                    <span className="text-gray-500 text-sm">Total:</span>
                     <span className="text-lg font-semibold text-foreground">
                       ${quote.total.toFixed(2)}
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-border">
-                  <span className="text-xs text-muted">
+                <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                  <span className="text-xs text-gray-500">
                     {new Date(quote.createdAt).toLocaleDateString()}
                   </span>
                   <div className="flex gap-2">

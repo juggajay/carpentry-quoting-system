@@ -3,17 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+  "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-magenta focus-visible:ring-offset-2 focus-visible:ring-offset-dark-surface",
   {
     variants: {
       variant: {
-        primary: "bg-green-500 hover:bg-green-600 text-white shadow-md hover:shadow-lg hover:-translate-y-[1px]",
-        secondary: "bg-transparent border border-slate-700 hover:border-slate-600 hover:bg-white/5 text-white",
-        ghost: "hover:bg-white/5 text-slate-400 hover:text-white",
-        destructive: "bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg",
-        outline: "border border-slate-700 bg-transparent hover:bg-white/5 hover:border-slate-600 text-white",
-        success: "bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg",
-        warning: "bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg",
+        primary: "bg-electric-magenta hover:bg-electric-magenta/90 text-white shadow-md hover:shadow-lg hover:-translate-y-[1px]",
+        secondary: "bg-transparent border border-gray-600 hover:border-gray-500 hover:bg-white/5 text-white",
+        ghost: "hover:bg-royal-blue/10 text-royal-blue hover:text-royal-blue",
+        destructive: "bg-critical-red hover:bg-critical-red/90 text-white shadow-md hover:shadow-lg",
+        outline: "border border-gray-600 bg-transparent hover:bg-white/5 hover:border-gray-500 text-white",
+        success: "bg-success-green hover:bg-success-green/90 text-white shadow-md hover:shadow-lg",
+        warning: "bg-warning-orange hover:bg-warning-orange/90 text-white shadow-md hover:shadow-lg",
       },
       size: {
         xs: "h-7 px-2.5 text-xs",

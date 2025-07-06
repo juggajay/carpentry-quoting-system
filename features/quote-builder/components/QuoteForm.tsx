@@ -272,7 +272,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             {...form.register("validUntil")}
           />
           <div>
-            <label className="block text-sm font-medium text-slate-400 mb-2">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Project Type
             </label>
             <select
@@ -307,7 +307,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               placeholder="e.g., Master Bedroom Extension"
             />
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Description
               </label>
               <textarea
@@ -318,7 +318,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Special Notes (Optional)
               </label>
               <textarea
@@ -361,29 +361,29 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             <div className="flex justify-end">
               <div className="w-96 space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Subtotal:</span>
+                  <span className="text-gray-400">Subtotal:</span>
                   <span className="text-white font-medium">
                     ${subtotal.toFixed(2)}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400">GST (10%):</span>
+                  <span className="text-gray-400">GST (10%):</span>
                   <span className="text-white">
                     ${tax.toFixed(2)}
                   </span>
                 </div>
                 
-                <div className="flex justify-between text-lg font-semibold pt-2 border-t border-slate-700">
+                <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-700">
                   <span>Total (inc GST):</span>
-                  <span className="text-green-500">
+                  <span className="text-lime-green">
                     ${total.toFixed(2)}
                   </span>
                 </div>
 
                 {/* Add deposit line */}
                 <div className="flex items-center justify-between text-sm pt-2">
-                  <span className="text-slate-400">Deposit (10%):</span>
+                  <span className="text-gray-400">Deposit (10%):</span>
                   <span className="text-white font-medium">
                     ${deposit.toFixed(2)}
                   </span>
@@ -415,7 +415,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Payment Schedule
               </label>
               <textarea
@@ -427,7 +427,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Additional Terms
               </label>
               <textarea

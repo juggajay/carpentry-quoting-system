@@ -100,8 +100,8 @@ export default async function DashboardPage() {
       <PageContainer title="Dashboard">
         <ContentCard className="text-center py-12">
           <div className="space-y-4">
-            <div className="mx-auto w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center">
-              <span className="text-red-600 text-2xl">⚠️</span>
+            <div className="mx-auto w-12 h-12 bg-critical-red/20 rounded-full flex items-center justify-center">
+              <span className="text-critical-red text-2xl">⚠️</span>
             </div>
             <h3 className="text-lg font-semibold text-white">Unable to Load Dashboard</h3>
             <p className="text-slate-400 max-w-md mx-auto">
@@ -166,12 +166,12 @@ export default async function DashboardPage() {
               <div className="space-y-2">
                 {data.recentQuotes.map((quote) => (
                   <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800/50 transition-colors">
+                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-dark-elevated/50 transition-colors">
                       <div className="flex-1">
                         <p className="font-medium text-white">
                           {quote.quoteNumber}
                         </p>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-gray-400">
                           {quote.client?.name || "No client"} • {quote.title}
                         </p>
                       </div>
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                         <p className="font-medium text-white">
                           ${quote.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-gray-400">
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -188,7 +188,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-3 pt-3 border-t border-slate-700">
+            <div className="mt-3 pt-3 border-t border-gray-700">
               <Link href="/quotes">
                 <Button variant="ghost" className="w-full">
                   View All Quotes
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-2">
                 {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-800/50 transition-colors">
+                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-dark-elevated/50 transition-colors">
                     <div className="flex-1">
                       <p className="font-medium text-white truncate">
                         {file.fileName}
@@ -223,10 +223,10 @@ export default async function DashboardPage() {
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
                           file.status === "VERIFIED"
-                            ? "bg-green-600/20 text-green-600"
+                            ? "bg-success-green/20 text-success-green"
                             : file.status === "FAILED"
-                            ? "bg-red-600/20 text-red-600"
-                            : "bg-slate-600/20 text-slate-400"
+                            ? "bg-critical-red/20 text-critical-red"
+                            : "bg-gray-600/20 text-gray-400"
                         }`}
                       >
                         {file.status}
@@ -239,7 +239,7 @@ export default async function DashboardPage() {
                 ))}
               </div>
             )}
-            <div className="mt-3 pt-3 border-t border-slate-700">
+            <div className="mt-3 pt-3 border-t border-gray-700">
               <Link href="/import">
                 <Button variant="ghost" className="w-full">
                   Import New File
