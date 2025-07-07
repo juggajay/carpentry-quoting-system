@@ -85,7 +85,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       count: results.length,
-      materials: results
+      materials: results.map(m => ({
+        ...m,
+        lastUpdated: m.lastUpdated.toISOString() // Ensure dates are serialized
+      }))
     });
   } catch (error) {
     console.error('Scraping error:', error);

@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 export function MaterialImportButton() {
   const [scraperOpen, setScraperOpen] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [scrapedData, setScrapedData] = useState<Array<{ material: string; price: number; unit: string; supplier: string; lastUpdated: Date; inStock: boolean; sourceUrl?: string }>>([]);
+  const [scrapedData, setScrapedData] = useState<Array<{ material: string; price: number; unit: string; supplier: string; lastUpdated: string; inStock: boolean; sourceUrl?: string }>>([]);
   const router = useRouter();
 
   const handleScrape = async (config: { source: string; materials?: string[]; customUrl?: string; customSelectors?: Record<string, string> }) => {
@@ -48,7 +48,9 @@ export function MaterialImportButton() {
       const response = await fetch('/api/materials/import', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ materials: scrapedData }),
+        body: JSON.stringify({ 
+          materials: scrapedData // Already has string dates
+        }),
       });
 
       const data = await response.json();
