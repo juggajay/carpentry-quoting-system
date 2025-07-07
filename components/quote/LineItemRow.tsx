@@ -76,7 +76,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
           <select
             value={item.itemType}
             onChange={(e) => onUpdate(item.id, { itemType: e.target.value as ItemType })}
-            className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded"
+            className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded"
           >
             <option value={ItemType.CUSTOM}>Custom</option>
             <option value={ItemType.MATERIAL}>Material</option>
@@ -90,7 +90,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
               type="text"
               value={item.description}
               onChange={(e) => onUpdate(item.id, { description: e.target.value })}
-              className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded"
+              className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded"
             />
           ) : item.itemType === ItemType.MATERIAL ? (
             <div className="flex gap-2">
@@ -98,7 +98,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
                 type="text"
                 value={item.description}
                 readOnly
-                className="flex-1 p-1 border border-slate-700 bg-slate-800 text-white rounded cursor-pointer"
+                className="flex-1 p-1 border border-gray-700 bg-dark-elevated/50 text-gray-400 rounded cursor-pointer"
                 onClick={() => setShowMaterialSelector(true)}
                 placeholder="Click to select material..."
               />
@@ -138,7 +138,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
           <select
             value={item.unit}
             onChange={(e) => handleUnitChange(e.target.value as Unit)}
-            className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded"
+            className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded"
           >
             <option value={Unit.EA}>EA</option>
             <option value={Unit.LM}>L/M</option>
