@@ -63,12 +63,17 @@ async function copyMaterials() {
         }
         
         // Create copy for target user
-        const { id, userId, createdAt, updatedAt, ...materialData } = material;
+        const { id, userId, createdAt, updatedAt, lastScrapedAt, sourceUrl, scraperType, scraperSelectors, ...materialData } = material;
         
         await prisma.material.create({
           data: {
             ...materialData,
-            userId: targetUser.id
+            userId: targetUser.id,
+            // Only include new fields if they exist
+            ...(lastScrapedAt && { lastScrapedAt }),
+            ...(sourceUrl && { sourceUrl }),
+            ...(scraperType && { scraperType }),
+            ...(scraperSelectors && { scraperSelectors })
           }
         });
         
@@ -131,10 +136,15 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
       });
       
       if (!existing) {
-        const { id, userId, createdAt, updatedAt, ...materialData } = material;
+        const { id, userId, createdAt, updatedAt, lastScrapedAt, sourceUrl, scraperType, scraperSelectors, ...materialData } = material;
         materialsToCreate.push({
           ...materialData,
-          userId: targetUserId
+          userId: targetUserId,
+          // Only include new fields if they exist
+          ...(lastScrapedAt && { lastScrapedAt }),
+          ...(sourceUrl && { sourceUrl }),
+          ...(scraperType && { scraperType }),
+          ...(scraperSelectors && { scraperSelectors })
         });
       }
     }

@@ -12,6 +12,10 @@ export const navigationLinks = [
     href: "/import/labor-rates",
   },
   {
+    name: "Materials",
+    href: "/materials",
+  },
+  {
     name: "New Quote",
     href: "/quotes/new",
   },
