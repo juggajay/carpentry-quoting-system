@@ -1,6 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
@@ -120,124 +119,176 @@ export default async function DashboardPage() {
       description="Welcome back! Here's an overview of your activity."
     >
       <div className="space-y-8">
-        {/* Style Test Section */}
-        <div className="mb-4 p-4 bg-dark-elevated rounded-lg">
-          <h2 className="text-electric-magenta text-2xl font-bold mb-4">Modern UI Style Test</h2>
-          <div className="flex gap-4 flex-wrap">
-            <button className="btn btn-primary">New Quote (Custom CSS)</button>
-            <button className="bg-electric-magenta hover:bg-electric-magenta/90 text-white px-6 py-2 rounded-lg transition-all">New Quote (Tailwind)</button>
-            <div className="p-4 bg-dark-surface rounded">
-              <p className="text-vibrant-cyan">Vibrant Cyan Text</p>
-              <p className="text-lime-green">Lime Green Text</p>
-              <p className="text-royal-blue">Royal Blue Text</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="card bg-dark-elevated">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Total Quotes</p>
+                <p className="text-2xl font-bold text-white mt-1">{data.stats.totalQuotes}</p>
+              </div>
+              <div className="w-12 h-12 bg-electric-magenta/20 rounded-lg flex items-center justify-center">
+                <span className="text-xl">📊</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-dark-elevated">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Accepted Quotes</p>
+                <p className="text-2xl font-bold text-white mt-1">{data.stats.acceptedQuotes}</p>
+              </div>
+              <div className="w-12 h-12 bg-lime-green/20 rounded-lg flex items-center justify-center">
+                <span className="text-xl">✅</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-dark-elevated">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Total Clients</p>
+                <p className="text-2xl font-bold text-white mt-1">{data.stats.totalClients}</p>
+              </div>
+              <div className="w-12 h-12 bg-royal-blue/20 rounded-lg flex items-center justify-center">
+                <span className="text-xl">👥</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="card bg-dark-elevated">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-400">Monthly Growth</p>
+                <p className="text-2xl font-bold text-white mt-1">
+                  {data.stats.monthlyGrowth > 0 ? '+' : ''}{data.stats.monthlyGrowth.toFixed(0)}%
+                </p>
+              </div>
+              <div className={`w-12 h-12 ${data.stats.monthlyGrowth >= 0 ? 'bg-lime-green/20' : 'bg-critical-red/20'} rounded-lg flex items-center justify-center`}>
+                <span className="text-xl">{data.stats.monthlyGrowth >= 0 ? '📈' : '📉'}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/quotes/new">
-          <Card hover className="h-full md:col-span-1">
-            <CardContent className="text-center">
-              <h3 className="font-semibold text-white text-lg">New Quote</h3>
-              <p className="text-sm text-slate-400 mt-1">Create a new quote</p>
-            </CardContent>
-          </Card>
-        </Link>
+          <Link href="/quotes/new" className="group">
+            <div className="card bg-dark-elevated hover:shadow-lg hover:shadow-electric-magenta/20 transition-all duration-300 transform hover:scale-[1.02] h-full">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2">New Quote</h3>
+                  <p className="text-sm text-gray-400 mb-4">Create a professional quote</p>
+                </div>
+                <div className="w-12 h-12 bg-electric-magenta/20 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">📄</span>
+                </div>
+              </div>
+              <button className="btn btn-primary w-full group-hover:shadow-md">Get Started</button>
+            </div>
+          </Link>
 
-        <Link href="/import">
-          <Card hover className="h-full">
-            <CardContent className="text-center">
-              <h3 className="font-semibold text-white">Import PDF</h3>
-              <p className="text-sm text-slate-400 mt-1">Import from PDF</p>
-            </CardContent>
-          </Card>
-        </Link>
+          <Link href="/import" className="group">
+            <div className="card bg-dark-elevated hover:shadow-lg hover:shadow-royal-blue/20 transition-all duration-300 transform hover:scale-[1.02] h-full">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Import PDF</h3>
+                  <p className="text-sm text-gray-400 mb-4">Extract data from PDFs</p>
+                </div>
+                <div className="w-12 h-12 bg-royal-blue/20 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">📑</span>
+                </div>
+              </div>
+              <button className="btn btn-secondary w-full">Browse Files</button>
+            </div>
+          </Link>
 
-        <Link href="/search">
-          <Card hover className="h-full">
-            <CardContent className="text-center">
-              <h3 className="font-semibold text-white">Search Quotes</h3>
-              <p className="text-sm text-slate-400 mt-1">Find existing quotes</p>
-            </CardContent>
-          </Card>
-        </Link>
+          <Link href="/search" className="group">
+            <div className="card bg-dark-elevated hover:shadow-lg hover:shadow-vibrant-cyan/20 transition-all duration-300 transform hover:scale-[1.02] h-full">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Search Quotes</h3>
+                  <p className="text-sm text-gray-400 mb-4">Find existing quotes</p>
+                </div>
+                <div className="w-12 h-12 bg-vibrant-cyan/20 rounded-lg flex items-center justify-center">
+                  <span className="text-2xl">🔍</span>
+                </div>
+              </div>
+              <button className="btn btn-secondary w-full">Search Now</button>
+            </div>
+          </Link>
         </div>
 
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Quotes */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Quotes</CardTitle>
-            <CardDescription>Your latest quote activity</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.recentQuotes.length === 0 ? (
-              <EmptyQuotesState />
-            ) : (
-              <div className="space-y-2">
-                {data.recentQuotes.map((quote) => (
-                  <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-dark-elevated/50 transition-colors">
-                      <div className="flex-1">
-                        <p className="font-medium text-white">
+        <div className="card bg-dark-elevated">
+          <h2 className="text-xl font-semibold text-white mb-4">Recent Quotes</h2>
+          {data.recentQuotes.length === 0 ? (
+            <EmptyQuotesState />
+          ) : (
+            <div className="space-y-3">
+              {data.recentQuotes.map((quote) => (
+                <Link key={quote.id} href={`/quotes/${quote.id}`} className="block group">
+                  <div className="p-4 bg-dark-surface rounded-lg hover:bg-dark-navy transition-all duration-200 hover:shadow-md hover:shadow-electric-magenta/10">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-white group-hover:text-electric-magenta transition-colors">
                           {quote.quoteNumber}
-                        </p>
+                        </h4>
                         <p className="text-sm text-gray-400">
                           {quote.client?.name || "No client"} • {quote.title}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-white">
+                        <p className="font-semibold text-white">
                           ${quote.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-500">
                           {new Date(quote.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <Link href="/quotes">
-                <Button variant="ghost" className="w-full">
-                  View All Quotes
-                </Button>
-              </Link>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <Link href="/quotes">
+              <Button variant="ghost" className="w-full hover:bg-dark-surface">
+                View All Quotes
+              </Button>
+            </Link>
+          </div>
+        </div>
 
         {/* Recent Uploads */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Imports</CardTitle>
-            <CardDescription>PDF files imported for OCR</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.recentFiles.length === 0 ? (
-              <EmptyFilesState />
-            ) : (
-              <div className="space-y-2">
-                {data.recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-dark-elevated/50 transition-colors">
-                    <div className="flex-1">
+        <div className="card bg-dark-elevated">
+          <h2 className="text-xl font-semibold text-white mb-4">Recent Imports</h2>
+          <p className="text-sm text-gray-400 mb-4">PDF files imported for OCR</p>
+          {data.recentFiles.length === 0 ? (
+            <EmptyFilesState />
+          ) : (
+            <div className="space-y-3">
+              {data.recentFiles.map((file) => (
+                <div key={file.id} className="p-4 bg-dark-surface rounded-lg hover:bg-dark-navy transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
                       <p className="font-medium text-white truncate">
                         {file.fileName}
                       </p>
-                      <p className="text-sm text-slate-400">
+                      <p className="text-sm text-gray-400">
                         {(file.fileSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-col items-end ml-4">
                       <span
-                        className={`text-xs px-2 py-1 rounded-full ${
+                        className={`text-xs px-3 py-1 rounded-full font-medium ${
                           file.status === "VERIFIED"
-                            ? "bg-success-green/20 text-success-green"
+                            ? "bg-lime-green/20 text-lime-green"
                             : file.status === "FAILED"
                             ? "bg-critical-red/20 text-critical-red"
                             : "bg-gray-600/20 text-gray-400"
@@ -245,23 +296,23 @@ export default async function DashboardPage() {
                       >
                         {file.status}
                       </span>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-gray-500 mt-2">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <Link href="/import">
-                <Button variant="ghost" className="w-full">
-                  Import New File
-                </Button>
-              </Link>
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <Link href="/import">
+              <Button variant="ghost" className="w-full hover:bg-dark-surface">
+                Import New File
+              </Button>
+            </Link>
+          </div>
+        </div>
         </div>
       </div>
     </PageContainer>

@@ -102,15 +102,15 @@ function SortableLineItem({
       ref={setNodeRef}
       style={style}
       className={`
-        grid grid-cols-12 gap-2 items-start p-2 rounded-lg
-        ${isDragging ? "bg-background-hover" : ""}
+        grid grid-cols-12 gap-2 items-start p-2 bg-dark-surface rounded-md transition-colors
+        ${isDragging ? "opacity-50" : "hover:bg-dark-navy"}
       `}
     >
       {/* Drag Handle */}
       <div className="col-span-1 flex items-center justify-center pt-2">
         <button
           type="button"
-          className="p-1 rounded hover:bg-background-hover cursor-move touch-none"
+          className="p-1 rounded hover:bg-dark-elevated cursor-move touch-none transition-colors"
           {...attributes}
           {...listeners}
           aria-label={`Reorder item ${index + 1}`}
@@ -123,7 +123,7 @@ function SortableLineItem({
       <div className="col-span-1">
         <select
           {...register(`items.${index}.type`)}
-          className="w-full px-2 py-2 bg-slate-900 border border-slate-700 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600"
+          className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white text-sm focus:border-royal-blue focus:ring-1 focus:ring-royal-blue transition-colors"
         >
           <option value="custom">Custom</option>
           <option value="material">Material</option>
@@ -279,16 +279,18 @@ export default function LineItemsManager({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="bg-dark-elevated rounded-lg p-6">
+      <h3 className="text-lg font-semibold text-white mb-4">Quote Items</h3>
+      
       {/* Header */}
-      <div className="grid grid-cols-12 gap-2 text-sm font-medium text-slate-400 px-2">
+      <div className="grid grid-cols-12 gap-2 mb-2 px-2">
         <div className="col-span-1"></div>
-        <div className="col-span-1">Type</div>
-        <div className="col-span-3">Description</div>
-        <div className="col-span-2">Quantity</div>
-        <div className="col-span-1">Unit</div>
-        <div className="col-span-2">Unit Price</div>
-        <div className="col-span-1">Total</div>
+        <div className="col-span-1 text-xs font-medium text-gray-400">Type</div>
+        <div className="col-span-3 text-xs font-medium text-gray-400">Description</div>
+        <div className="col-span-2 text-xs font-medium text-gray-400">Quantity</div>
+        <div className="col-span-1 text-xs font-medium text-gray-400">Unit</div>
+        <div className="col-span-2 text-xs font-medium text-gray-400">Unit Price</div>
+        <div className="col-span-1 text-xs font-medium text-gray-400">Total</div>
         <div className="col-span-1"></div>
       </div>
 
@@ -318,15 +320,17 @@ export default function LineItemsManager({
       </DndContext>
 
       {/* Add Item Button */}
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={addNewItem}
-        className="w-full"
-      >
-        <span className="mr-2">+</span>
-        Add Line Item
-      </Button>
+      <div className="mt-4 pt-4 border-t border-gray-700">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={addNewItem}
+          className="w-full hover:bg-dark-surface"
+        >
+          <span className="mr-2">+</span>
+          Add Line Item
+        </Button>
+      </div>
 
       {/* Instructions for Screen Readers */}
       <div className="sr-only" aria-live="polite">

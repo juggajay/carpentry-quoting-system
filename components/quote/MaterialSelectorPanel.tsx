@@ -148,7 +148,7 @@ export function MaterialSelectorPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black z-40"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
             onClick={onClose}
           />
 
@@ -158,15 +158,15 @@ export function MaterialSelectorPanel({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-[600px] bg-slate-900 border-l border-slate-700 shadow-2xl z-50 flex flex-col"
+            className="fixed right-0 top-0 h-full w-[600px] bg-dark-elevated border-l border-gray-700 shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="p-4 border-b border-slate-700">
+            <div className="p-4 border-b border-gray-700">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-white">Select Materials</h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
+                  className="p-2 hover:bg-dark-surface rounded-lg transition-colors text-gray-400 hover:text-white"
                 >
                   ✕
                 </button>
@@ -180,7 +180,7 @@ export function MaterialSelectorPanel({
                   placeholder="Search materials by name, SKU, or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-emerald-600"
+                  className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-royal-blue focus:ring-1 focus:ring-royal-blue transition-colors"
                 />
               </div>
 
@@ -192,13 +192,13 @@ export function MaterialSelectorPanel({
                 <div className="flex gap-2">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-1 text-sm rounded ${viewMode === 'list' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+                    className={`px-3 py-1 text-sm rounded ${viewMode === 'list' ? 'bg-electric-magenta text-white' : 'bg-dark-surface text-gray-400 hover:bg-dark-navy'} transition-colors`}
                   >
                     List
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-3 py-1 text-sm rounded ${viewMode === 'grid' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+                    className={`px-3 py-1 text-sm rounded ${viewMode === 'grid' ? 'bg-electric-magenta text-white' : 'bg-dark-surface text-gray-400 hover:bg-dark-navy'} transition-colors`}
                   >
                     Grid
                   </button>
@@ -209,15 +209,15 @@ export function MaterialSelectorPanel({
             {/* Main Content */}
             <div className="flex-1 flex overflow-hidden">
               {/* Categories Sidebar */}
-              <div className="w-48 border-r border-slate-700 p-4 overflow-y-auto">
-                <h3 className="text-sm font-semibold text-slate-400 mb-3">Categories</h3>
+              <div className="w-48 border-r border-gray-700 p-4 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Categories</h3>
                 <div className="space-y-1">
                   <button
                     onClick={() => setSelectedCategory('all')}
-                    className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                    className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
                       selectedCategory === 'all'
-                        ? 'bg-emerald-600 text-white'
-                        : 'hover:bg-slate-800 text-slate-300'
+                        ? 'bg-electric-magenta text-white font-medium'
+                        : 'hover:bg-dark-navy text-gray-300'
                     }`}
                   >
                     All Materials
@@ -228,10 +228,10 @@ export function MaterialSelectorPanel({
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
-                      className={`w-full text-left px-3 py-2 rounded text-sm transition-colors ${
+                      className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
                         selectedCategory === category
-                          ? 'bg-emerald-600 text-white'
-                          : 'hover:bg-slate-800 text-slate-300'
+                          ? 'bg-electric-magenta text-white font-medium'
+                          : 'hover:bg-dark-navy text-gray-300'
                       }`}
                     >
                       {category}
@@ -245,19 +245,19 @@ export function MaterialSelectorPanel({
               <div className="flex-1 p-4 overflow-y-auto">
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-slate-400">Loading materials...</div>
+                    <div className="text-gray-400 animate-pulse">Loading materials...</div>
                   </div>
                 ) : filteredMaterials.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <div className="text-slate-400">No materials found</div>
+                    <div className="text-gray-400">No materials found</div>
                   </div>
                 ) : viewMode === 'list' ? (
                   <div className="space-y-2">
                     {filteredMaterials.map((material) => (
                       <div
                         key={material.id}
-                        className={`p-3 border border-slate-700 rounded-lg hover:border-emerald-600 transition-colors cursor-pointer ${
-                          selectedItems.some(item => item.id === material.id) ? 'bg-emerald-600/10 border-emerald-600' : ''
+                        className={`p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-electric-magenta/50 transition-all cursor-pointer ${
+                          selectedItems.some(item => item.id === material.id) ? 'bg-electric-magenta/10 border-electric-magenta' : ''
                         }`}
                         onClick={() => handleSelect(material)}
                       >
@@ -268,10 +268,11 @@ export function MaterialSelectorPanel({
                               <div className="text-sm text-slate-400 mt-1">{material.description}</div>
                             )}
                             <div className="flex items-center gap-4 mt-2">
-                              {material.sku && <span className="text-sm text-slate-500">{material.sku}</span>}
-                              <span className="text-sm font-medium text-emerald-400">
-                                {formatPrice(material.pricePerUnit)}/{material.unit}
+                              {material.sku && <span className="text-sm text-gray-500">{material.sku}</span>}
+                              <span className="text-lg font-semibold text-vibrant-cyan">
+                                {formatPrice(material.pricePerUnit)}
                               </span>
+                              <span className="text-sm text-gray-500">per {material.unit}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 ml-4">
@@ -280,7 +281,7 @@ export function MaterialSelectorPanel({
                                 e.stopPropagation();
                                 toggleFavorite(material.id);
                               }}
-                              className="p-1 hover:bg-slate-800 rounded text-2xl"
+                              className="p-1 hover:bg-dark-elevated rounded text-2xl transition-colors"
                             >
                               {favorites.includes(material.id) ? '⭐' : '☆'}
                             </button>
@@ -289,7 +290,7 @@ export function MaterialSelectorPanel({
                                 e.stopPropagation();
                                 handleSelect(material);
                               }}
-                              className="p-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
+                              className="px-3 py-1 bg-electric-magenta text-white rounded-md hover:bg-electric-magenta/90 transition-colors font-medium"
                             >
                               +
                             </button>
@@ -309,12 +310,12 @@ export function MaterialSelectorPanel({
                         onClick={() => handleSelect(material)}
                       >
                         <div className="font-medium text-white">{material.name}</div>
-                        <div className="text-sm text-slate-400 mt-1">{material.category}</div>
+                        <div className="text-sm text-gray-400 mt-1">{material.category}</div>
                         <div className="mt-3 flex items-center justify-between">
-                          <span className="text-lg font-semibold text-emerald-400">
+                          <span className="text-lg font-semibold text-vibrant-cyan">
                             {formatPrice(material.pricePerUnit)}
                           </span>
-                          <span className="text-sm text-slate-500">/{material.unit}</span>
+                          <span className="text-sm text-gray-500">per {material.unit}</span>
                         </div>
                       </div>
                     ))}
@@ -325,14 +326,14 @@ export function MaterialSelectorPanel({
 
             {/* Footer - Multi-select actions */}
             {multiple && selectedItems.length > 0 && (
-              <div className="p-4 border-t border-slate-700 bg-slate-800">
+              <div className="p-4 border-t border-gray-700 bg-dark-surface">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">
+                  <span className="text-sm text-gray-400">
                     {selectedItems.length} items selected
                   </span>
                   <button
                     onClick={handleAddSelected}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    className="btn btn-primary"
                   >
                     Add Selected Items
                   </button>
