@@ -313,7 +313,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               <textarea
                 {...form.register("projectDescription")}
                 rows={4}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-surface/80 transition-all duration-200"
                 placeholder="Describe the work to be done..."
               />
             </div>
@@ -324,7 +324,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               <textarea
                 {...form.register("specialNotes")}
                 rows={3}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-surface/80 transition-all duration-200"
                 placeholder="Any special conditions, access requirements, etc..."
               />
             </div>
@@ -421,7 +421,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               <textarea
                 {...form.register("paymentSchedule")}
                 rows={3}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-surface/80 transition-all duration-200"
                 placeholder="e.g., 10% deposit, 50% on commencement, 40% on completion"
               />
             </div>
@@ -433,7 +433,7 @@ export default function QuoteForm({ initialData, quoteId, onSubmit }: QuoteFormP
               <textarea
                 {...form.register("additionalTerms")}
                 rows={4}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-surface/80 transition-all duration-200"
                 placeholder="Any additional terms and conditions..."
               />
             </div>

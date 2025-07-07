@@ -129,7 +129,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
             type="number"
             value={item.quantity}
             onChange={(e) => handleQuantityChange(parseFloat(e.target.value) || 0)}
-            className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded text-right"
+            className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded text-right"
             step="0.01"
           />
         </td>
@@ -154,7 +154,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
             type="number"
             value={item.unitPrice}
             onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
-            className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded text-right"
+            className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded text-right"
             step="0.01"
             disabled={item.itemType !== ItemType.CUSTOM}
           />

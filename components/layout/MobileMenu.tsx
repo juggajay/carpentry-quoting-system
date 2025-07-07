@@ -57,7 +57,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 </div>
               </Transition.Child>
               
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-900 px-6 pb-4 shadow-xl">
+              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-dark-elevated px-6 pb-4 shadow-xl">
                 <div className="flex h-16 shrink-0 items-center border-b border-slate-800">
                   <h1 className="text-xl font-bold text-white">CarpentryQS</h1>
                 </div>
@@ -76,7 +76,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                               group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-semibold transition-all duration-200
                               ${isActive 
                                 ? "bg-green-500 text-white shadow-md" 
-                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                : "text-slate-400 hover:bg-dark-surface hover:text-white"
                               }
                             `}
                           >
