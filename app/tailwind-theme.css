@@ -1,0 +1,25 @@
+@import 'tailwindcss/theme' layer(theme);
+
+@theme {
+  /* Custom Colors */
+  --color-deep-charcoal: #1A1A1A;
+  --color-pure-black: #000000;
+  --color-clean-white: #FFFFFF;
+  
+  /* Accent Colors */
+  --color-electric-magenta: #FF1744;
+  --color-vibrant-cyan: #00E5FF;
+  --color-lime-green: #76FF03;
+  --color-royal-blue: #2962FF;
+  
+  /* System Colors */
+  --color-critical-red: #F44336;
+  --color-warning-orange: #FF9800;
+  --color-success-green: #4CAF50;
+  --color-info-blue: #2196F3;
+  
+  /* Dark Mode Surfaces */
+  --color-dark-surface: #121212;
+  --color-dark-elevated: #1E1E1E;
+  --color-dark-navy: #0A1929;
+}
