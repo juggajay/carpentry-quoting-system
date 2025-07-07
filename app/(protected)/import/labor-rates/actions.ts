@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { createClient } from '@supabase/supabase-js';
 import { LaborRateProcessor } from '@/lib/rate-extraction/labor-rate-processor';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
@@ -129,7 +129,7 @@ export async function saveLaborRateTemplates(rates: Array<{
 
   try {
     // Get user from database
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -140,7 +140,7 @@ export async function saveLaborRateTemplates(rates: Array<{
     // Save rates in batches to handle potential duplicates
     for (const rate of rates) {
       try {
-        await db.laborRateTemplate.upsert({
+        await prisma.laborRateTemplate.upsert({
           where: {
             userId_activity_unit: {
               userId: user.id,
@@ -200,7 +200,7 @@ export async function getLaborRateTemplates(category?: string) {
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -214,7 +214,7 @@ export async function getLaborRateTemplates(category?: string) {
       ...(category && { category })
     };
 
-    const rates = await db.laborRateTemplate.findMany({
+    const rates = await prisma.laborRateTemplate.findMany({
       where,
       orderBy: [
         { category: 'asc' },
@@ -247,7 +247,7 @@ export async function updateLaborRateTemplate(
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -256,7 +256,7 @@ export async function updateLaborRateTemplate(
     }
 
     // Verify ownership
-    const existing = await db.laborRateTemplate.findFirst({
+    const existing = await prisma.laborRateTemplate.findFirst({
       where: { id, userId: user.id }
     });
 
@@ -264,7 +264,7 @@ export async function updateLaborRateTemplate(
       return { success: false, error: 'Rate not found' };
     }
 
-    await db.laborRateTemplate.update({
+    await prisma.laborRateTemplate.update({
       where: { id },
       data: {
         ...updates,
@@ -291,7 +291,7 @@ export async function deleteLaborRateTemplate(id: string): Promise<{ success: bo
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -300,7 +300,7 @@ export async function deleteLaborRateTemplate(id: string): Promise<{ success: bo
     }
 
     // Verify ownership
-    const existing = await db.laborRateTemplate.findFirst({
+    const existing = await prisma.laborRateTemplate.findFirst({
       where: { id, userId: user.id }
     });
 
@@ -308,7 +308,7 @@ export async function deleteLaborRateTemplate(id: string): Promise<{ success: bo
       return { success: false, error: 'Rate not found' };
     }
 
-    await db.laborRateTemplate.delete({
+    await prisma.laborRateTemplate.delete({
       where: { id }
     });
 
@@ -331,7 +331,7 @@ export async function deleteLaborRateTemplates(ids: string[]): Promise<{ success
   }
 
   try {
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -340,7 +340,7 @@ export async function deleteLaborRateTemplates(ids: string[]): Promise<{ success
     }
 
     // Delete only rates belonging to the user
-    const result = await db.laborRateTemplate.deleteMany({
+    const result = await prisma.laborRateTemplate.deleteMany({
       where: {
         id: { in: ids },
         userId: user.id

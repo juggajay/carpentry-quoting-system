@@ -1,9 +1,9 @@
 'use client';
 
 import { CheckCircle2, XCircle, AlertCircle, FileSearch, TrendingUp } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { toast } from 'sonner';
 import { saveLaborRateTemplates } from '@/app/(protected)/import/labor-rates/actions';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';

@@ -1,5 +1,5 @@
 import { Unit } from '@prisma/client';
-import { normalizeUnit, categorizeActivity, isReasonableRate } from './rate-patterns';
+import { isReasonableRate } from './rate-patterns';
 
 export interface ExtractedRate {
   activity: string;

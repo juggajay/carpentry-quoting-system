@@ -202,7 +202,7 @@ export class PdfProcessor {
     return null;
   }
 
-  private extractTableRow(row: string, columns: any, fileName: string): ExtractedRate | null {
+  private extractTableRow(row: string, columns: { activity: number; rate: number; unit?: number } | null, fileName: string): ExtractedRate | null {
     if (!columns) return null;
     
     // Try to extract based on column positions

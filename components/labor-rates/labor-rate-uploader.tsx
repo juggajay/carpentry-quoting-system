@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, FileText, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { toast } from 'sonner';
 import { uploadAndProcessFile } from '@/app/(protected)/import/labor-rates/actions';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
@@ -153,7 +153,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
         <div className="text-xs text-muted-foreground space-y-1">
           <p className="font-medium">Tips for best results:</p>
           <ul className="list-disc list-inside space-y-0.5">
-            <li>Excel files should contain "Trade Breakup" or "Labor" sheets</li>
+            <li>Excel files should contain &quot;Trade Breakup&quot; or &quot;Labor&quot; sheets</li>
             <li>PDF files should have clear rate tables or labor sections</li>
             <li>Rates should be in format like $X/hr, $X/day, $X/m²</li>
           </ul>

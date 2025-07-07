@@ -3,9 +3,7 @@ import { Unit } from '@prisma/client';
 import { ExtractedRate, RateNormalizer } from './rate-normalizer';
 import { normalizeUnit, categorizeActivity, RATE_PATTERNS } from './rate-patterns';
 
-interface ExcelRow {
-  [key: string]: any;
-}
+type CellValue = string | number | boolean | null | undefined;
 
 interface LaborEntry {
   activity: string;
@@ -49,12 +47,12 @@ export class ExcelProcessor {
   private processSheet(sheet: XLSX.WorkSheet, sheetName: string, fileName: string): ExtractedRate[] {
     const extractedRates: ExtractedRate[] = [];
     
-    // Convert sheet to JSON
-    const data = XLSX.utils.sheet_to_json<ExcelRow>(sheet, { 
+    // Convert sheet to JSON - header: 1 returns array of arrays
+    const data = XLSX.utils.sheet_to_json<CellValue[]>(sheet, { 
       header: 1, 
       raw: false,
       defval: ''
-    });
+    }) as CellValue[][];
 
     // Look for different extraction patterns
     const tradeBreakupRates = this.extractFromTradeBreakup(data, sheetName, fileName);
@@ -66,19 +64,17 @@ export class ExcelProcessor {
     return extractedRates;
   }
 
-  private extractFromTradeBreakup(data: any[][], sheetName: string, fileName: string): ExtractedRate[] {
+  private extractFromTradeBreakup(data: CellValue[][], sheetName: string, fileName: string): ExtractedRate[] {
     const rates: ExtractedRate[] = [];
     let inTradeBreakup = false;
-    let laborEntries: LaborEntry[] = [];
-    let materialQuantities: Map<string, MaterialEntry> = new Map();
+    const laborEntries: LaborEntry[] = [];
+    const materialQuantities: Map<string, MaterialEntry> = new Map();
 
     // First pass: collect material quantities
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       if (!row || row.length === 0) continue;
 
-      const firstCell = String(row[0] || '').toLowerCase();
-      
       // Look for material sections
       if (this.isMaterialRow(row)) {
         const material = this.extractMaterialInfo(row);
@@ -159,7 +155,7 @@ export class ExcelProcessor {
     return rates;
   }
 
-  private extractDirectRates(data: any[][], sheetName: string, fileName: string): ExtractedRate[] {
+  private extractDirectRates(data: CellValue[][], sheetName: string, fileName: string): ExtractedRate[] {
     const rates: ExtractedRate[] = [];
     
     for (const row of data) {
@@ -195,7 +191,7 @@ export class ExcelProcessor {
     return rates;
   }
 
-  private extractFromLaborSection(data: any[][], sheetName: string, fileName: string): ExtractedRate[] {
+  private extractFromLaborSection(data: CellValue[][], sheetName: string, fileName: string): ExtractedRate[] {
     const rates: ExtractedRate[] = [];
     let inLaborSection = false;
 
@@ -248,7 +244,7 @@ export class ExcelProcessor {
     return rates;
   }
 
-  private isMaterialRow(row: any[]): boolean {
+  private isMaterialRow(row: CellValue[]): boolean {
     const desc = String(row[0] || '').toLowerCase();
     const hasQuantity = row.some((cell, index) => {
       if (index === 0) return false;
@@ -259,7 +255,7 @@ export class ExcelProcessor {
     return hasQuantity && !desc.includes('labor') && !desc.includes('labour');
   }
 
-  private extractMaterialInfo(row: any[]): MaterialEntry | null {
+  private extractMaterialInfo(row: CellValue[]): MaterialEntry | null {
     const description = String(row[0] || '').trim();
     
     // Look for quantity and unit in subsequent cells
@@ -280,7 +276,7 @@ export class ExcelProcessor {
     return null;
   }
 
-  private extractLaborEntry(row: any[]): LaborEntry | null {
+  private extractLaborEntry(row: CellValue[]): LaborEntry | null {
     const activity = String(row[0] || '').trim();
     if (!activity || activity.length < 3) return null;
 
@@ -341,7 +337,7 @@ export class ExcelProcessor {
     return sectionKeywords.some(keyword => text.includes(keyword));
   }
 
-  private extractActivityFromRow(row: any[], rateIndex: number): string {
+  private extractActivityFromRow(row: CellValue[], rateIndex: number): string {
     // Look for activity description before the rate
     for (let i = 0; i < Math.min(rateIndex, row.length); i++) {
       const cell = String(row[i] || '').trim();
@@ -363,7 +359,7 @@ export class ExcelProcessor {
     return unitMap[patternName] || 'EA';
   }
 
-  private determineUnitFromContext(row: any[], valueIndex: number): string {
+  private determineUnitFromContext(row: CellValue[], valueIndex: number): string {
     // Check cells around the value for unit indicators
     for (let i = Math.max(0, valueIndex - 2); i < Math.min(row.length, valueIndex + 2); i++) {
       const cell = String(row[i] || '').toLowerCase();
@@ -378,7 +374,7 @@ export class ExcelProcessor {
     return 'EA'; // Default
   }
 
-  private findUnitInRow(row: any[], startIndex: number): string {
+  private findUnitInRow(row: CellValue[], startIndex: number): string {
     for (let i = startIndex; i < Math.min(row.length, startIndex + 3); i++) {
       const cell = String(row[i] || '').toLowerCase();
       

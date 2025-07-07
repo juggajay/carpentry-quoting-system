@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Wrench, Download, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { PageContainer } from '@/components/layout/page-container';
-import { PageHeader } from '@/components/layout/page-header';
+import { Download, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import PageContainer from '@/components/layout/PageContainer';
 import { LaborRateUploader } from '@/components/labor-rates/labor-rate-uploader';
 import { LaborRateTable } from '@/components/labor-rates/labor-rate-table';
 import { LaborRateCalculator } from '@/components/labor-rates/labor-rate-calculator';
@@ -17,8 +16,13 @@ import type { LaborRateTemplate } from '@prisma/client';
 export default function LaborRatesPage() {
   const [rates, setRates] = useState<LaborRateTemplate[]>([]);
   const [extractedRates, setExtractedRates] = useState<NormalizedRate[]>([]);
-  const [extractionStats, setExtractionStats] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [extractionStats, setExtractionStats] = useState<{
+    totalExtracted: number;
+    validRates: number;
+    invalidRates: number;
+    byCategory: Record<string, number>;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -107,36 +111,34 @@ export default function LaborRatesPage() {
   };
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Labor Rate Library"
-        description="Extract and manage labor rates from Excel and PDF documents"
-        icon={<Wrench className="h-8 w-8" />}
-        actions={
-          <div className="flex space-x-3">
-            {selectedIds.size > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteSelected}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete ({selectedIds.size})
-              </Button>
-            )}
-            {rates.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportRates}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
-            )}
-          </div>
-        }
-      />
+    <PageContainer
+      title="Labor Rate Library"
+      description="Extract and manage labor rates from Excel and PDF documents"
+      actions={
+        <div className="flex space-x-3">
+          {selectedIds.size > 0 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteSelected}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete ({selectedIds.size})
+            </Button>
+          )}
+          {rates.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportRates}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          )}
+        </div>
+      }
+    >
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
@@ -148,14 +150,14 @@ export default function LaborRatesPage() {
                 onRatesChange={loadRates}
               />
             </>
-          ) : (
+          ) : extractionStats ? (
             <ExtractionProgress
               rates={extractedRates}
               stats={extractionStats}
               onSave={handleSaveComplete}
               onCancel={handleCancelExtraction}
             />
-          )}
+          ) : null}
         </div>
 
         <div>
