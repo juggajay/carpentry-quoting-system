@@ -9,6 +9,75 @@ export class MaterialWebScraper {
     this.config = config;
   }
 
+  // Expose the source configuration
+  public getSourceConfig() {
+    return this.getSource();
+  }
+
+  // New method to parse HTML without fetching
+  public async parseHtml(html: string, searchTerm: string, source: { 
+    name: string;
+    baseUrl: string;
+    searchPath: string;
+    selectors: {
+      productList: string;
+      price: string;
+      title: string;
+      unit: string;
+    };
+  }): Promise<MaterialPrice[]> {
+    const results: MaterialPrice[] = [];
+    const $ = cheerio.load(html);
+    
+    // Extract products using the selectors
+    const products = $(source.selectors.productList);
+    
+    if (products.length === 0) {
+      console.log(`No products found for "${searchTerm}"`);
+      return results;
+    }
+    
+    // Take first 3 results max per search term
+    products.slice(0, 3).each((i, el) => {
+      try {
+        const $el = $(el);
+        const priceText = $el.find(source.selectors.price).text().trim();
+        const title = $el.find(source.selectors.title).text().trim();
+        const unitText = $el.find(source.selectors.unit).text().trim();
+        
+        // Parse price - remove currency symbols and non-numeric chars
+        const price = this.parsePrice(priceText);
+        if (!price || !title) return;
+        
+        results.push({
+          material: title,
+          price: price,
+          unit: this.normalizeUnit(unitText),
+          supplier: source.name || 'Unknown',
+          lastUpdated: new Date(),
+          inStock: true,
+          sourceUrl: source.baseUrl || ''
+        });
+      } catch (error) {
+        console.error('Error parsing product:', error);
+      }
+    });
+
+    return results;
+  }
+
+  // Expose mock prices for fallback
+  public async getMockPrices(searchTerms: string[]): Promise<MaterialPrice[]> {
+    const results: MaterialPrice[] = [];
+    for (const term of searchTerms) {
+      const mockPrice = this.getMockPrice(term);
+      if (mockPrice) {
+        results.push(mockPrice);
+      }
+    }
+    return results;
+  }
+
   async scrapePrices(searchTerms: string[]): Promise<MaterialPrice[]> {
     const results: MaterialPrice[] = [];
     const source = this.getSource();
