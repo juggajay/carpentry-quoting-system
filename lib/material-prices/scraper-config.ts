@@ -8,10 +8,10 @@ export const SCRAPER_SOURCES = {
     searchPath: '/search/products?q=',
     requiresProxy: false,
     selectors: {
-      productList: '.product-list article',
-      price: '[data-testid="product-price"]',
-      title: '[data-testid="product-title"]',
-      unit: '.product-price-unit',
+      productList: 'article[data-index]',
+      price: '[class*="Price"]',
+      title: '[data-locator="product-title"]',
+      unit: '[class*="unit"]',
     },
   },
   customUrl: {
