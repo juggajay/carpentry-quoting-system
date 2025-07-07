@@ -77,12 +77,12 @@ export default async function QuotesPage() {
         <ContentCard>
           <CardContent className="py-12 text-center">
             <div className="max-w-md mx-auto space-y-4">
-              <div className="mx-auto w-12 h-12 bg-slate-900 rounded-full flex items-center justify-center">
+              <div className="mx-auto w-12 h-12 bg-dark-surface rounded-full flex items-center justify-center">
                 <span className="text-xl">📄</span>
               </div>
               <div>
                 <p className="text-white font-medium mb-1">No quotes yet</p>
-                <p className="text-slate-400 text-sm mb-4">
+                <p className="text-gray-400 text-sm mb-4">
                   Get started by importing a PDF or creating a new quote
                 </p>
               </div>
@@ -114,7 +114,7 @@ export default async function QuotesPage() {
                         : quote.status === "SENT"
                         ? "bg-amber-500/20 text-amber-500"
                         : quote.status === "ACCEPTED"
-                        ? "bg-green-600/20 text-green-600"
+                        ? "bg-lime-green/20 text-lime-green"
                         : "bg-red-600/20 text-red-600"
                     }`}
                   >

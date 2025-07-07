@@ -69,19 +69,19 @@ export function SearchableDropdown({
         onChange={handleInputChange}
         onFocus={() => setIsOpen(true)}
         placeholder={placeholder}
-        className="w-full p-1 border border-slate-700 bg-slate-900 text-white rounded"
+        className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded"
       />
       
       {isOpen && options.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 w-full mt-1 bg-dark-elevated border border-gray-700 rounded shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <div
               key={option.id}
               onClick={() => handleSelect(option)}
-              className="p-2 hover:bg-slate-700 cursor-pointer text-white"
+              className="p-2 hover:bg-dark-navy cursor-pointer text-white"
             >
               <div className="font-medium">{displayOption(option)}</div>
-              <div className="text-sm text-slate-400">
+              <div className="text-sm text-gray-400">
                 {getPriceInfo(option)}
               </div>
             </div>

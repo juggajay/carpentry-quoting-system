@@ -182,11 +182,11 @@ export default function QuoteItemsPage() {
     return (
       <div className="max-w-6xl mx-auto">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-slate-800 rounded w-1/3"></div>
-          <div className="h-4 bg-slate-800 rounded w-1/2"></div>
+          <div className="h-8 bg-dark-elevated rounded w-1/3"></div>
+          <div className="h-4 bg-dark-elevated rounded w-1/2"></div>
           <div className="space-y-4 mt-8">
-            <div className="h-48 bg-slate-800 rounded"></div>
-            <div className="h-96 bg-slate-800 rounded"></div>
+            <div className="h-48 bg-dark-elevated rounded"></div>
+            <div className="h-96 bg-dark-elevated rounded"></div>
           </div>
         </div>
       </div>
@@ -264,7 +264,7 @@ export default function QuoteItemsPage() {
                   
                   <div className="flex justify-between text-lg font-semibold pt-2 border-t border-slate-700">
                     <span>Total (inc GST):</span>
-                    <span className="text-green-500">
+                    <span className="text-vibrant-cyan">
                       ${total.toFixed(2)}
                     </span>
                   </div>
@@ -307,7 +307,7 @@ export default function QuoteItemsPage() {
               <textarea
                 {...form.register("paymentSchedule")}
                 rows={3}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-slate-950 focus:border-green-600 hover:border-slate-700 hover:bg-slate-800 transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-elevated transition-all duration-200"
               />
             </div>
           </CardContent>

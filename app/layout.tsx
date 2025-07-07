@@ -20,8 +20,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" data-theme="dark">
-        <body className={`${inter.className} bg-dark-surface text-white`}>
+      <html lang="en" className="dark" data-theme="dark">
+        <body className={`${inter.className} dark bg-dark-surface text-white`}>
           <QueryProvider>
             {children}
           </QueryProvider>

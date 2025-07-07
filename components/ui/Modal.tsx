@@ -62,12 +62,12 @@ const ModalContent = React.forwardRef<
           duration: 0.3,
           ease: [0.4, 0, 0.2, 1]
         }}
-        className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-2xl w-[90vw] max-w-[600px]"
+        className="bg-dark-elevated border border-gray-700 rounded-2xl p-6 shadow-2xl w-[90vw] max-w-[600px]"
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 transition-all hover:opacity-100 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-slate-800 disabled:pointer-events-none p-2">
-            <span className="text-slate-400 text-xl">×</span>
+          <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg opacity-70 transition-all hover:opacity-100 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-electric-magenta focus:ring-offset-2 focus:ring-offset-dark-elevated disabled:pointer-events-none p-2">
+            <span className="text-gray-400 text-xl">×</span>
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

@@ -167,8 +167,8 @@ export default function UploadZone() {
           transition-all duration-200
           ${
             isDragActive
-              ? "border-green-500 bg-green-500/5"
-              : "border-slate-700 hover:border-slate-700 bg-slate-800/50 hover:bg-slate-800"
+              ? "border-electric-magenta bg-electric-magenta/5"
+              : "border-gray-700 hover:border-gray-600 bg-dark-elevated/50 hover:bg-dark-elevated"
           }
         `}
       >

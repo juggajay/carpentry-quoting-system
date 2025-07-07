@@ -210,7 +210,7 @@ function SortableLineItem({
             valueAsNumber: true,
           })}
           readOnly
-          className="bg-slate-800/50"
+          className="bg-dark-elevated/50"
         />
       </div>
       <div className="col-span-1 flex items-center justify-center pt-2">

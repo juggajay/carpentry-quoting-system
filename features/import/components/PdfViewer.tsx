@@ -74,8 +74,8 @@ export default function PdfViewer({ pdfUrl, highlightArea }: PdfViewerProps) {
       </AnimatePresence>
 
       {/* Fallback for demo - show a simulated PDF */}
-      <div className="absolute inset-0 bg-white p-8 overflow-auto">
-        <div className="max-w-3xl mx-auto text-black">
+      <div className="absolute inset-0 bg-dark-elevated p-8 overflow-auto">
+        <div className="max-w-3xl mx-auto text-white">
           <h1 className="text-2xl font-bold mb-4">CARPENTER PRO SUPPLIES</h1>
           <p className="text-sm mb-2">123 Wood Street, Craftville, CA 90210</p>
           <p className="text-sm mb-6">Phone: (555) 123-4567</p>
