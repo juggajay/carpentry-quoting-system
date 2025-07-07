@@ -8,10 +8,28 @@ import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
 import { Unit } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Helper function to safely get auth
+async function getAuthUserId(): Promise<string | null> {
+  try {
+    const authResult = await auth();
+    return authResult?.userId || null;
+  } catch (error) {
+    console.error('Auth error:', error);
+    return null;
+  }
+}
+
+// Initialize Supabase client with error handling
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing Supabase environment variables');
+}
+
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 interface UploadResult {
   success: boolean;
@@ -36,7 +54,7 @@ export async function uploadAndProcessFile(formData: FormData): Promise<{
   upload: UploadResult;
   processing?: ProcessingResult;
 }> {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return {
       upload: { success: false, error: 'Unauthorized' }
@@ -61,30 +79,36 @@ export async function uploadAndProcessFile(formData: FormData): Promise<{
   }
 
   try {
-    // Upload to Supabase Storage
-    const fileId = `labor-rates-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    const filePath = `uploads/labor-rates/${userId}/${fileId}/${file.name}`;
-    
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    const { error: uploadError } = await supabase.storage
-      .from('quotes')
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        upsert: false
-      });
+    let fileUrl: string | undefined;
+    const fileId = `labor-rates-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    
+    // Only upload to Supabase if client is initialized
+    if (supabase) {
+      const filePath = `uploads/labor-rates/${userId}/${fileId}/${file.name}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('quotes')
+        .upload(filePath, buffer, {
+          contentType: file.type,
+          upsert: false
+        });
 
-    if (uploadError) {
-      return {
-        upload: { success: false, error: uploadError.message }
-      };
+      if (uploadError) {
+        return {
+          upload: { success: false, error: uploadError.message }
+        };
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('quotes')
+        .getPublicUrl(filePath);
+      
+      fileUrl = publicUrl;
     }
-
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('quotes')
-      .getPublicUrl(filePath);
 
     // Process the file
     const processor = new LaborRateProcessor();
@@ -95,7 +119,7 @@ export async function uploadAndProcessFile(formData: FormData): Promise<{
       upload: {
         success: true,
         fileId,
-        fileUrl: publicUrl
+        fileUrl: fileUrl || `local-${fileId}` // Fallback for when Supabase is not available
       },
       processing: processingResult
     };
@@ -119,7 +143,7 @@ export async function saveLaborRateTemplates(rates: Array<{
   source?: string;
   confidence?: number;
 }>): Promise<{ success: boolean; saved: number; errors: string[] }> {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return { success: false, saved: 0, errors: ['Unauthorized'] };
   }
@@ -194,7 +218,7 @@ export async function saveLaborRateTemplates(rates: Array<{
 }
 
 export async function getLaborRateTemplates(category?: string) {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return { success: false, data: [], error: 'Unauthorized' };
   }
@@ -241,7 +265,7 @@ export async function updateLaborRateTemplate(
     isActive?: boolean;
   }
 ): Promise<{ success: boolean; error?: string }> {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return { success: false, error: 'Unauthorized' };
   }
@@ -285,7 +309,7 @@ export async function updateLaborRateTemplate(
 }
 
 export async function deleteLaborRateTemplate(id: string): Promise<{ success: boolean; error?: string }> {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return { success: false, error: 'Unauthorized' };
   }
@@ -325,7 +349,7 @@ export async function deleteLaborRateTemplate(id: string): Promise<{ success: bo
 }
 
 export async function deleteLaborRateTemplates(ids: string[]): Promise<{ success: boolean; deleted: number; error?: string }> {
-  const { userId } = await auth();
+  const userId = await getAuthUserId();
   if (!userId) {
     return { success: false, deleted: 0, error: 'Unauthorized' };
   }
