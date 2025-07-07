@@ -8,6 +8,10 @@ export const navigationLinks = [
     href: "/import",
   },
   {
+    name: "Labor Rates",
+    href: "/import/labor-rates",
+  },
+  {
     name: "New Quote",
     href: "/quotes/new",
   },

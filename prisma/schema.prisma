@@ -26,6 +26,7 @@ model User {
   uploadedFiles   UploadedFile[]
   materials       Material[]
   laborRates      LaborRate[]
+  laborRateTemplates LaborRateTemplate[]
 
   @@index([clerkId])
   @@index([email])
@@ -232,4 +233,25 @@ model LaborRate {
   user          User     @relation(fields: [userId], references: [id])
   
   @@index([title])
+}
+
+// LaborRateTemplate model - stores extracted labor rates from documents
+model LaborRateTemplate {
+  id            String   @id @default(cuid())
+  category      String   // framing, doors, windows, decking, etc.
+  activity      String   // specific activity description
+  unit          Unit     // HR, DAY, SQM, LM, EA
+  rate          Float    // extracted rate value
+  description   String?  // additional context
+  source        String?  // filename it was extracted from
+  confidence    Float?   // extraction confidence score (0-1)
+  isActive      Boolean  @default(true)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([category])
+  @@unique([userId, activity, unit])
 }
