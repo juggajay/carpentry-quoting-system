@@ -112,9 +112,9 @@ export function MaterialScraperDialog({
                 />
               </div>
 
-              <div className="flex items-start space-x-2 p-4 bg-amber-50 border border-amber-200 rounded-md">
-                <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
-                <p className="text-sm text-amber-800">
+              <div className="flex items-start space-x-2 p-4 bg-amber-900/20 border border-amber-700 rounded-md">
+                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
+                <p className="text-sm text-amber-300">
                   Custom scraping requires CSS selectors for the website&apos;s HTML structure.
                   This is an advanced feature.
                 </p>
@@ -173,7 +173,7 @@ export function MaterialScraperDialog({
           <div className="space-y-2">
             <Label>Materials to Search (one per line)</Label>
             <textarea
-              className="flex min-h-[120px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex min-h-[120px] w-full rounded-lg border border-gray-700 bg-dark-surface px-4 py-3 text-sm text-white ring-offset-dark-surface placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-royal-blue focus-visible:border-royal-blue disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-600 transition-all duration-200"
               placeholder="90x45 Pine 2.4m
 12mm Plywood
 Liquid Nails 320g"
@@ -187,9 +187,9 @@ Liquid Nails 320g"
           </div>
 
           {/* Preview of what will be scraped */}
-          <div className="flex items-start space-x-2 p-4 bg-blue-50 border border-blue-200 rounded-md">
-            <Search className="h-4 w-4 text-blue-600 mt-0.5" />
-            <p className="text-sm text-blue-800">
+          <div className="flex items-start space-x-2 p-4 bg-blue-900/20 border border-blue-700 rounded-md">
+            <Search className="h-4 w-4 text-blue-400 mt-0.5" />
+            <p className="text-sm text-blue-300">
               {source !== 'customUrl' ? (
                 <>
                   Will scrape from <strong>{SCRAPER_SOURCES[source].name}</strong>

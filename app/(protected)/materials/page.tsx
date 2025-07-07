@@ -114,7 +114,7 @@ export default function MaterialsPage() {
         </div>
       }
     >
-      <div className="bg-white rounded-lg shadow">
+      <div className="bg-dark-elevated rounded-lg shadow">
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">
             Loading materials...
@@ -138,9 +138,9 @@ export default function MaterialsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-dark-surface border-b border-gray-800">
                 <tr>
-                  <th className="p-4 text-left font-medium text-gray-900">
+                  <th className="p-4 text-left font-medium text-gray-100">
                   <input
                     type="checkbox"
                     checked={selectedIds.size === materials.length}
@@ -153,18 +153,18 @@ export default function MaterialsPage() {
                     }}
                   />
                   </th>
-                  <th className="p-4 text-left font-medium text-gray-900">Name</th>
-                  <th className="p-4 text-left font-medium text-gray-900">Category</th>
-                  <th className="p-4 text-left font-medium text-gray-900">Supplier</th>
-                  <th className="p-4 text-left font-medium text-gray-900">Unit</th>
-                  <th className="p-4 text-right font-medium text-gray-900">Price</th>
-                  <th className="p-4 text-left font-medium text-gray-900">Status</th>
-                  <th className="p-4 text-left font-medium text-gray-900">Last Updated</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Name</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Category</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Supplier</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Unit</th>
+                  <th className="p-4 text-right font-medium text-gray-100">Price</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Status</th>
+                  <th className="p-4 text-left font-medium text-gray-100">Last Updated</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-800">
                 {materials.map((material) => (
-                  <tr key={material.id} className="hover:bg-gray-50">
+                  <tr key={material.id} className="hover:bg-dark-surface/50">
                     <td className="p-4">
                       <input
                         type="checkbox"
