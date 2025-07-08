@@ -25,13 +25,15 @@ const AVAILABLE_MCPS = [
     icon: '🗄️',
     description: 'Access your materials database',
     features: ['Query materials', 'Search products', 'Get pricing'],
+    tools: ['search_materials', 'get_labor_rates', 'find_similar_quotes', 'get_labor_rate_templates'],
   },
   {
-    type: 'playwright' as const,
-    name: 'Playwright MCP',
-    icon: '🌐',
-    description: 'Scrape supplier websites',
-    features: ['Web scraping', 'Price updates', 'Screenshot capture'],
+    type: 'filesystem' as const,
+    name: 'Filesystem MCP',
+    icon: '📁',
+    description: 'Read project files and documents',
+    features: ['Read files', 'List directories', 'Process documents'],
+    tools: ['read_file', 'list_files'],
   },
   {
     type: 'memory' as const,
@@ -39,6 +41,7 @@ const AVAILABLE_MCPS = [
     icon: '🧠',
     description: 'Remember project preferences',
     features: ['Store preferences', 'Learn patterns', 'Improve suggestions'],
+    tools: ['store_memory', 'retrieve_memory'],
   },
   {
     type: 'brave' as const,
@@ -46,30 +49,76 @@ const AVAILABLE_MCPS = [
     icon: '🔍',
     description: 'Research products and standards',
     features: ['Web search', 'Product research', 'Technical standards'],
+    tools: ['web_search'],
   },
 ];
 
 export default function MCPSelector({ onClose, onConnect, existingConnections }: MCPSelectorProps) {
   const [selectedMCP, setSelectedMCP] = useState<typeof AVAILABLE_MCPS[0] | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string>('');
 
   const handleConnect = async () => {
     if (!selectedMCP) return;
 
     setIsConnecting(true);
+    setConnectionStatus('Creating MCP connection...');
 
-    // TODO: Implement actual MCP connection
-    // For now, simulate connection
-    setTimeout(() => {
+    try {
+      // Create the MCP connection in the database
+      const response = await fetch('/api/mcp/connections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: selectedMCP.name,
+          type: selectedMCP.type,
+          config: {
+            tools: selectedMCP.tools,
+            features: selectedMCP.features,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create MCP connection');
+      }
+
+      const dbConnection = await response.json();
+      setConnectionStatus('Connecting to MCP server...');
+
+      // Connect to the MCP server
+      const connectResponse = await fetch(`/api/mcp/connections/${dbConnection.id}/connect`, {
+        method: 'POST',
+      });
+
+      if (!connectResponse.ok) {
+        throw new Error('Failed to connect to MCP server');
+      }
+
+      const connectionResult = await connectResponse.json();
+      
       const connection: MCPConnection = {
-        id: crypto.randomUUID(),
+        id: dbConnection.id,
         name: selectedMCP.name,
         type: selectedMCP.type,
-        status: 'connected',
+        status: connectionResult.status,
       };
+
       onConnect(connection);
       setIsConnecting(false);
-    }, 1500);
+      setConnectionStatus('');
+    } catch (error) {
+      console.error('MCP connection error:', error);
+      setConnectionStatus('Connection failed');
+      setIsConnecting(false);
+      
+      // Show error for 3 seconds then clear
+      setTimeout(() => {
+        setConnectionStatus('');
+      }, 3000);
+    }
   };
 
   const isConnected = (type: string) => {
@@ -114,14 +163,19 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
                     <p className="text-sm text-muted-foreground">
                       {mcp.description}
                     </p>
-                    <ul className="text-xs space-y-1">
-                      {mcp.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-1">
-                          <span className="text-electric-magenta">•</span>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="space-y-2">
+                      <ul className="text-xs space-y-1">
+                        {mcp.features.map((feature) => (
+                          <li key={feature} className="flex items-center gap-1">
+                            <span className="text-electric-magenta">•</span>
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="text-xs text-muted-foreground">
+                        <strong>Tools:</strong> {mcp.tools.join(', ')}
+                      </div>
+                    </div>
                   </div>
                 </Card>
               );
@@ -133,20 +187,27 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            onClick={handleConnect}
-            disabled={!selectedMCP || isConnecting}
-            className="min-w-[100px]"
-          >
-            {isConnecting ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Connecting...
-              </span>
-            ) : (
-              'Connect'
+          <div className="flex flex-col items-end gap-2">
+            {connectionStatus && (
+              <div className="text-sm text-muted-foreground">
+                {connectionStatus}
+              </div>
             )}
-          </Button>
+            <Button
+              onClick={handleConnect}
+              disabled={!selectedMCP || isConnecting}
+              className="min-w-[100px]"
+            >
+              {isConnecting ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Connecting...
+                </span>
+              ) : (
+                'Connect'
+              )}
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -21,6 +21,7 @@
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
+    "@modelcontextprotocol/sdk": "^1.15.0",
     "@prisma/client": "^6.11.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@react-pdf/renderer": "^4.3.0",

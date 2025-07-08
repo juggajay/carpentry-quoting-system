@@ -70,7 +70,7 @@ export interface GeneratedQuote {
 export interface MCPConnection {
   id: string;
   name: string;
-  type: 'postgresql' | 'playwright' | 'memory' | 'brave';
+  type: 'postgresql' | 'filesystem' | 'memory' | 'brave';
   status: 'connected' | 'disconnected' | 'error';
   config?: Record<string, unknown>;
 }

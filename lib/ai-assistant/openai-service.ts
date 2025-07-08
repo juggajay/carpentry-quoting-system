@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import type { ChatMessage } from './types';
+import { mcpManager } from './mcp-manager';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -64,6 +65,9 @@ export async function processChat(
   files?: { name: string; type: string; size: number }[]
 ): Promise<string> {
   try {
+    // Get available MCP tools (manager will auto-initialize if needed)
+    const mcpTools = mcpManager.getAllTools();
+    
     // Convert our message format to OpenAI format
     const openAIMessages = [
       { role: 'system' as const, content: SYSTEM_PROMPT },
@@ -80,15 +84,79 @@ export async function processChat(
       lastMessage.content += fileContext;
     }
 
-    // Call OpenAI API
+    // Convert MCP tools to OpenAI function format
+    const openAITools = mcpTools.map(tool => ({
+      type: 'function' as const,
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.inputSchema,
+      }
+    }));
+
+    // Call OpenAI API with tool support
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: openAIMessages,
-      temperature: 0.3, // Lower temperature for more consistent outputs
+      temperature: 0.3,
       max_tokens: 1000,
+      tools: openAITools.length > 0 ? openAITools : undefined,
+      tool_choice: 'auto',
     });
 
-    return completion.choices[0].message.content || 'I apologize, but I was unable to generate a response.';
+    const response = completion.choices[0];
+    
+    // Check if the AI wants to use tools
+    if (response.message.tool_calls && response.message.tool_calls.length > 0) {
+      // Handle tool calls
+      const toolResults = await Promise.all(
+        response.message.tool_calls.map(async (toolCall) => {
+          try {
+            const result = await mcpManager.callTool(
+              toolCall.function.name,
+              JSON.parse(toolCall.function.arguments)
+            );
+            
+            return {
+              tool_call_id: toolCall.id,
+              role: 'tool' as const,
+              content: typeof result.content === 'string' 
+                ? result.content 
+                : JSON.stringify(result.content)
+            };
+          } catch (error) {
+            console.error(`Tool call error for ${toolCall.function.name}:`, error);
+            return {
+              tool_call_id: toolCall.id,
+              role: 'tool' as const,
+              content: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+            };
+          }
+        })
+      );
+
+      // Add the assistant's message with tool calls
+      openAIMessages.push({
+        role: 'assistant' as const,
+        content: response.message.content || '',
+        tool_calls: response.message.tool_calls
+      } as { role: 'assistant'; content: string; tool_calls?: unknown });
+
+      // Add tool results
+      openAIMessages.push(...(toolResults as unknown as { role: 'user' | 'assistant'; content: string }[]));
+
+      // Get the final response from OpenAI
+      const finalCompletion = await openai.chat.completions.create({
+        model: 'gpt-4-turbo-preview',
+        messages: openAIMessages,
+        temperature: 0.3,
+        max_tokens: 1000,
+      });
+
+      return finalCompletion.choices[0].message.content || 'I apologize, but I was unable to generate a response.';
+    }
+
+    return response.message.content || 'I apologize, but I was unable to generate a response.';
   } catch (error) {
     console.error('OpenAI API error:', error);
     

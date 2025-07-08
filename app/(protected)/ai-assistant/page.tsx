@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import ChatInterface from "./components/ChatInterface";
 import FileDropZone from "./components/FileDropZone";
@@ -19,6 +19,30 @@ export default function AIAssistantPage() {
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+
+  // Load existing MCP connections on component mount
+  useEffect(() => {
+    const loadMCPConnections = async () => {
+      try {
+        const response = await fetch('/api/mcp/connections');
+        if (response.ok) {
+          const connections = await response.json();
+          setMcpConnections(connections.map((conn: { id: string; name: string; type: string; status: string }) => ({
+            id: conn.id,
+            name: conn.name,
+            type: conn.type,
+            status: conn.status === 'active' ? 'connected' : 'disconnected',
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading MCP connections:', error);
+      }
+    };
+
+    if (userId) {
+      loadMCPConnections();
+    }
+  }, [userId]);
 
   const handleSendMessage = async (content: string) => {
     if (!userId) return;
