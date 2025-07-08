@@ -320,35 +320,36 @@ export class MCPManager {
         };
       }
       
-      const whereClause: Record<string, unknown> = {
-        AND: [
-          {
-            OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { description: { contains: query, mode: 'insensitive' } },
-              { sku: { contains: query, mode: 'insensitive' } }
-            ]
-          }
-        ]
-      };
-
+      // Use raw SQL to avoid schema mismatch issues
+      let materials;
       if (category) {
-        (whereClause.AND as Array<Record<string, unknown>>).push({ 
-          category: { contains: category, mode: 'insensitive' } 
-        });
+        materials = await prisma.$queryRaw`
+          SELECT id, name, description, sku, supplier, unit, "pricePerUnit", 
+                 "gstInclusive", category, "inStock", notes, "createdAt", "updatedAt"
+          FROM "Material"
+          WHERE (
+            LOWER(name) LIKE ${`%${query.toLowerCase()}%`} OR
+            LOWER(description) LIKE ${`%${query.toLowerCase()}%`} OR
+            LOWER(sku) LIKE ${`%${query.toLowerCase()}%`}
+          )
+          AND LOWER(category) LIKE ${`%${category.toLowerCase()}%`}
+          ORDER BY name ASC
+          LIMIT ${limit}
+        `;
+      } else {
+        materials = await prisma.$queryRaw`
+          SELECT id, name, description, sku, supplier, unit, "pricePerUnit", 
+                 "gstInclusive", category, "inStock", notes, "createdAt", "updatedAt"
+          FROM "Material"
+          WHERE (
+            LOWER(name) LIKE ${`%${query.toLowerCase()}%`} OR
+            LOWER(description) LIKE ${`%${query.toLowerCase()}%`} OR
+            LOWER(sku) LIKE ${`%${query.toLowerCase()}%`}
+          )
+          ORDER BY name ASC
+          LIMIT ${limit}
+        `;
       }
-
-      const materials = await prisma.material.findMany({
-        where: whereClause,
-        take: limit,
-        orderBy: [{ name: 'asc' }],
-        include: {
-          priceUpdates: {
-            take: 1,
-            orderBy: { scrapedAt: 'desc' }
-          }
-        }
-      });
 
       return {
         content: [{
@@ -357,7 +358,7 @@ export class MCPManager {
             count: materials.length,
             query: query,
             category: category || null,
-            materials: materials.map(material => ({
+            materials: materials.map((material: any) => ({
               id: material.id,
               name: material.name,
               description: material.description,
@@ -367,8 +368,7 @@ export class MCPManager {
               pricePerUnit: material.pricePerUnit,
               gstInclusive: material.gstInclusive,
               category: material.category,
-              inStock: material.inStock,
-              recentPriceUpdate: material.priceUpdates[0] || null
+              inStock: material.inStock
             }))
           }, null, 2)
         }]
