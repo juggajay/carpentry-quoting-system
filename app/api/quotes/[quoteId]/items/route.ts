@@ -26,7 +26,7 @@ export async function GET(
     const quote = await db.quote.findFirst({
       where: {
         id: quoteId,
-        userId: user.id,
+        createdById: user.id,
       },
       include: {
         items: {

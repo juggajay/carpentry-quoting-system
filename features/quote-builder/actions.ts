@@ -69,7 +69,7 @@ export async function updateQuote(quoteId: string, data: any) {
     const quote = await db.quote.findFirst({
       where: {
         id: quoteId,
-        userId: user.id,
+        createdById: user.id,
       },
     });
 
@@ -145,7 +145,7 @@ export async function createQuote(data: any) {
     if (data.clientName) {
       client = await db.client.findFirst({
         where: {
-          userId: user.id,
+          createdById: user.id,
           name: data.clientName,
         },
       });
@@ -156,7 +156,7 @@ export async function createQuote(data: any) {
             name: data.clientName,
             email: data.clientEmail || '',
             phone: data.clientPhone || '',
-            userId: user.id,
+            createdById: user.id,
           },
         });
       }
@@ -184,7 +184,7 @@ export async function createQuote(data: any) {
         total,
         status: "DRAFT",
         clientId: client?.id,
-        userId: user.id,
+        createdById: user.id,
         versionNumber: 1,
       },
     });
