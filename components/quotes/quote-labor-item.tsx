@@ -6,6 +6,17 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { LaborRateSelector } from './labor-rate-selector';
 
+interface LaborRate {
+  rate_id: number;
+  category_name: string;
+  activity: string;
+  description: string | null;
+  unit: string;
+  rate: number;
+  min_rate: number;
+  max_rate: number;
+}
+
 interface QuoteLaborItem {
   id: string;
   type: 'labour';
@@ -29,7 +40,7 @@ interface QuoteLaborItemProps {
 export function QuoteLaborItem({ item, onUpdate, onDelete, onOpenAddLabor }: QuoteLaborItemProps) {
   const [quantity, setQuantity] = useState(item.quantity.toString());
 
-  const handleLaborSelect = (labor: any) => {
+  const handleLaborSelect = (labor: LaborRate) => {
     const updatedItem = {
       ...item,
       rateId: labor.rate_id,

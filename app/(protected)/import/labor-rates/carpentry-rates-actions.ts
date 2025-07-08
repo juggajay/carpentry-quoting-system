@@ -25,10 +25,10 @@ interface CreateLabourRateParams {
 interface LabourRateResult {
   rate_id: number;
   category_name: string;
-  item_name: string;
+  activity: string;
   description: string | null;
-  unit_abbreviation: string;
-  typical_rate: number;
+  unit: string;
+  rate: number;
   min_rate: number;
   max_rate: number;
 }
@@ -137,10 +137,10 @@ export async function getLabourRates(search?: string, categoryFilter?: string) {
       SELECT 
         lr.rate_id,
         c.category_name,
-        lr.item_name as activity,
+        lr.item_name AS activity,
         lr.description,
-        u.unit_abbreviation as unit,
-        lr.typical_rate as rate,
+        u.unit_abbreviation AS unit,
+        lr.typical_rate AS rate,
         lr.min_rate,
         lr.max_rate
       FROM carpentry_rates.labour_rates lr
@@ -149,7 +149,7 @@ export async function getLabourRates(search?: string, categoryFilter?: string) {
       WHERE 1=1
     `;
 
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     
     if (search) {
       query += ` AND lr.item_name ILIKE $${params.length + 1}`;
@@ -184,10 +184,10 @@ export async function searchLabourRates(searchTerm: string) {
       SELECT 
         lr.rate_id,
         c.category_name,
-        lr.item_name as activity,
+        lr.item_name AS activity,
         lr.description,
-        u.unit_abbreviation as unit,
-        lr.typical_rate as rate,
+        u.unit_abbreviation AS unit,
+        lr.typical_rate AS rate,
         lr.min_rate,
         lr.max_rate
       FROM carpentry_rates.labour_rates lr
