@@ -73,8 +73,17 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error in chat API:", error);
+    
+    // Check if it's an OpenAI API key error
+    if (error instanceof Error && error.message.includes('API key')) {
+      return NextResponse.json(
+        { error: "OpenAI API key not configured. Please add OPENAI_API_KEY to environment variables." },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }

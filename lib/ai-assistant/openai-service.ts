@@ -6,6 +6,11 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Check if API key is configured
+if (!process.env.OPENAI_API_KEY) {
+  console.error('OPENAI_API_KEY is not configured');
+}
+
 // System prompt for the AI Assistant
 const SYSTEM_PROMPT = `You are an AI Quote Assistant for a carpentry business. Your role is to help process Bill of Quantities (BOQ) documents and generate accurate quotes.
 

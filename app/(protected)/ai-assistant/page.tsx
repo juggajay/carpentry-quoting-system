@@ -46,11 +46,11 @@ export default function AIAssistantPage() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send message');
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
       
       // Store session ID if it's the first message
       if (!sessionId && data.sessionId) {
@@ -64,7 +64,7 @@ export default function AIAssistantPage() {
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
