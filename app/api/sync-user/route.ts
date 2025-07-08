@@ -18,12 +18,14 @@ export async function GET() {
       where: { clerkId: userId },
       update: {
         email: currentUser.emailAddresses[0]?.emailAddress || "",
-        name: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || null,
+        firstName: currentUser.firstName || null,
+        lastName: currentUser.lastName || null,
       },
       create: {
         clerkId: userId,
         email: currentUser.emailAddresses[0]?.emailAddress || "",
-        name: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || null,
+        firstName: currentUser.firstName || null,
+        lastName: currentUser.lastName || null,
       },
     });
 
