@@ -228,7 +228,7 @@ export async function loadQuote(quoteId: string) {
     if (!user) throw new Error("User not found");
 
     const quote = await db.quote.findUnique({
-      where: { id: quoteId, userId: user.id },
+      where: { id: quoteId, createdById: user.id },
       include: {
         client: true,
         items: {

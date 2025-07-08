@@ -306,7 +306,7 @@ export async function saveVerifiedData(
 
       // Generate quote number
       const quoteCount = await tx.quote.count({
-        where: { userId: user.id },
+        where: { createdById: user.id },
       });
       const quoteNumber = `Q-${new Date().getFullYear()}-${String(quoteCount + 1).padStart(4, "0")}`;
 
@@ -325,7 +325,7 @@ export async function saveVerifiedData(
           tax,
           total,
           clientId: client.id,
-          userId: user.id,
+          createdById: user.id,
           validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         },
       });

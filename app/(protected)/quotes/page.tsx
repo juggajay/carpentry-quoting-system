@@ -19,7 +19,7 @@ async function getQuotes() {
     if (!user) return [];
 
     const quotes = await db.quote.findMany({
-      where: { userId: user.id },
+      where: { createdById: user.id },
       include: {
         client: true,
         _count: {

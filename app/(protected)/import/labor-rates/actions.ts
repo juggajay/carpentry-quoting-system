@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import { db } from '@/lib/prisma';
+import { db } from '@/lib/db';
 import { createClient } from '@supabase/supabase-js';
 import { LaborRateProcessor } from '@/lib/rate-extraction/labor-rate-processor';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
