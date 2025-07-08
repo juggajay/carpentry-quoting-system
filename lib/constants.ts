@@ -4,6 +4,10 @@ export const navigationLinks = [
     href: "/dashboard",
   },
   {
+    name: "AI Assistant",
+    href: "/ai-assistant",
+  },
+  {
     name: "Import Quote",
     href: "/import",
   },
