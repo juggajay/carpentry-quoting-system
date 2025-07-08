@@ -321,7 +321,22 @@ export class MCPManager {
       }
       
       // Use raw SQL to avoid schema mismatch issues
-      let materials;
+      let materials: Array<{
+        id: string;
+        name: string;
+        description: string | null;
+        sku: string | null;
+        supplier: string | null;
+        unit: string;
+        pricePerUnit: number;
+        gstInclusive: boolean;
+        category: string | null;
+        inStock: boolean;
+        notes: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+      }>;
+      
       if (category) {
         materials = await prisma.$queryRaw`
           SELECT id, name, description, sku, supplier, unit, "pricePerUnit", 
@@ -358,7 +373,7 @@ export class MCPManager {
             count: materials.length,
             query: query,
             category: category || null,
-            materials: materials.map((material: any) => ({
+            materials: materials.map(material => ({
               id: material.id,
               name: material.name,
               description: material.description,
@@ -565,7 +580,7 @@ export class MCPManager {
               type: 'text',
               text: JSON.stringify({
                 query: query,
-                results: results.map((result: any) => ({
+                results: results.map((result: { title: string; url: string; description: string }) => ({
                   title: result.title,
                   url: result.url,
                   snippet: result.description
