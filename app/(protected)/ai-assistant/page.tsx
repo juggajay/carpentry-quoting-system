@@ -130,6 +130,20 @@ export default function AIAssistantPage() {
     setShowMCPSelector(false);
   };
 
+  const handleMCPDisconnect = async (connectionId: string) => {
+    try {
+      const response = await fetch(`/api/mcp/connections/${connectionId}/connect`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setMcpConnections(prev => prev.filter(conn => conn.id !== connectionId));
+      }
+    } catch (error) {
+      console.error('Error disconnecting MCP:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -142,10 +156,15 @@ export default function AIAssistantPage() {
         <Button
           onClick={() => setShowMCPSelector(true)}
           variant="secondary"
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 relative"
         >
           <span className="text-lg">🔌</span>
           Add MCP
+          {mcpConnections.filter(c => c.status === 'connected').length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              {mcpConnections.filter(c => c.status === 'connected').length}
+            </span>
+          )}
         </Button>
       </div>
 
@@ -186,20 +205,44 @@ export default function AIAssistantPage() {
 
           {mcpConnections.length > 0 && (
             <Card className="p-4 mt-6">
-              <h3 className="font-semibold mb-3">Active Connections</h3>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <span className="text-lg">🔌</span>
+                Active Connections
+              </h3>
               <div className="space-y-2">
                 {mcpConnections.map(conn => (
-                  <div key={conn.id} className="flex items-center justify-between text-sm">
-                    <span>{conn.name}</span>
-                    <span className={`
-                      ${conn.status === 'connected' ? 'text-green-500' : ''}
-                      ${conn.status === 'error' ? 'text-red-500' : ''}
-                      ${conn.status === 'disconnected' ? 'text-gray-500' : ''}
-                    `}>
-                      {conn.status === 'connected' && '🟢'}
-                      {conn.status === 'error' && '🔴'}
-                      {conn.status === 'disconnected' && '⚫'}
-                    </span>
+                  <div key={conn.id} className="flex items-center justify-between p-2 rounded-lg bg-dark-elevated/50 hover:bg-dark-elevated transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full animate-pulse ${
+                        conn.status === 'connected' ? 'bg-green-500' : ''
+                      }${
+                        conn.status === 'error' ? 'bg-red-500' : ''
+                      }${
+                        conn.status === 'disconnected' ? 'bg-gray-500' : ''
+                      }`} />
+                      <span className="text-sm font-medium">{conn.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        conn.status === 'connected' ? 'bg-green-500/20 text-green-500' : ''
+                      }${
+                        conn.status === 'error' ? 'bg-red-500/20 text-red-500' : ''
+                      }${
+                        conn.status === 'disconnected' ? 'bg-gray-500/20 text-gray-500' : ''
+                      }`}>
+                        {conn.status}
+                      </span>
+                      {conn.status === 'connected' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 text-xs hover:bg-red-500/20 hover:text-red-500"
+                          onClick={() => handleMCPDisconnect(conn.id)}
+                        >
+                          Disconnect
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

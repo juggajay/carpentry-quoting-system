@@ -143,11 +143,15 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
               return (
                 <Card
                   key={mcp.type}
-                  className={`p-4 cursor-pointer transition-all ${
-                    selectedMCP?.type === mcp.type
+                  className={`p-4 transition-all ${
+                    connected 
+                      ? 'bg-green-500/10 border-green-500/50' 
+                      : 'cursor-pointer hover:border-electric-magenta/50'
+                  } ${
+                    selectedMCP?.type === mcp.type && !connected
                       ? 'ring-2 ring-electric-magenta'
                       : ''
-                  } ${connected ? 'opacity-50' : ''}`}
+                  }`}
                   onClick={() => !connected && setSelectedMCP(mcp)}
                 >
                   <div className="space-y-3">
@@ -157,22 +161,25 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
                         <h3 className="font-semibold">{mcp.name}</h3>
                       </div>
                       {connected && (
-                        <span className="text-green-500 text-sm">Connected</span>
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                          <span className="text-green-500 text-sm font-medium">Connected</span>
+                        </div>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className={`text-sm ${connected ? 'text-green-100/80' : 'text-muted-foreground'}`}>
                       {mcp.description}
                     </p>
                     <div className="space-y-2">
                       <ul className="text-xs space-y-1">
                         {mcp.features.map((feature) => (
                           <li key={feature} className="flex items-center gap-1">
-                            <span className="text-electric-magenta">•</span>
-                            {feature}
+                            <span className={connected ? "text-green-500" : "text-electric-magenta"}>•</span>
+                            <span className={connected ? "text-green-100/70" : ""}>{feature}</span>
                           </li>
                         ))}
                       </ul>
-                      <div className="text-xs text-muted-foreground">
+                      <div className={`text-xs ${connected ? 'text-green-100/60' : 'text-muted-foreground'}`}>
                         <strong>Tools:</strong> {mcp.tools.join(', ')}
                       </div>
                     </div>
