@@ -129,12 +129,12 @@ export class MCPManager {
       },
       {
         name: 'get_labor_rates',
-        description: 'Get labor rates by title or level',
+        description: 'Get labor rates by job title (e.g., Carpenter, Leading Hand, Apprentice) or level',
         inputSchema: {
           type: 'object',
           properties: {
-            title: { type: 'string', description: 'Labor title filter' },
-            level: { type: 'string', description: 'Labor level filter' }
+            title: { type: 'string', description: 'Job title filter (e.g., "Carpenter", "Leading Hand")' },
+            level: { type: 'string', description: 'Labor level filter (e.g., "Level 1", "Level 2")' }
           }
         },
         server: 'postgresql'
@@ -149,6 +149,19 @@ export class MCPManager {
             limit: { type: 'number', description: 'Maximum number of results', default: 5 }
           },
           required: ['description']
+        },
+        server: 'postgresql'
+      },
+      {
+        name: 'get_labor_rate_templates',
+        description: 'Get labor rate templates by category or activity (e.g., skirting, framing, doors)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            category: { type: 'string', description: 'Category filter (e.g., "framing", "doors", "windows")' },
+            activity: { type: 'string', description: 'Activity search query (e.g., "skirting", "door installation")' },
+            limit: { type: 'number', description: 'Maximum number of results', default: 10 }
+          }
         },
         server: 'postgresql'
       }
