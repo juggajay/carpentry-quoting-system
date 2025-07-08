@@ -142,15 +142,15 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="fixed right-0 top-0 h-full w-[800px] bg-dark-elevated border-l border-gray-700 shadow-2xl z-50 flex flex-col"
+        className="fixed right-0 top-0 h-full w-[800px] md:w-[800px] sm:w-full bg-dark-elevated border-l border-gray-700 shadow-2xl z-50 flex flex-col mobile-modal md:rounded-none"
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-gray-700 ios-safe-area">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-white">Select Labor Rate</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-dark-surface rounded-lg transition-colors text-gray-400 hover:text-white"
+              className="p-2 hover:bg-dark-surface rounded-lg transition-colors text-gray-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
               ✕
             </button>
@@ -166,6 +166,22 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-dark-surface border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-royal-blue focus:ring-1 focus:ring-royal-blue transition-colors"
             />
+          </div>
+
+          {/* Mobile Category Dropdown */}
+          <div className="md:hidden mt-3">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-4 py-2 bg-dark-surface border border-gray-700 rounded-md text-white focus:border-royal-blue focus:ring-1 focus:ring-royal-blue"
+            >
+              <option value="all">All Labor ({laborRates.length})</option>
+              {categories.map(({ category, count }) => (
+                <option key={category} value={category}>
+                  {category} ({count})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* View Mode Toggle */}
@@ -193,7 +209,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Categories Sidebar */}
-          <div className="w-48 border-r border-gray-700 p-4 overflow-y-auto bg-dark-surface/50">
+          <div className="w-48 border-r border-gray-700 p-4 overflow-y-auto bg-dark-surface/50 hidden md:block">
             <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Categories</h3>
             <div className="space-y-1">
               <button
@@ -236,11 +252,11 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                 <div className="text-gray-400">No labor rates found</div>
               </div>
             ) : viewMode === 'list' ? (
-              <div className="space-y-2">
+              <div className="space-y-2 pb-20 md:pb-0">
                 {filteredRates.map((rate) => (
                   <div
                     key={rate.rate_id}
-                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-electric-magenta/50 transition-all cursor-pointer"
+                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-electric-magenta/50 transition-all cursor-pointer mobile-card md:rounded-lg"
                     onClick={() => onSelect(rate)}
                   >
                     <div className="flex items-start justify-between">
@@ -251,7 +267,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                           <div className="text-sm text-gray-500 mt-1">{rate.description}</div>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex items-center gap-2 ml-2 md:ml-4">
                         <div className="text-right">
                           <div className="text-lg font-semibold text-vibrant-cyan">
                             {formatPrice(rate.typical_rate || rate.rate)}
@@ -263,7 +279,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                             e.stopPropagation();
                             toggleFavorite(rate.rate_id);
                           }}
-                          className="p-1 hover:bg-dark-elevated rounded text-2xl transition-colors"
+                          className="p-2 md:p-1 hover:bg-dark-elevated rounded text-2xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                         >
                           {favorites.includes(rate.rate_id) ? '⭐' : '☆'}
                         </button>
@@ -272,7 +288,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                             e.stopPropagation();
                             onSelect(rate);
                           }}
-                          className="px-3 py-1 bg-electric-magenta text-white rounded-md hover:bg-electric-magenta/90 transition-colors font-medium text-lg"
+                          className="px-4 py-2 md:px-3 md:py-1 bg-electric-magenta text-white rounded-md hover:bg-electric-magenta/90 transition-colors font-medium text-lg min-h-[44px]"
                         >
                           +
                         </button>
@@ -282,11 +298,11 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-20 md:pb-0">
                 {filteredRates.map((rate) => (
                   <div
                     key={rate.rate_id}
-                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-electric-magenta/50 transition-all cursor-pointer"
+                    className="p-4 bg-dark-surface border border-gray-700 rounded-lg hover:border-electric-magenta/50 transition-all cursor-pointer mobile-card md:rounded-lg"
                     onClick={() => onSelect(rate)}
                   >
                     <div className="font-medium text-white">{rate.item_name || rate.activity}</div>
@@ -303,7 +319,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                           e.stopPropagation();
                           toggleFavorite(rate.rate_id);
                         }}
-                        className="p-1 hover:bg-dark-elevated rounded text-xl transition-colors"
+                        className="p-2 md:p-1 hover:bg-dark-elevated rounded text-xl transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                       >
                         {favorites.includes(rate.rate_id) ? '⭐' : '☆'}
                       </button>
@@ -312,7 +328,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
                           e.stopPropagation();
                           onSelect(rate);
                         }}
-                        className="px-3 py-1 bg-electric-magenta text-white rounded-md hover:bg-electric-magenta/90 transition-colors font-medium"
+                        className="px-4 py-2 md:px-3 md:py-1 bg-electric-magenta text-white rounded-md hover:bg-electric-magenta/90 transition-colors font-medium min-h-[44px]"
                       >
                         +
                       </button>
@@ -330,7 +346,7 @@ export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps)
             // For now, we'll just show a toast. You can implement the add modal later
             toast.info('Add new labor rate functionality coming soon!');
           }}
-          className="absolute bottom-6 right-6 w-14 h-14 bg-electric-magenta text-white rounded-full shadow-lg hover:bg-electric-magenta/90 transition-colors flex items-center justify-center text-2xl font-bold"
+          className="fixed md:absolute bottom-20 md:bottom-6 right-6 w-14 h-14 bg-electric-magenta text-white rounded-full shadow-lg hover:bg-electric-magenta/90 transition-colors flex items-center justify-center text-2xl font-bold z-50"
           title="Add New Labor Rate"
         >
           +

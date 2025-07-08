@@ -199,10 +199,10 @@ export default function QuoteItemsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">Create New Quote - Step 2</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Create New Quote - Step 2</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Add materials, labor, and other line items
         </p>
       </div>
@@ -216,7 +216,7 @@ export default function QuoteItemsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="text-slate-400">Quote #:</span>
               <span className="ml-2 text-white">{projectDetails.quoteNumber || 'Auto-generated'}</span>
@@ -248,7 +248,7 @@ export default function QuoteItemsPage() {
             {/* Totals */}
             <div className="mt-6 pt-6 border-t border-slate-700">
               <div className="flex justify-end">
-                <div className="w-96 space-y-3">
+                <div className="w-full sm:w-96 space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-400">Subtotal:</span>
                     <span className="text-white font-medium">
@@ -288,7 +288,7 @@ export default function QuoteItemsPage() {
             <CardTitle>Payment Terms</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Payment Terms"
                 {...form.register("paymentTerms")}
@@ -308,30 +308,47 @@ export default function QuoteItemsPage() {
               <textarea
                 {...form.register("paymentSchedule")}
                 rows={3}
-                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-elevated transition-all duration-200"
+                className="w-full px-3 py-2 bg-dark-surface border border-gray-700 rounded-md text-white resize-none focus:outline-none focus:ring-2 focus:ring-royal-blue focus:ring-offset-2 focus:ring-offset-dark-surface focus:border-royal-blue hover:border-gray-600 hover:bg-dark-elevated transition-all duration-200 min-h-[100px]"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 pb-20 sm:pb-0">
           <Button 
             type="button" 
             variant="secondary" 
             onClick={() => router.push('/quotes/new')}
+            className="w-full sm:w-auto order-2 sm:order-1"
           >
             ← Back to Details
           </Button>
-          <div className="space-x-4">
+          <div className="flex gap-3 order-1 sm:order-2">
             <Button 
               type="button" 
               variant="secondary"
               onClick={handleSaveDraft}
+              className="flex-1 sm:flex-none"
             >
               Save Draft
             </Button>
-            <Button type="submit">
+            <Button type="submit" className="flex-1 sm:flex-none">
+              Create Quote
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Action Bar */}
+        <div className="md:hidden mobile-actions">
+          <div className="flex justify-between items-center">
+            <div className="text-sm">
+              <div className="text-gray-400">Total</div>
+              <div className="text-lg font-bold text-vibrant-cyan">
+                ${total.toFixed(2)}
+              </div>
+            </div>
+            <Button type="submit" size="sm">
               Create Quote
             </Button>
           </div>

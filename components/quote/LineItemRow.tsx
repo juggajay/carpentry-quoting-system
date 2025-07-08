@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Unit, ItemType } from '@prisma/client';
 import { MaterialSelectorPanel } from './MaterialSelectorPanel';
 import { LaborRateSelector } from './LaborRateSelector';
+import { LineItemCard } from './LineItemCard';
 import { Material, LaborRate, LineItem, LineItemUpdate } from '@/types';
 
 interface DatabaseLaborRate {
@@ -25,6 +26,17 @@ interface LineItemRowProps {
 }
 
 export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const [showMaterialSelector, setShowMaterialSelector] = useState(false);
   const [showLaborSelector, setShowLaborSelector] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
@@ -172,6 +184,76 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
     }
   };
 
+  // Mobile view uses LineItemCard
+  if (isMobile) {
+    const mobileItem = {
+      ...item,
+      material: selectedMaterial ? {
+        name: selectedMaterial.name,
+        pricePerUnit: selectedMaterial.pricePerUnit,
+        unit: selectedMaterial.unit as string
+      } : undefined,
+      laborRate: selectedLabor ? {
+        item_name: selectedLabor.item_name || selectedLabor.activity,
+        rate: selectedLabor.typical_rate || selectedLabor.rate,
+        unit: selectedLabor.unit as string
+      } : undefined,
+      laborPrice: selectedLabor ? (selectedLabor.typical_rate || selectedLabor.rate) : 0
+    };
+
+    return (
+      <>
+        <LineItemCard
+          item={mobileItem}
+          onUpdate={(field, value) => {
+            if (field === 'quantity') {
+              handleQuantityChange(value as number);
+            } else if (field === 'unit') {
+              handleUnitChange(value as Unit);
+            } else if (field === 'description') {
+              handleDescriptionChange(value as string);
+            } else if (field === 'unitPrice') {
+              handlePriceChange(value as number);
+            } else if (field === 'notes') {
+              // Notes field doesn't exist in the LineItem type, so we skip it
+              return;
+            } else {
+              onUpdate(item.id, { [field]: value });
+            }
+          }}
+          onDelete={() => onRemove(item.id)}
+          onSelectMaterial={() => setShowMaterialSelector(true)}
+          onSelectLabor={() => setShowLaborSelector(true)}
+          index={0}
+        />
+        
+        {/* Material Selector Panel */}
+        <MaterialSelectorPanel
+          isOpen={showMaterialSelector}
+          onClose={() => setShowMaterialSelector(false)}
+          onSelect={(materials) => {
+            if (materials.length > 0) {
+              handleMaterialSelect(materials[0]);
+              setShowMaterialSelector(false);
+            }
+          }}
+          multiple={false}
+        />
+        
+        {/* Labor Rate Selector */}
+        {showLaborSelector && (
+          <LaborRateSelector
+            onSelect={(labor) => {
+              handleLaborSelect(labor);
+            }}
+            onClose={() => setShowLaborSelector(false)}
+          />
+        )}
+      </>
+    );
+  }
+
+  // Desktop view - original table row
   return (
     <>
       <tr className="border-b border-slate-700">
