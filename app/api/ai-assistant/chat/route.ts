@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import type { ChatMessage } from "@/lib/ai-assistant/types";
+import { processChat } from "@/lib/ai-assistant/openai-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,18 +48,15 @@ export async function POST(request: NextRequest) {
 
     const messages = [...(session.messages as unknown as ChatMessage[]), userMessage];
 
-    // TODO: Implement actual AI processing
-    // For now, return a placeholder response
+    // Process with OpenAI
+    const aiResponse = await processChat(messages, attachments);
+
+    // Create assistant message
     const assistantMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'assistant',
-      content: "I've received your message. In the full implementation, I'll process your BOQ files and help generate a quote with confidence indicators.",
+      content: aiResponse,
       timestamp: new Date(),
-      confidence: {
-        score: 85,
-        indicator: '🟢',
-        reasons: ['This is a placeholder response'],
-      },
     };
 
     messages.push(assistantMessage);

@@ -18,6 +18,7 @@ export default function AIAssistantPage() {
   const [mcpConnections, setMcpConnections] = useState<MCPConnection[]>([]);
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
   const handleSendMessage = async (content: string) => {
     if (!userId) return;
@@ -32,21 +33,44 @@ export default function AIAssistantPage() {
 
     setMessages(prev => [...prev, newMessage]);
     setAttachedFiles([]); // Clear attachments after sending
-
-    // TODO: Implement API call to process message
     setIsProcessing(true);
-    
-    // Simulate response for now
-    setTimeout(() => {
-      const response: ChatMessage = {
+
+    try {
+      const response = await fetch('/api/ai-assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: content,
+          sessionId: sessionId,
+          attachments: newMessage.attachments,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const data = await response.json();
+      
+      // Store session ID if it's the first message
+      if (!sessionId && data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+      
+      // Add the AI response to messages
+      setMessages(prev => [...prev, data.message]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: "I've received your message. In the full implementation, I'll process your files and help generate a quote.",
+        content: 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, response]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsProcessing(false);
-    }, 1000);
+    }
   };
 
   const handleFileUpload = (files: File[]) => {
