@@ -12,11 +12,27 @@ async function getDashboardData() {
     const { userId } = await auth();
     if (!userId) return null;
 
-    const user = await db.user.findUnique({
+    // First try to find the user
+    let user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
-    if (!user) return null;
+    // If user doesn't exist, create them
+    if (!user) {
+      const { clerkClient } = await import("@clerk/nextjs/server");
+      const clerk = await clerkClient();
+      const clerkUser = await clerk.users.getUser(userId);
+      
+      user = await db.user.create({
+        data: {
+          clerkId: userId,
+          email: clerkUser.emailAddresses[0]?.emailAddress || "",
+          firstName: clerkUser.firstName || null,
+          lastName: clerkUser.lastName || null,
+          role: "VIEWER", // Default role for new users
+        },
+      });
+    }
 
     // Get stats
     const [
