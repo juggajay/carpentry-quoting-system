@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import type { ChatMessage } from "@/lib/ai-assistant/types";
 import { processChat } from "@/lib/ai-assistant/openai-service";
@@ -12,6 +12,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Ensure user exists in our database
+    const clerk = await clerkClient();
+    const clerkUser = await clerk.users.getUser(userId);
+    
+    const dbUser = await prisma.user.upsert({
+      where: { clerkId: userId },
+      update: {
+        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        firstName: clerkUser.firstName || null,
+        lastName: clerkUser.lastName || null,
+      },
+      create: {
+        clerkId: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        firstName: clerkUser.firstName || null,
+        lastName: clerkUser.lastName || null,
+      },
+    });
+
     const body = await request.json();
     const { message, sessionId, attachments } = body;
 
@@ -23,14 +42,14 @@ export async function POST(request: NextRequest) {
     let session;
     if (sessionId) {
       session = await prisma.aISession.findUnique({
-        where: { id: sessionId, userId },
+        where: { id: sessionId, userId: dbUser.id },
       });
     }
 
     if (!session) {
       session = await prisma.aISession.create({
         data: {
-          userId,
+          userId: dbUser.id,
           messages: [],
           status: 'active',
         },
