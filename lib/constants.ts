@@ -28,6 +28,10 @@ export const navigationLinks = [
     href: "/quotes",
   },
   {
+    name: "Settings",
+    href: "/settings",
+  },
+  {
     name: "Components",
     href: "/components-demo",
   },

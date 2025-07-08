@@ -42,6 +42,7 @@ model User {
   materials       Material[]
   laborRates      LaborRate[]
   laborRateTemplates LaborRateTemplate[]
+  settings        Settings?
 
   @@index([clerkId])
   @@index([email])
@@ -286,5 +287,37 @@ model LaborRateTemplate {
   @@index([userId])
   @@index([category])
   @@unique([userId, activity, unit])
+}
+
+// Settings model - stores user/company default settings
+model Settings {
+  id                      String   @id @default(uuid())
+  
+  // Company Information
+  companyName             String
+  companyAddress          String
+  companyPhone            String
+  companyEmail            String
+  abn                     String?
+  
+  // Quote Defaults
+  defaultTaxRate          Float    @default(10)
+  defaultValidityDays     Int      @default(30)
+  defaultTermsConditions  String?  @db.Text
+  defaultNotes            String?  @db.Text
+  defaultUnit             Unit     @default(EA)
+  
+  // Labor Rate Multipliers
+  saturdayRateMultiplier  Float    @default(1.5)
+  sundayRateMultiplier    Float    @default(2.0)
+  
+  // Relations
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  @@index([userId])
 }
 
