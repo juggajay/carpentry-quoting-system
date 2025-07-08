@@ -21,6 +21,7 @@ export class MCPManager {
   private connections: Map<string, MCPConnection> = new Map();
   private static instance: MCPManager;
   private initialized: boolean = false;
+  private memory: Map<string, string> = new Map();
 
   private constructor() {}
 
@@ -536,36 +537,60 @@ export class MCPManager {
   }
 
   private async callBraveTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>) {
-    // Mock web search implementation
     switch (toolName) {
       case 'web_search':
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify({
-              query: args.query,
-              results: [
-                {
-                  title: 'Sample Web Result',
-                  url: 'https://example.com',
-                  snippet: 'This is a sample web search result.'
-                }
-              ]
-            }, null, 2)
-          }]
-        };
+        try {
+          const apiKey = process.env.BRAVE_API_KEY;
+          if (!apiKey) {
+            throw new Error('BRAVE_API_KEY not configured');
+          }
+
+          const query = args.query as string;
+          const response = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`, {
+            headers: {
+              'Accept': 'application/json',
+              'X-Subscription-Token': apiKey
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Brave API error: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          const results = data.web?.results || [];
+
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                query: query,
+                results: results.map((result: any) => ({
+                  title: result.title,
+                  url: result.url,
+                  snippet: result.description
+                }))
+              }, null, 2)
+            }]
+          };
+        } catch (error) {
+          console.error('Brave search error:', error);
+          return {
+            content: [{
+              type: 'text',
+              text: `Error performing web search: ${error instanceof Error ? error.message : 'Unknown error'}`
+            }]
+          };
+        }
       default:
         throw new Error(`Unknown Brave tool: ${toolName}`);
     }
   }
 
   private async callMemoryTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>) {
-    // Simple in-memory storage for now
-    const memory = new Map<string, string>();
-
     switch (toolName) {
       case 'store_memory':
-        memory.set(args.key as string, args.value as string);
+        this.memory.set(args.key as string, args.value as string);
         return {
           content: [{
             type: 'text',
@@ -573,7 +598,7 @@ export class MCPManager {
           }]
         };
       case 'retrieve_memory':
-        const value = memory.get(args.key as string);
+        const value = this.memory.get(args.key as string);
         return {
           content: [{
             type: 'text',
