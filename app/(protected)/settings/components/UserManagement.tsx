@@ -2,34 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-import { Loader2, UserCog, Shield, User, Save } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { toast } from "sonner";
+import { Loader2, UserCog, Shield, User } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
 import { Label } from "@/components/ui/label";
 
 type UserRole = "OWNER" | "ADMIN" | "USER";
@@ -87,7 +65,6 @@ export default function UserManagement() {
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -102,11 +79,7 @@ export default function UserManagement() {
       setUsers(data);
     } catch (error) {
       console.error("Failed to fetch users:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load users",
-        variant: "destructive",
-      });
+      toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -130,17 +103,10 @@ export default function UserManagement() {
           : user
       ));
 
-      toast({
-        title: "Success",
-        description: "User role updated successfully",
-      });
+      toast.success("User role updated successfully");
     } catch (error) {
       console.error("Failed to update user:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update user role",
-        variant: "destructive",
-      });
+      toast.error("Failed to update user role");
     } finally {
       setSavingUserId(null);
     }
@@ -161,17 +127,10 @@ export default function UserManagement() {
         user.id === userId ? { ...user, isActive } : user
       ));
 
-      toast({
-        title: "Success",
-        description: `User ${isActive ? "activated" : "deactivated"} successfully`,
-      });
+      toast.success(`User ${isActive ? "activated" : "deactivated"} successfully`);
     } catch (error) {
       console.error("Failed to update user:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update user status",
-        variant: "destructive",
-      });
+      toast.error("Failed to update user status");
     } finally {
       setSavingUserId(null);
     }
@@ -202,18 +161,11 @@ export default function UserManagement() {
         user.id === selectedUser.id ? selectedUser : user
       ));
 
-      toast({
-        title: "Success",
-        description: "User permissions updated successfully",
-      });
+      toast.success("User permissions updated successfully");
       setShowPermissionsDialog(false);
     } catch (error) {
       console.error("Failed to update permissions:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update permissions",
-        variant: "destructive",
-      });
+      toast.error("Failed to update permissions");
     } finally {
       setSavingUserId(null);
     }
@@ -233,11 +185,11 @@ export default function UserManagement() {
   const getRoleBadgeVariant = (role: UserRole) => {
     switch (role) {
       case "OWNER":
-        return "default";
+        return "primary" as const;
       case "ADMIN":
-        return "secondary";
+        return "secondary" as const;
       default:
-        return "outline";
+        return "outline" as const;
     }
   };
 
@@ -252,20 +204,20 @@ export default function UserManagement() {
   return (
     <>
       <div className="space-y-4">
-        <div className="rounded-md border border-dark-border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-dark-text-secondary">User</TableHead>
-                <TableHead className="text-dark-text-secondary">Role</TableHead>
-                <TableHead className="text-dark-text-secondary">Status</TableHead>
-                <TableHead className="text-dark-text-secondary">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="rounded-md border border-dark-border overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-dark-elevated border-b border-dark-border">
+              <tr>
+                <th className="text-left p-4 text-dark-text-secondary font-medium">User</th>
+                <th className="text-left p-4 text-dark-text-secondary font-medium">Role</th>
+                <th className="text-left p-4 text-dark-text-secondary font-medium">Status</th>
+                <th className="text-left p-4 text-dark-text-secondary font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
               {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
+                <tr key={user.id} className="border-b border-dark-border hover:bg-dark-elevated/50 transition-colors">
+                  <td className="p-4">
                     <div>
                       <div className="font-medium text-white">
                         {user.firstName} {user.lastName}
@@ -274,8 +226,8 @@ export default function UserManagement() {
                         {user.email}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="p-4">
                     {user.email === currentUser?.primaryEmailAddress?.emailAddress ? (
                       <Badge variant={getRoleBadgeVariant(user.role)} className="gap-1">
                         {getRoleIcon(user.role)}
@@ -284,7 +236,7 @@ export default function UserManagement() {
                     ) : (
                       <Select
                         value={user.role}
-                        onValueChange={(value: UserRole) => updateUserRole(user.id, value)}
+                        onValueChange={(value) => updateUserRole(user.id, value as UserRole)}
                         disabled={savingUserId === user.id}
                       >
                         <SelectTrigger className="w-32">
@@ -312,18 +264,23 @@ export default function UserManagement() {
                         </SelectContent>
                       </Select>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={user.isActive}
-                      onCheckedChange={(checked) => toggleUserStatus(user.id, checked)}
-                      disabled={
-                        savingUserId === user.id || 
-                        user.email === currentUser?.primaryEmailAddress?.emailAddress
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
+                  </td>
+                  <td className="p-4">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={user.isActive}
+                        onChange={(e) => toggleUserStatus(user.id, e.target.checked)}
+                        disabled={
+                          savingUserId === user.id || 
+                          user.email === currentUser?.primaryEmailAddress?.emailAddress
+                        }
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-electric-magenta"></div>
+                    </label>
+                  </td>
+                  <td className="p-4">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -335,11 +292,11 @@ export default function UserManagement() {
                     >
                       Custom Permissions
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
 
         <div className="bg-dark-elevated p-4 rounded-lg border border-dark-border">
@@ -361,111 +318,64 @@ export default function UserManagement() {
         </div>
       </div>
 
-      <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
-        <DialogContent className="bg-dark-elevated border-dark-border">
-          <DialogHeader>
-            <DialogTitle className="text-white">
-              Custom Permissions for {selectedUser?.firstName} {selectedUser?.lastName}
-            </DialogTitle>
-            <DialogDescription className="text-dark-text-secondary">
-              Override default role permissions with custom settings
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedUser && (
+      <Modal
+        isOpen={showPermissionsDialog}
+        onClose={() => setShowPermissionsDialog(false)}
+        title={`Custom Permissions for ${selectedUser?.firstName} ${selectedUser?.lastName}`}
+      >
+        {selectedUser && (
+          <>
             <div className="space-y-4 py-4">
+              <p className="text-dark-text-secondary">
+                Override default role permissions with custom settings
+              </p>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="create-quotes">Can Create Quotes</Label>
-                  <Switch
-                    id="create-quotes"
-                    checked={selectedUser.canCreateQuotes}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canCreateQuotes: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="edit-quotes">Can Edit Quotes</Label>
-                  <Switch
-                    id="edit-quotes"
-                    checked={selectedUser.canEditQuotes}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canEditQuotes: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="delete-quotes">Can Delete Quotes</Label>
-                  <Switch
-                    id="delete-quotes"
-                    checked={selectedUser.canDeleteQuotes}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canDeleteQuotes: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="view-all-quotes">Can View All Quotes</Label>
-                  <Switch
-                    id="view-all-quotes"
-                    checked={selectedUser.canViewAllQuotes}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canViewAllQuotes: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="manage-users">Can Manage Users</Label>
-                  <Switch
-                    id="manage-users"
-                    checked={selectedUser.canManageUsers}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canManageUsers: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="view-reports">Can View Reports</Label>
-                  <Switch
-                    id="view-reports"
-                    checked={selectedUser.canViewReports}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canViewReports: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="manage-settings">Can Manage Settings</Label>
-                  <Switch
-                    id="manage-settings"
-                    checked={selectedUser.canManageSettings}
-                    onCheckedChange={(checked) => 
-                      setSelectedUser({ ...selectedUser, canManageSettings: checked })
-                    }
-                  />
-                </div>
+                {[
+                  { key: "canCreateQuotes", label: "Can Create Quotes" },
+                  { key: "canEditQuotes", label: "Can Edit Quotes" },
+                  { key: "canDeleteQuotes", label: "Can Delete Quotes" },
+                  { key: "canViewAllQuotes", label: "Can View All Quotes" },
+                  { key: "canManageUsers", label: "Can Manage Users" },
+                  { key: "canViewReports", label: "Can View Reports" },
+                  { key: "canManageSettings", label: "Can Manage Settings" },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <Label htmlFor={key}>{label}</Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        id={key}
+                        className="sr-only peer"
+                        checked={selectedUser[key as keyof UserData] as boolean}
+                        onChange={(e) => 
+                          setSelectedUser({ ...selectedUser, [key]: e.target.checked })
+                        }
+                      />
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-electric-magenta"></div>
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={updateUserPermissions}
-              disabled={savingUserId === selectedUser?.id}
-              className="bg-electric-magenta hover:bg-electric-magenta/90"
-            >
-              {savingUserId === selectedUser?.id && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Save Permissions
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={updateUserPermissions}
+                disabled={savingUserId === selectedUser?.id}
+                variant="primary"
+              >
+                {savingUserId === selectedUser?.id && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Save Permissions
+              </Button>
+            </div>
+          </>
+        )}
+      </Modal>
     </>
   );
 }

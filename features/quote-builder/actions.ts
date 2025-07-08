@@ -140,28 +140,6 @@ export async function createQuote(data: any) {
 
     if (!user) throw new Error("User not found");
 
-    // Get or create client
-    let client = null;
-    if (data.clientName) {
-      client = await db.client.findFirst({
-        where: {
-          userId: user.id,
-          name: data.clientName,
-        },
-      });
-
-      if (!client) {
-        client = await db.client.create({
-          data: {
-            name: data.clientName,
-            email: data.clientEmail || '',
-            phone: data.clientPhone || '',
-            userId: user.id,
-          },
-        });
-      }
-    }
-
     // Generate unique sequential quote number
     const quoteNumber = await generateUniqueQuoteNumber(user.id);
 
@@ -170,43 +148,75 @@ export async function createQuote(data: any) {
     const tax = subtotal * 0.10; // 10% GST for Australia
     const total = subtotal + tax;
 
-    // Create quote
-    const quote = await db.quote.create({
-      data: {
-        quoteNumber,
-        title: data.projectTitle || data.title || 'Untitled Quote',
-        description: data.projectDescription || data.description || '',
-        notes: data.notes || '',
-        termsConditions: data.additionalTerms || data.termsConditions || '',
-        validUntil: data.validUntil ? new Date(data.validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        subtotal,
-        tax,
-        total,
-        status: "DRAFT",
-        clientId: client?.id,
-        createdById: user.id,
-        versionNumber: 1,
-      },
-    });
+    // Use transaction to ensure quote and items are created atomically
+    const result = await db.$transaction(async (tx) => {
+      // Get or create client within transaction
+      let client = null;
+      if (data.clientName) {
+        client = await tx.client.findFirst({
+          where: {
+            userId: user.id,
+            name: data.clientName,
+          },
+        });
 
-    // Create quote items
-    if (data.items && data.items.length > 0) {
-      await db.quoteItem.createMany({
-        data: data.items.map((item: any, index: number) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unit: item.unit,
-          unitPrice: item.unitPrice,
-          total: item.total,
-          sortOrder: index,
-          quoteId: quote.id,
-        })),
+        if (!client) {
+          client = await tx.client.create({
+            data: {
+              name: data.clientName,
+              email: data.clientEmail || '',
+              phone: data.clientPhone || '',
+              userId: user.id,
+            },
+          });
+        }
+      }
+
+      // Create quote
+      console.log("Creating quote with number:", quoteNumber);
+      const quote = await tx.quote.create({
+        data: {
+          quoteNumber,
+          title: data.projectTitle || data.title || 'Untitled Quote',
+          description: data.projectDescription || data.description || '',
+          notes: data.notes || '',
+          termsConditions: data.additionalTerms || data.termsConditions || '',
+          validUntil: data.validUntil ? new Date(data.validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          subtotal,
+          tax,
+          total,
+          status: "DRAFT",
+          clientId: client?.id,
+          createdById: user.id,
+          versionNumber: 1,
+        },
       });
-    }
+
+      console.log("Quote created with ID:", quote.id);
+
+      // Create quote items
+      if (data.items && data.items.length > 0) {
+        console.log("Creating", data.items.length, "quote items for quote ID:", quote.id);
+        await tx.quoteItem.createMany({
+          data: data.items.map((item: any, index: number) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit: item.unit,
+            unitPrice: item.unitPrice,
+            total: item.total,
+            sortOrder: index,
+            quoteId: quote.id,
+          })),
+        });
+        console.log("Quote items created successfully");
+      }
+
+      return { quote };
+    });
 
     revalidatePath("/quotes");
     
-    return { success: true, quoteId: quote.id };
+    return { success: true, quoteId: result.quote.id };
   } catch (error) {
     console.error("createQuote error:", error);
     return {

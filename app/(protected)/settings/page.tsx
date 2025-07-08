@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/Card";
 import QuoteDefaults from "./components/QuoteDefaults";
 import UserManagement from "./components/UserManagement";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("quote-defaults");
+  const [activeTab, setActiveTab] = useState<"quote-defaults" | "user-management">("quote-defaults");
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
@@ -18,50 +17,54 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 bg-dark-elevated">
-          <TabsTrigger 
-            value="quote-defaults"
-            className="data-[state=active]:bg-electric-magenta data-[state=active]:text-white"
+      <div className="space-y-4">
+        <div className="flex space-x-1 bg-dark-elevated p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab("quote-defaults")}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+              activeTab === "quote-defaults"
+                ? "bg-electric-magenta text-white"
+                : "text-dark-text-secondary hover:text-white hover:bg-dark-surface"
+            }`}
           >
             Quote Defaults
-          </TabsTrigger>
-          <TabsTrigger 
-            value="user-management"
-            className="data-[state=active]:bg-electric-magenta data-[state=active]:text-white"
+          </button>
+          <button
+            onClick={() => setActiveTab("user-management")}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+              activeTab === "user-management"
+                ? "bg-electric-magenta text-white"
+                : "text-dark-text-secondary hover:text-white hover:bg-dark-surface"
+            }`}
           >
             User Management
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
-        <TabsContent value="quote-defaults" className="space-y-4">
+        {activeTab === "quote-defaults" && (
           <Card className="bg-dark-elevated border-dark-border">
-            <CardHeader>
-              <CardTitle className="text-white">Quote Default Settings</CardTitle>
-              <CardDescription className="text-dark-text-secondary">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-2">Quote Default Settings</h2>
+              <p className="text-dark-text-secondary mb-6">
                 Configure default values that will be applied to all new quotes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
               <QuoteDefaults />
-            </CardContent>
+            </div>
           </Card>
-        </TabsContent>
+        )}
 
-        <TabsContent value="user-management" className="space-y-4">
+        {activeTab === "user-management" && (
           <Card className="bg-dark-elevated border-dark-border">
-            <CardHeader>
-              <CardTitle className="text-white">User Management</CardTitle>
-              <CardDescription className="text-dark-text-secondary">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-white mb-2">User Management</h2>
+              <p className="text-dark-text-secondary mb-6">
                 Manage users and their roles within the application
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </p>
               <UserManagement />
-            </CardContent>
+            </div>
           </Card>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }
