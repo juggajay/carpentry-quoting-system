@@ -210,11 +210,11 @@ export class MCPManager {
     connection.tools = [
       {
         name: 'store_memory',
-        description: 'Store information in session memory',
+        description: 'Store information in session memory. Use descriptive keys like "plywood_preference", "preferred_supplier", etc.',
         inputSchema: {
           type: 'object',
           properties: {
-            key: { type: 'string', description: 'Memory key' },
+            key: { type: 'string', description: 'Memory key (e.g., "plywood_preference", "standard_markup")' },
             value: { type: 'string', description: 'Value to store' }
           },
           required: ['key', 'value']
@@ -227,9 +227,18 @@ export class MCPManager {
         inputSchema: {
           type: 'object',
           properties: {
-            key: { type: 'string', description: 'Memory key to retrieve' }
+            key: { type: 'string', description: 'Memory key to retrieve (e.g., "plywood_preference", "standard_markup")' }
           },
           required: ['key']
+        },
+        server: 'memory'
+      },
+      {
+        name: 'list_memories',
+        description: 'List all stored memories',
+        inputSchema: {
+          type: 'object',
+          properties: {}
         },
         server: 'memory'
       }
@@ -528,26 +537,48 @@ export class MCPManager {
 
   private async callFilesystemTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>) {
     const fs = await import('fs/promises');
+    const path = await import('path');
+    
+    try {
+      // In production/Vercel, adjust paths to be relative to the deployment root
+      let targetPath = args.path as string;
+      if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+        // Convert absolute paths to relative paths
+        if (targetPath.startsWith('/')) {
+          targetPath = '.' + targetPath;
+        }
+        // Remove home directory references
+        targetPath = targetPath.replace(/^.*\/carpentry-quoting-system\//, './');
+      }
 
-    switch (toolName) {
-      case 'read_file':
-        const content = await fs.readFile(args.path as string, 'utf-8');
-        return {
-          content: [{
-            type: 'text',
-            text: content
-          }]
-        };
-      case 'list_files':
-        const files = await fs.readdir(args.path as string);
-        return {
-          content: [{
-            type: 'text',
-            text: JSON.stringify(files, null, 2)
-          }]
-        };
-      default:
-        throw new Error(`Unknown filesystem tool: ${toolName}`);
+      switch (toolName) {
+        case 'read_file':
+          const content = await fs.readFile(targetPath, 'utf-8');
+          return {
+            content: [{
+              type: 'text',
+              text: content
+            }]
+          };
+        case 'list_files':
+          const files = await fs.readdir(targetPath);
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify(files, null, 2)
+            }]
+          };
+        default:
+          throw new Error(`Unknown filesystem tool: ${toolName}`);
+      }
+    } catch (error) {
+      console.error('Filesystem tool error:', error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}. In production, use relative paths like "./package.json" or "./app/components".`
+        }]
+      };
     }
   }
 
@@ -609,7 +640,7 @@ export class MCPManager {
         return {
           content: [{
             type: 'text',
-            text: `Stored value for key: ${args.key}`
+            text: `Stored "${args.value}" for key: ${args.key}`
           }]
         };
       case 'retrieve_memory':
@@ -618,6 +649,17 @@ export class MCPManager {
           content: [{
             type: 'text',
             text: value || `No value found for key: ${args.key}`
+          }]
+        };
+      case 'list_memories':
+        const memories: Record<string, string> = {};
+        this.memory.forEach((value, key) => {
+          memories[key] = value;
+        });
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(memories, null, 2)
           }]
         };
       default:
