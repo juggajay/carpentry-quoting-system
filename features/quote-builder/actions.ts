@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -11,7 +11,7 @@ async function generateUniqueQuoteNumber(userId: string): Promise<string> {
   // Get the highest quote number for this year
   const lastQuote = await db.quote.findFirst({
     where: {
-      userId,
+      createdById: userId,
       quoteNumber: {
         startsWith: `Q-${currentYear}-`
       }
@@ -145,7 +145,7 @@ export async function createQuote(data: any) {
     if (data.clientName) {
       client = await db.client.findFirst({
         where: {
-          createdById: user.id,
+          userId: user.id,
           name: data.clientName,
         },
       });
@@ -156,7 +156,7 @@ export async function createQuote(data: any) {
             name: data.clientName,
             email: data.clientEmail || '',
             phone: data.clientPhone || '',
-            createdById: user.id,
+            userId: user.id,
           },
         });
       }
