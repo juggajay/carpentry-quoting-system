@@ -27,7 +27,29 @@ interface LineItemRowProps {
 export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
   const [showMaterialSelector, setShowMaterialSelector] = useState(false);
   const [showLaborSelector, setShowLaborSelector] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [selectedLabor, setSelectedLabor] = useState<DatabaseLaborRate | null>(null);
+  const [description, setDescription] = useState(item.description);
+
+  // Fetch material details if item has materialId
+  useEffect(() => {
+    const fetchMaterialDetails = async () => {
+      if (item.materialId && item.itemType === ItemType.MATERIAL) {
+        try {
+          const res = await fetch(`/api/materials?search=`);
+          const data = await res.json();
+          const material = data.find((m: Material) => m.id === item.materialId);
+          if (material) {
+            setSelectedMaterial(material);
+          }
+        } catch (error) {
+          console.error('Error fetching material details:', error);
+        }
+      }
+    };
+
+    fetchMaterialDetails();
+  }, [item.materialId, item.itemType]);
 
   // Fetch labor rate details if item has laborRateId
   useEffect(() => {
@@ -51,6 +73,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
 
 
   const handleMaterialSelect = (material: Material) => {
+    setSelectedMaterial(material);
     onUpdate(item.id, {
       description: material.name,
       unitPrice: material.pricePerUnit,
@@ -58,6 +81,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
       materialId: material.id,
       total: item.quantity * material.pricePerUnit
     });
+    setShowMaterialSelector(false);
   };
 
   const handleLaborSelect = (labor: DatabaseLaborRate) => {
@@ -90,6 +114,64 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
     });
   };
 
+  const handleDescriptionChange = (description: string) => {
+    setDescription(description);
+    onUpdate(item.id, { description });
+  };
+
+  const renderDescriptionField = () => {
+    switch (item.itemType) {
+      case ItemType.MATERIAL:
+        return (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Click Browse to select"
+              value={selectedMaterial?.name || item.description || ''}
+              readOnly
+              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-300"
+            />
+            <button
+              onClick={() => setShowMaterialSelector(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Browse
+            </button>
+          </div>
+        );
+      
+      case ItemType.LABOR:
+        return (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Click Browse to select"
+              value={selectedLabor?.item_name || item.description || ''}
+              readOnly
+              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-300"
+            />
+            <button
+              onClick={() => setShowLaborSelector(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Browse
+            </button>
+          </div>
+        );
+      
+      default:
+        return (
+          <input
+            type="text"
+            placeholder="Description"
+            value={description}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white"
+          />
+        );
+    }
+  };
+
   return (
     <>
       <tr className="border-b border-slate-700">
@@ -106,47 +188,7 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
         </td>
         
         <td className="p-2">
-          {item.itemType === ItemType.CUSTOM ? (
-            <input
-              type="text"
-              value={item.description}
-              onChange={(e) => onUpdate(item.id, { description: e.target.value })}
-              className="w-full p-1 border border-gray-700 bg-dark-surface text-white rounded"
-            />
-          ) : item.itemType === ItemType.MATERIAL ? (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={item.description}
-                readOnly
-                className="flex-1 p-1 border border-gray-700 bg-dark-elevated/50 text-gray-400 rounded cursor-pointer"
-                onClick={() => setShowMaterialSelector(true)}
-                placeholder="Click to select material..."
-              />
-              <button
-                onClick={() => setShowMaterialSelector(true)}
-                className="px-3 py-1 bg-emerald-600 text-white rounded hover:bg-emerald-700"
-              >
-                Browse
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Click Browse to select"
-                value={selectedLabor?.item_name || selectedLabor?.activity || item.description || ''}
-                readOnly
-                className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-300"
-              />
-              <button
-                onClick={() => setShowLaborSelector(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Browse
-              </button>
-            </div>
-          )}
+          {renderDescriptionField()}
         </td>
         
         <td className="p-2 w-24">
