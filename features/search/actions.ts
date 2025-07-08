@@ -25,7 +25,7 @@ export async function exportSearchResults(filters: {
 
     // Build where clause (same as search API)
     const where: any = {
-      userId: user.id,
+      createdById: user.id,
     };
 
     if (filters.search) {

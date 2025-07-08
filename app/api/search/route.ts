@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: Prisma.QuoteWhereInput = {
-      userId: user.id,
+      createdById: user.id,
     };
 
     // Text search across multiple fields
