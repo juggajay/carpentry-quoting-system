@@ -535,6 +535,95 @@ export class MCPManager {
     };
   }
 
+  private async getLaborRateTemplates(args: { category?: string; activity?: string; limit?: number }) {
+    try {
+      const { category, activity, limit = 10 } = args;
+      
+      // Use raw SQL to avoid schema mismatches
+      let templates: Array<{
+        id: string;
+        category: string;
+        activity: string;
+        unit: string;
+        rate: number;
+        description: string | null;
+        source: string | null;
+        isActive: boolean;
+      }>;
+      
+      if (category && activity) {
+        templates = await prisma.$queryRaw`
+          SELECT id, category, activity, unit, rate, description, source, "isActive"
+          FROM "LaborRateTemplate"
+          WHERE (
+            LOWER(category) LIKE ${`%${category.toLowerCase()}%`} AND
+            LOWER(activity) LIKE ${`%${activity.toLowerCase()}%`}
+          )
+          AND "isActive" = true
+          ORDER BY category, activity ASC
+          LIMIT ${limit}
+        `;
+      } else if (category) {
+        templates = await prisma.$queryRaw`
+          SELECT id, category, activity, unit, rate, description, source, "isActive"
+          FROM "LaborRateTemplate"
+          WHERE LOWER(category) LIKE ${`%${category.toLowerCase()}%`}
+          AND "isActive" = true
+          ORDER BY category, activity ASC
+          LIMIT ${limit}
+        `;
+      } else if (activity) {
+        templates = await prisma.$queryRaw`
+          SELECT id, category, activity, unit, rate, description, source, "isActive"
+          FROM "LaborRateTemplate"
+          WHERE LOWER(activity) LIKE ${`%${activity.toLowerCase()}%`}
+          AND "isActive" = true
+          ORDER BY category, activity ASC
+          LIMIT ${limit}
+        `;
+      } else {
+        templates = await prisma.$queryRaw`
+          SELECT id, category, activity, unit, rate, description, source, "isActive"
+          FROM "LaborRateTemplate"
+          WHERE "isActive" = true
+          ORDER BY category, activity ASC
+          LIMIT ${limit}
+        `;
+      }
+      
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            count: templates.length,
+            query: { category, activity },
+            templates: templates.map(t => ({
+              id: t.id,
+              category: t.category,
+              activity: t.activity,
+              unit: t.unit,
+              rate: t.rate,
+              description: t.description,
+              source: t.source
+            }))
+          }, null, 2)
+        }]
+      };
+    } catch (error) {
+      console.error('Error searching labor rate templates:', error);
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            error: 'Database error while searching labor rate templates',
+            count: 0,
+            templates: []
+          }, null, 2)
+        }]
+      };
+    }
+  }
+
   private async callFilesystemTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>) {
     const fs = await import('fs/promises');
     
