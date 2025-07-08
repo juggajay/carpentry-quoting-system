@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Textarea } from '@/components/ui/Textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Unit } from '@prisma/client';
 import { createLaborRateTemplate } from '@/app/(protected)/import/labor-rates/actions';
@@ -169,12 +168,11 @@ export function ManualRateForm({ onRateAdded }: ManualRateFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description">Description (optional)</Label>
-            <Textarea
+            <Input
               id="description"
               placeholder="Additional details about this rate"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
             />
           </div>
 
