@@ -52,8 +52,7 @@ When providing information, ALWAYS include the source:
 - "From web scraping: [supplier website]"
 - "From MCP connection: [connection name]"
 
-If you don't have actual data access yet, be transparent:
-"I would search the materials database for this item, but I need the database connection to be configured first. Once connected, I'll be able to provide real pricing from your materials database."
+Available MCP tools will be provided dynamically. When you have access to tools like 'search_materials', 'get_labor_rates', or 'web_search', use them to provide real data. If a tool is not available or returns an error, explain what data you would provide once the connection is properly configured.
 
 Remember: You're not a generic AI - you're specifically integrated with the carpentry quoting system. Always be clear about whether you're providing:
 - Real data from the system (with source)
@@ -65,8 +64,12 @@ export async function processChat(
   files?: { name: string; type: string; size: number }[]
 ): Promise<string> {
   try {
-    // Get available MCP tools (manager will auto-initialize if needed)
+    // Ensure MCP connections are initialized
+    await mcpManager.initializeConnections();
+    
+    // Get available MCP tools
     const mcpTools = mcpManager.getAllTools();
+    console.log(`OpenAI Service: ${mcpTools.length} MCP tools available:`, mcpTools.map(t => t.name));
     
     // Convert our message format to OpenAI format
     const openAIMessages = [
@@ -93,10 +96,12 @@ export async function processChat(
         parameters: tool.inputSchema,
       }
     }));
+    
+    console.log(`OpenAI Service: Sending ${openAITools.length} tools to OpenAI`);
 
     // Call OpenAI API with tool support
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4-turbo',
       messages: openAIMessages,
       temperature: 0.3,
       max_tokens: 1000,
@@ -108,6 +113,7 @@ export async function processChat(
     
     // Check if the AI wants to use tools
     if (response.message.tool_calls && response.message.tool_calls.length > 0) {
+      console.log(`OpenAI requested ${response.message.tool_calls.length} tool calls`);
       // Handle tool calls
       const toolResults = await Promise.all(
         response.message.tool_calls.map(async (toolCall) => {
@@ -116,6 +122,8 @@ export async function processChat(
               toolCall.function.name,
               JSON.parse(toolCall.function.arguments)
             );
+            
+            console.log(`Tool ${toolCall.function.name} called successfully`);
             
             return {
               tool_call_id: toolCall.id,
@@ -147,7 +155,7 @@ export async function processChat(
 
       // Get the final response from OpenAI
       const finalCompletion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4-turbo',
         messages: openAIMessages,
         temperature: 0.3,
         max_tokens: 1000,
@@ -199,7 +207,7 @@ Extract:
 Return a structured list of items found.`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4-turbo',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: prompt },
