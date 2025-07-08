@@ -1,8 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Unit, ItemType } from '@prisma/client';
-import { SearchableDropdown } from '@/components/ui/SearchableDropdown';
 import { MaterialSelectorPanel } from './MaterialSelectorPanel';
+import { LaborRateSelector } from './LaborRateSelector';
 import { Material, LaborRate, LineItem, LineItemUpdate } from '@/types';
+
+interface DatabaseLaborRate {
+  rate_id: number;
+  category_name: string;
+  activity: string;
+  item_name?: string;
+  description: string | null;
+  unit: string;
+  rate: number;
+  typical_rate?: number;
+  min_rate: number;
+  max_rate: number;
+}
 
 interface LineItemRowProps {
   item: LineItem;
@@ -11,24 +24,29 @@ interface LineItemRowProps {
 }
 
 export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
-  const [laborRates, setLaborRates] = useState<LaborRate[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [showMaterialSelector, setShowMaterialSelector] = useState(false);
+  const [showLaborSelector, setShowLaborSelector] = useState(false);
+  const [selectedLabor, setSelectedLabor] = useState<DatabaseLaborRate | null>(null);
 
-  const fetchOptions = useCallback(async () => {
-    if (item.itemType === ItemType.LABOR) {
-      const res = await fetch(`/api/labor-rates?search=${searchTerm}`);
-      const data = await res.json();
-      setLaborRates(data);
-    }
-  }, [item.itemType, searchTerm]);
-
-  // Fetch materials/labor when searching
+  // Fetch labor rate details if item has laborRateId
   useEffect(() => {
-    if (searchTerm.length > 2) {
-      fetchOptions();
-    }
-  }, [searchTerm, fetchOptions]);
+    const fetchLaborDetails = async () => {
+      if (item.laborRateId && item.itemType === ItemType.LABOR) {
+        try {
+          const res = await fetch(`/api/labor-rates?search=`);
+          const data = await res.json();
+          const labor = data.find((l: LaborRate) => l.id === item.laborRateId);
+          if (labor) {
+            setSelectedLabor(labor);
+          }
+        } catch (error) {
+          console.error('Error fetching labor details:', error);
+        }
+      }
+    };
+
+    fetchLaborDetails();
+  }, [item.laborRateId, item.itemType]);
 
 
   const handleMaterialSelect = (material: Material) => {
@@ -41,14 +59,16 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
     });
   };
 
-  const handleLaborSelect = (labor: LaborRate) => {
+  const handleLaborSelect = (labor: DatabaseLaborRate) => {
+    setSelectedLabor(labor);
     onUpdate(item.id, {
-      description: `${labor.title} ${labor.level || ''}`.trim(),
-      unitPrice: labor.loadedRate,
-      unit: Unit.HR,
-      laborRateId: labor.id,
-      total: item.quantity * labor.loadedRate
+      description: labor.item_name || labor.activity,
+      unitPrice: labor.typical_rate || labor.rate,
+      unit: labor.unit as Unit,
+      laborRateId: labor.rate_id.toString(),
+      total: item.quantity * (labor.typical_rate || labor.rate)
     });
+    setShowLaborSelector(false);
   };
 
   const handleQuantityChange = (quantity: number) => {
@@ -110,17 +130,21 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
               </button>
             </div>
           ) : (
-            <SearchableDropdown
-              value={item.description}
-              onSearch={setSearchTerm}
-              options={laborRates}
-              onSelect={(option) => {
-                if ('title' in option) {
-                  handleLaborSelect(option);
-                }
-              }}
-              placeholder="Search labor rates..."
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Click Browse to select"
+                value={selectedLabor?.item_name || selectedLabor?.activity || item.description || ''}
+                readOnly
+                className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-300"
+              />
+              <button
+                onClick={() => setShowLaborSelector(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Browse
+              </button>
+            </div>
           )}
         </td>
         
@@ -186,6 +210,16 @@ export function LineItemRow({ item, onUpdate, onRemove }: LineItemRowProps) {
         }}
         multiple={false}
       />
+      
+      {/* Labor Rate Selector */}
+      {showLaborSelector && (
+        <LaborRateSelector
+          onSelect={(labor) => {
+            handleLaborSelect(labor);
+          }}
+          onClose={() => setShowLaborSelector(false)}
+        />
+      )}
     </>
   );
 }
