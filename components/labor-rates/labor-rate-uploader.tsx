@@ -78,7 +78,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
     setFile(null);
   };
 
-  const getFileIcon = (fileName: string) => {
+  const getFileIcon = () => {
     return <FileSpreadsheet className="h-8 w-8 text-green-500" />;
   };
 
@@ -115,7 +115,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
           <div className="border rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                {getFileIcon(file.name)}
+                {getFileIcon()}
                 <div>
                   <p className="font-medium text-sm">{file.name}</p>
                   <p className="text-xs text-muted-foreground">
