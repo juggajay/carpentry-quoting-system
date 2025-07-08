@@ -48,10 +48,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingConnection) {
-      return NextResponse.json(
-        { error: `An active ${type} MCP connection already exists` },
-        { status: 400 }
-      );
+      // Instead of erroring, update the existing connection to inactive and create a new one
+      await prisma.mCPConnection.update({
+        where: { id: existingConnection.id },
+        data: { status: 'inactive' }
+      });
     }
 
     const connection = await prisma.mCPConnection.create({

@@ -132,12 +132,16 @@ export default function AIAssistantPage() {
 
   const handleMCPDisconnect = async (connectionId: string) => {
     try {
+      console.log('Disconnecting MCP:', connectionId);
       const response = await fetch(`/api/mcp/connections/${connectionId}/connect`, {
         method: 'DELETE',
       });
       
       if (response.ok) {
         setMcpConnections(prev => prev.filter(conn => conn.id !== connectionId));
+        console.log('MCP disconnected successfully');
+      } else {
+        console.error('Failed to disconnect MCP:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error disconnecting MCP:', error);

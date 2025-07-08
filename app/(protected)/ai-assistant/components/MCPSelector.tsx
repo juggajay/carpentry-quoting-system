@@ -82,7 +82,8 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create MCP connection');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create MCP connection');
       }
 
       const dbConnection = await response.json();
@@ -111,13 +112,14 @@ export default function MCPSelector({ onClose, onConnect, existingConnections }:
       setConnectionStatus('');
     } catch (error) {
       console.error('MCP connection error:', error);
-      setConnectionStatus('Connection failed');
+      const errorMessage = error instanceof Error ? error.message : 'Connection failed';
+      setConnectionStatus(`Error: ${errorMessage}`);
       setIsConnecting(false);
       
-      // Show error for 3 seconds then clear
+      // Show error for 5 seconds then clear
       setTimeout(() => {
         setConnectionStatus('');
-      }, 3000);
+      }, 5000);
     }
   };
 
