@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Trash2 } from 'lucide-react';
+import { Download, Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import PageContainer from '@/components/layout/PageContainer';
 import { LaborRateUploader } from '@/components/labor-rates/labor-rate-uploader';
 import { LaborRateTable } from '@/components/labor-rates/labor-rate-table';
 import { LaborRateCalculator } from '@/components/labor-rates/labor-rate-calculator';
 import { ExtractionProgress } from '@/components/labor-rates/extraction-progress';
+import { ManualRateForm } from '@/components/labor-rates/manual-rate-form';
 import { getLaborRateTemplates, deleteLaborRateTemplates } from './actions';
 import { toast } from 'sonner';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
@@ -24,6 +25,7 @@ export default function LaborRatesPage() {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showManualForm, setShowManualForm] = useState(false);
 
   useEffect(() => {
     loadRates();
@@ -113,7 +115,7 @@ export default function LaborRatesPage() {
   return (
     <PageContainer
       title="Labor Rate Library"
-      description="Extract and manage labor rates from Excel and PDF documents"
+      description="Extract and manage labor rates from Excel documents or add them manually"
       actions={
         <div className="flex space-x-3">
           {selectedIds.size > 0 && (
@@ -144,7 +146,26 @@ export default function LaborRatesPage() {
         <div className="lg:col-span-2 space-y-6">
           {extractedRates.length === 0 ? (
             <>
-              <LaborRateUploader onRatesExtracted={handleRatesExtracted} />
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Add Labor Rates</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowManualForm(!showManualForm)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {showManualForm ? 'Upload File' : 'Add Manually'}
+                  </Button>
+                </div>
+                
+                {showManualForm ? (
+                  <ManualRateForm onRateAdded={loadRates} />
+                ) : (
+                  <LaborRateUploader onRatesExtracted={handleRatesExtracted} />
+                )}
+              </div>
+              
               <LaborRateTable 
                 rates={rates} 
                 onRatesChange={loadRates}

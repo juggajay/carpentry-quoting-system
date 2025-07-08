@@ -70,11 +70,11 @@ export async function uploadAndProcessFile(formData: FormData): Promise<{
 
   // Validate file type
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
-  const supportedTypes = ['xlsx', 'xls', 'pdf'];
+  const supportedTypes = ['xlsx', 'xls'];
   
   if (!fileExtension || !supportedTypes.includes(fileExtension)) {
     return {
-      upload: { success: false, error: 'Unsupported file type. Please upload Excel (.xlsx, .xls) or PDF files.' }
+      upload: { success: false, error: 'Unsupported file type. Please upload Excel (.xlsx, .xls) files.' }
     };
   }
 
@@ -112,8 +112,7 @@ export async function uploadAndProcessFile(formData: FormData): Promise<{
 
     // Process the file
     const processor = new LaborRateProcessor();
-    const fileType = fileExtension === 'pdf' ? 'pdf' : 'excel';
-    const processingResult = await processor.processFile(buffer, file.name, fileType);
+    const processingResult = await processor.processFile(buffer, file.name, 'excel');
 
     return {
       upload: {
@@ -380,6 +379,61 @@ export async function deleteLaborRateTemplates(ids: string[]): Promise<{ success
       success: false,
       deleted: 0,
       error: error instanceof Error ? error.message : 'Failed to delete rates'
+    };
+  }
+}
+
+export async function createLaborRateTemplate(data: {
+  category: string;
+  activity: string;
+  unit: Unit;
+  rate: number;
+  description?: string;
+  source?: string;
+  confidence?: number;
+}): Promise<{ success: boolean; error?: string }> {
+  const userId = await getAuthUserId();
+  if (!userId) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const user = await db.user.findUnique({
+      where: { clerkId: userId }
+    });
+
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    await db.laborRateTemplate.create({
+      data: {
+        userId: user.id,
+        category: data.category,
+        activity: data.activity,
+        unit: data.unit,
+        rate: data.rate,
+        description: data.description,
+        source: data.source || 'Manual Entry',
+        confidence: data.confidence ?? 1.0,
+        isActive: true
+      }
+    });
+
+    revalidatePath('/import/labor-rates');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error creating labor rate template:', error);
+    if (error instanceof Error && error.message.includes('Unique constraint')) {
+      return {
+        success: false,
+        error: 'A rate with this activity and unit already exists'
+      };
+    }
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create rate'
     };
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileSpreadsheet, FileText, X } from 'lucide-react';
+import { Upload, FileSpreadsheet, X } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { toast } from 'sonner';
@@ -27,8 +27,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
     onDrop,
     accept: {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-      'application/vnd.ms-excel': ['.xls'],
-      'application/pdf': ['.pdf']
+      'application/vnd.ms-excel': ['.xls']
     },
     maxFiles: 1,
     disabled: isProcessing
@@ -80,10 +79,6 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
   };
 
   const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    if (extension === 'pdf') {
-      return <FileText className="h-8 w-8 text-red-500" />;
-    }
     return <FileSpreadsheet className="h-8 w-8 text-green-500" />;
   };
 
@@ -93,7 +88,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
         <div>
           <h3 className="text-lg font-semibold mb-2">Upload Labor Rate Document</h3>
           <p className="text-sm text-muted-foreground">
-            Upload Excel or PDF files containing labor rates. The system will automatically extract rates from trade breakup sheets and labor sections.
+            Upload Excel files containing labor rates. The system will automatically extract rates from trade breakup sheets and labor sections.
           </p>
         </div>
 
@@ -113,7 +108,7 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
               {isDragActive ? 'Drop the file here' : 'Drag & drop a file here, or click to select'}
             </p>
             <p className="text-xs text-muted-foreground">
-              Supports Excel (.xlsx, .xls) and PDF files up to 10MB
+              Supports Excel (.xlsx, .xls) files up to 10MB
             </p>
           </div>
         ) : (
@@ -154,8 +149,8 @@ export function LaborRateUploader({ onRatesExtracted }: LaborRateUploaderProps) 
           <p className="font-medium">Tips for best results:</p>
           <ul className="list-disc list-inside space-y-0.5">
             <li>Excel files should contain &quot;Trade Breakup&quot; or &quot;Labor&quot; sheets</li>
-            <li>PDF files should have clear rate tables or labor sections</li>
             <li>Rates should be in format like $X/hr, $X/day, $X/m²</li>
+            <li>The system will categorize rates automatically</li>
           </ul>
         </div>
       </div>
