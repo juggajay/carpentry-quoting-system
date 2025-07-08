@@ -54,6 +54,19 @@ export async function GET() {
       };
     }
 
+    // Test Brave Search
+    try {
+      const result = await mcpManager.callTool('web_search', { query: 'test search' });
+      tests.tests.brave = { success: true, result };
+    } catch (error) {
+      tests.tests.brave = { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        apiKeySet: !!process.env.BRAVE_API_KEY,
+        apiKeyLength: process.env.BRAVE_API_KEY?.length || 0
+      };
+    }
+
     return NextResponse.json(tests);
   } catch (error) {
     console.error('MCP debug error:', error);

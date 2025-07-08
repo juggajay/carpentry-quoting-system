@@ -587,11 +587,15 @@ export class MCPManager {
         try {
           const apiKey = process.env.BRAVE_API_KEY;
           if (!apiKey) {
-            throw new Error('BRAVE_API_KEY not configured');
+            throw new Error('BRAVE_API_KEY not configured in environment variables');
           }
 
           const query = args.query as string;
-          const response = await fetch(`https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`, {
+          const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`;
+          
+          console.log('Brave Search request:', { query, hasApiKey: !!apiKey, apiKeyLength: apiKey.length });
+          
+          const response = await fetch(url, {
             headers: {
               'Accept': 'application/json',
               'X-Subscription-Token': apiKey
@@ -599,7 +603,9 @@ export class MCPManager {
           });
 
           if (!response.ok) {
-            throw new Error(`Brave API error: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Brave API error:', { status: response.status, statusText: response.statusText, error: errorText });
+            throw new Error(`Brave API error: ${response.status} ${response.statusText} - ${errorText}`);
           }
 
           const data = await response.json();
