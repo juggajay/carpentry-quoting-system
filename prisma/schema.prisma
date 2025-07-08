@@ -43,6 +43,7 @@ model User {
   laborRates      LaborRate[]
   laborRateTemplates LaborRateTemplate[]
   settings        Settings?
+  aiSessions      AISession[]
 
   @@index([clerkId])
   @@index([email])
@@ -241,6 +242,7 @@ model Material {
   
   // Relations
   quoteItems    QuoteItem[]
+  priceUpdates  PriceUpdate[]
   
   @@index([category])
   @@index([name])
@@ -319,5 +321,63 @@ model Settings {
   updatedAt               DateTime @updatedAt
   
   @@index([userId])
+}
+
+// AI Assistant Models
+
+// AISession model - stores AI assistant chat sessions
+model AISession {
+  id             String   @id @default(cuid())
+  userId         String
+  messages       Json     // Chat history array
+  files          Json?    // Uploaded file references
+  generatedQuote Json?    // Generated quote data
+  status         String   @default("active") // active, completed
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// PriceUpdate model - stores price changes from web scraping
+model PriceUpdate {
+  id              String    @id @default(cuid())
+  productId       String
+  currentPrice    Float
+  scrapedPrice    Float
+  percentChange   Float
+  source          String    // bunnings, bowens, etc
+  status          String    @default("pending") // pending, approved, rejected
+  approvedBy      String?
+  approvalNotes   String?
+  scrapedAt       DateTime
+  reviewedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  material        Material  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@index([productId])
+  @@index([status])
+}
+
+// MCPConnection model - stores MCP service connections
+model MCPConnection {
+  id           String    @id @default(cuid())
+  name         String
+  type         String    // postgresql, playwright, memory, brave
+  config       Json      // Connection configuration
+  status       String    @default("active") // active, inactive
+  lastUsed     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  
+  @@index([type])
+  @@index([status])
 }
 
