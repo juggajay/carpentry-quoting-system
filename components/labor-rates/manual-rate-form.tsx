@@ -25,11 +25,9 @@ const CATEGORIES = [
 ];
 
 const UNITS: { value: Unit; label: string }[] = [
-  { value: 'HR', label: 'Hour (HR)' },
-  { value: 'DAY', label: 'Day' },
-  { value: 'SQM', label: 'Square Meter (m²)' },
-  { value: 'LM', label: 'Linear Meter (m)' },
-  { value: 'EA', label: 'Each' },
+  { value: 'SQM', label: 'SqM (Square Meter)' },
+  { value: 'LM', label: 'LM (Linear Meter)' },
+  { value: 'EA', label: 'Unit' },
 ];
 
 interface ManualRateFormProps {
@@ -41,7 +39,7 @@ export function ManualRateForm({ onRateAdded }: ManualRateFormProps) {
   const [formData, setFormData] = useState({
     category: '',
     activity: '',
-    unit: 'HR' as Unit,
+    unit: 'SQM' as Unit,
     rate: '',
     description: ''
   });
@@ -77,7 +75,7 @@ export function ManualRateForm({ onRateAdded }: ManualRateFormProps) {
         setFormData({
           category: '',
           activity: '',
-          unit: 'HR',
+          unit: 'SQM',
           rate: '',
           description: ''
         });
