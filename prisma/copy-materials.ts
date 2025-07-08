@@ -14,7 +14,7 @@ async function copyMaterials() {
     console.log('🚀 Starting material copy process...');
     
     // Find source user
-    const sourceUser = await prisma.user.findUnique({
+    const sourceUser = await db.user.findUnique({
       where: { email: SOURCE_USER_EMAIL }
     });
     
@@ -24,7 +24,7 @@ async function copyMaterials() {
     }
     
     // Find target user
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await db.user.findUnique({
       where: { email: TARGET_USER_EMAIL }
     });
     
@@ -36,7 +36,7 @@ async function copyMaterials() {
     console.log(`📋 Copying materials from ${SOURCE_USER_EMAIL} to ${TARGET_USER_EMAIL}`);
     
     // Get all materials from source user
-    const sourceMaterials = await prisma.material.findMany({
+    const sourceMaterials = await db.material.findMany({
       where: { userId: sourceUser.id }
     });
     
@@ -49,7 +49,7 @@ async function copyMaterials() {
     for (const material of sourceMaterials) {
       try {
         // Check if material already exists for target user
-        const existing = await prisma.material.findFirst({
+        const existing = await db.material.findFirst({
           where: {
             name: material.name,
             userId: targetUser.id
@@ -65,7 +65,7 @@ async function copyMaterials() {
         // Create copy for target user
         const { id, userId, createdAt, updatedAt, lastScrapedAt, sourceUrl, scraperType, scraperSelectors, ...materialData } = material;
         
-        await prisma.material.create({
+        await db.material.create({
           data: {
             ...materialData,
             userId: targetUser.id,
@@ -93,7 +93,7 @@ async function copyMaterials() {
   } catch (error) {
     console.error('❌ Error during copy process:', error);
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 
@@ -103,11 +103,11 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
     console.log('🚀 Starting material copy process...');
     
     // Verify users exist
-    const sourceUser = await prisma.user.findUnique({
+    const sourceUser = await db.user.findUnique({
       where: { id: sourceUserId }
     });
     
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await db.user.findUnique({
       where: { id: targetUserId }
     });
     
@@ -117,7 +117,7 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
     }
     
     // Get all materials from source user
-    const sourceMaterials = await prisma.material.findMany({
+    const sourceMaterials = await db.material.findMany({
       where: { userId: sourceUserId }
     });
     
@@ -128,7 +128,7 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
     
     for (const material of sourceMaterials) {
       // Check if material already exists
-      const existing = await prisma.material.findFirst({
+      const existing = await db.material.findFirst({
         where: {
           name: material.name,
           userId: targetUserId
@@ -150,7 +150,7 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
     }
     
     if (materialsToCreate.length > 0) {
-      const result = await prisma.material.createMany({
+      const result = await db.material.createMany({
         data: materialsToCreate,
         skipDuplicates: true
       });
@@ -163,7 +163,7 @@ async function copyMaterialsByUserId(sourceUserId: string, targetUserId: string)
   } catch (error) {
     console.error('❌ Error during copy process:', error);
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 

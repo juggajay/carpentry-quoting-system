@@ -16,7 +16,7 @@ async function seedLaborRates(userId: string) {
   ];
 
   for (const rate of laborRates) {
-    await prisma.laborRate.create({
+    await db.laborRate.create({
       data: {
         ...rate,
         saturdayRate: rate.baseRate * 1.5,
@@ -44,7 +44,7 @@ async function seedMaterials(userId: string) {
   ];
 
   for (const material of materials) {
-    await prisma.material.create({
+    await db.material.create({
       data: {
         ...material,
         supplier: 'Bunnings',
@@ -77,7 +77,7 @@ async function main() {
     console.error('Error seeding database:', error);
     throw error;
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -9,7 +9,7 @@ async function generateUniqueQuoteNumber(userId: string): Promise<string> {
   const currentYear = new Date().getFullYear();
   
   // Get the highest quote number for this year
-  const lastQuote = await prisma.quote.findFirst({
+  const lastQuote = await db.quote.findFirst({
     where: {
       userId,
       quoteNumber: {
@@ -37,7 +37,7 @@ async function generateUniqueQuoteNumber(userId: string): Promise<string> {
     const quoteNumber = `Q-${currentYear}-${String(nextNumber).padStart(4, '0')}`;
     
     // Check if this number already exists
-    const existing = await prisma.quote.findUnique({
+    const existing = await db.quote.findUnique({
       where: { quoteNumber }
     });
     
@@ -59,14 +59,14 @@ export async function updateQuote(quoteId: string, data: any) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
     // Verify quote ownership
-    const quote = await prisma.quote.findFirst({
+    const quote = await db.quote.findFirst({
       where: {
         id: quoteId,
         userId: user.id,
@@ -81,7 +81,7 @@ export async function updateQuote(quoteId: string, data: any) {
     const total = subtotal + tax;
 
     // Update quote in transaction
-    await prisma.$transaction(async (tx) => {
+    await db.$transaction(async (tx) => {
       // Update quote
       await tx.quote.update({
         where: { id: quoteId },
@@ -134,7 +134,7 @@ export async function createQuote(data: any) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -143,7 +143,7 @@ export async function createQuote(data: any) {
     // Get or create client
     let client = null;
     if (data.clientName) {
-      client = await prisma.client.findFirst({
+      client = await db.client.findFirst({
         where: {
           userId: user.id,
           name: data.clientName,
@@ -151,7 +151,7 @@ export async function createQuote(data: any) {
       });
 
       if (!client) {
-        client = await prisma.client.create({
+        client = await db.client.create({
           data: {
             name: data.clientName,
             email: data.clientEmail || '',
@@ -171,7 +171,7 @@ export async function createQuote(data: any) {
     const total = subtotal + tax;
 
     // Create quote
-    const quote = await prisma.quote.create({
+    const quote = await db.quote.create({
       data: {
         quoteNumber,
         title: data.projectTitle || data.title || 'Untitled Quote',
@@ -191,7 +191,7 @@ export async function createQuote(data: any) {
 
     // Create quote items
     if (data.items && data.items.length > 0) {
-      await prisma.quoteItem.createMany({
+      await db.quoteItem.createMany({
         data: data.items.map((item: any, index: number) => ({
           description: item.description,
           quantity: item.quantity,
@@ -221,13 +221,13 @@ export async function loadQuote(quoteId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
-    const quote = await prisma.quote.findUnique({
+    const quote = await db.quote.findUnique({
       where: { id: quoteId, userId: user.id },
       include: {
         client: true,

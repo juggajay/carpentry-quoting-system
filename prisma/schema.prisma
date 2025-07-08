@@ -13,16 +13,31 @@ datasource db {
 
 // User model - managed by Clerk, but we need it for relations
 model User {
-  id        String   @id @default(uuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(uuid())
+  clerkId     String    @unique
+  email       String    @unique
+  firstName   String?
+  lastName    String?
+  avatarUrl   String?
+  role        UserRole  @default(VIEWER)
+  isActive    Boolean   @default(true)
+  
+  // Permissions
+  canCreateQuotes    Boolean @default(false)
+  canEditQuotes      Boolean @default(false)
+  canDeleteQuotes    Boolean @default(false)
+  canViewAllQuotes   Boolean @default(false) // false = only their own
+  canManageUsers     Boolean @default(false)
+  canViewReports     Boolean @default(false)
+  canManageSettings  Boolean @default(false)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   // Relations
   clients         Client[]
-  quotes          Quote[]
+  createdQuotes   Quote[]  @relation("CreatedBy")
+  assignedQuotes  Quote[]  @relation("AssignedTo")
   uploadedFiles   UploadedFile[]
   materials       Material[]
   laborRates      LaborRate[]
@@ -68,17 +83,20 @@ model Quote {
   termsConditions String?
   versionNumber  Int         @default(1)
   clientId       String?
-  userId         String
+  createdById    String
+  assignedToId   String?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
   // Relations
   client        Client?        @relation(fields: [clientId], references: [id], onDelete: Restrict)
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBy     User           @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedTo    User?          @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
   items         QuoteItem[]
   versions      QuoteVersion[]
 
-  @@index([userId])
+  @@index([createdById])
+  @@index([assignedToId])
   @@index([clientId])
   @@index([quoteNumber])
   @@index([status])
@@ -154,6 +172,14 @@ model UploadedFile {
 }
 
 // Enums
+enum UserRole {
+  OWNER         // Full access to everything
+  ADMIN         // Can manage users and all data
+  MANAGER       // Can manage quotes and invoices
+  EMPLOYEE      // Can view and create quotes
+  VIEWER        // Read-only access
+}
+
 enum QuoteStatus {
   DRAFT
   SENT

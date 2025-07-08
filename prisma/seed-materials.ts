@@ -37,7 +37,7 @@ async function seedMaterials(userId: string) {
   for (const beam of glBeams) {
     try {
       // Check if material already exists
-      const existing = await prisma.material.findFirst({
+      const existing = await db.material.findFirst({
         where: {
           name: beam.name,
           userId: userId
@@ -45,7 +45,7 @@ async function seedMaterials(userId: string) {
       });
 
       if (!existing) {
-        await prisma.material.create({
+        await db.material.create({
           data: {
             name: beam.name,
             description: `Glue Laminated Pine Beam ${beam.size}mm, H3 Treated, GL15C Grade`,
@@ -69,7 +69,7 @@ async function seedMaterials(userId: string) {
   // Also create entries for standard lengths if you often quote full lengths
   for (const beam of glBeams) {
     try {
-      const existing = await prisma.material.findFirst({
+      const existing = await db.material.findFirst({
         where: {
           name: `${beam.name} - 2.4m Length`,
           userId: userId
@@ -77,7 +77,7 @@ async function seedMaterials(userId: string) {
       });
 
       if (!existing) {
-        await prisma.material.create({
+        await db.material.create({
           data: {
             name: `${beam.name} - 2.4m Length`,
             description: `Glue Laminated Pine Beam ${beam.size}mm, H3 Treated, GL15C Grade - Full 2.4m Length`,
@@ -122,7 +122,7 @@ async function seedMaterials(userId: string) {
 
   for (const material of commonMaterials) {
     try {
-      const existing = await prisma.material.findFirst({
+      const existing = await db.material.findFirst({
         where: {
           name: material.name,
           userId: userId
@@ -130,7 +130,7 @@ async function seedMaterials(userId: string) {
       });
 
       if (!existing) {
-        await prisma.material.create({
+        await db.material.create({
           data: {
             name: material.name,
             unit: material.unit,
@@ -158,7 +158,7 @@ async function main() {
     console.log('🚀 Starting materials database seed...');
     
     // Get the first user or create one
-    const user = await prisma.user.findFirst();
+    const user = await db.user.findFirst();
     
     if (user) {
       await seedMaterials(user.id);
@@ -171,7 +171,7 @@ async function main() {
     console.error('❌ Error seeding database:', error);
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 

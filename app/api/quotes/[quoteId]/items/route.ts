@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
@@ -14,7 +14,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -23,7 +23,7 @@ export async function GET(
     }
 
     // Get quote with items
-    const quote = await prisma.quote.findFirst({
+    const quote = await db.quote.findFirst({
       where: {
         id: quoteId,
         userId: user.id,

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
@@ -19,7 +19,7 @@ export async function prepareUpload(fileName: string) {
     if (!userId) throw new Error("Unauthorized");
 
     // Get user from database
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -28,7 +28,7 @@ export async function prepareUpload(fileName: string) {
     }
 
     // Create file record in database
-    const file = await prisma.uploadedFile.create({
+    const file = await db.uploadedFile.create({
       data: {
         fileName,
         fileSize: 0, // Will be updated after upload
@@ -74,7 +74,7 @@ export async function updateFileAfterUpload(
     const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
 
     // Update file record
-    await prisma.uploadedFile.update({
+    await db.uploadedFile.update({
       where: { id: fileId },
       data: {
         fileSize,
@@ -100,7 +100,7 @@ export async function processUploadedPdf(fileId: string) {
     if (!userId) throw new Error("Unauthorized");
 
     // Get file from database
-    const file = await prisma.uploadedFile.findUnique({
+    const file = await db.uploadedFile.findUnique({
       where: { id: fileId },
       include: { user: true },
     });
@@ -158,7 +158,7 @@ export async function processUploadedPdf(fileId: string) {
     const parseResult = QuoteParser.parse(sampleOcrText);
 
     // Update file with extracted data
-    await prisma.uploadedFile.update({
+    await db.uploadedFile.update({
       where: { id: fileId },
       data: {
         status: FileStatus.PENDING_VERIFICATION,
@@ -177,7 +177,7 @@ export async function processUploadedPdf(fileId: string) {
     console.error("processUploadedPdf error:", error);
     
     // Update file status to failed
-    await prisma.uploadedFile.update({
+    await db.uploadedFile.update({
       where: { id: fileId },
       data: {
         status: FileStatus.FAILED,
@@ -197,13 +197,13 @@ export async function getUploadedFiles() {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) return [];
 
-    const files = await prisma.uploadedFile.findMany({
+    const files = await db.uploadedFile.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
     });
@@ -220,7 +220,7 @@ export async function deleteUploadedFile(fileId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const file = await prisma.uploadedFile.findUnique({
+    const file = await db.uploadedFile.findUnique({
       where: { id: fileId },
       include: { user: true },
     });
@@ -234,7 +234,7 @@ export async function deleteUploadedFile(fileId: string) {
     await supabase.storage.from("uploads").remove([filePath]);
 
     // Delete from database
-    await prisma.uploadedFile.delete({
+    await db.uploadedFile.delete({
       where: { id: fileId },
     });
 
@@ -267,21 +267,21 @@ export async function saveVerifiedData(
     if (!userId) throw new Error("Unauthorized");
 
     // Get user
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) throw new Error("User not found");
 
     // Verify file ownership
-    const file = await prisma.uploadedFile.findUnique({
+    const file = await db.uploadedFile.findUnique({
       where: { id: fileId, userId: user.id },
     });
 
     if (!file) throw new Error("File not found");
 
     // Use transaction to ensure data integrity
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await db.$transaction(async (tx) => {
       // Create or find client
       let client = await tx.client.findFirst({
         where: {

@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -12,13 +12,13 @@ async function getQuotes() {
     const { userId } = await auth();
     if (!userId) return [];
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) return [];
 
-    const quotes = await prisma.quote.findMany({
+    const quotes = await db.quote.findMany({
       where: { userId: user.id },
       include: {
         client: true,

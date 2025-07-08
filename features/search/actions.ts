@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 import { auth } from "@clerk/nextjs/server";
 
@@ -17,7 +17,7 @@ export async function exportSearchResults(filters: {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -66,7 +66,7 @@ export async function exportSearchResults(filters: {
     }
 
     // Fetch all matching quotes
-    const quotes = await prisma.quote.findMany({
+    const quotes = await db.quote.findMany({
       where,
       include: {
         client: true,

@@ -17,7 +17,7 @@ export async function GET() {
 
   try {
     // Get all materials that have scraper configuration
-    const materials = await prisma.material.findMany({
+    const materials = await db.material.findMany({
       where: {
         scraperType: { not: null }
       }
@@ -59,7 +59,7 @@ export async function GET() {
         }
 
         if (newPrice !== null) {
-          await prisma.material.update({
+          await db.material.update({
             where: { id: material.id },
             data: {
               pricePerUnit: newPrice,

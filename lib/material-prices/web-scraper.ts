@@ -188,26 +188,57 @@ export class MaterialWebScraper {
   private getMockPrice(searchTerm: string): MaterialPrice | null {
     const mockPrices: Record<string, { price: number; unit: string; material: string }> = {
       '90x45 pine': { price: 8.50, unit: 'LM', material: '90x45 Pine Framing Timber' },
-      'plywood 12mm': { price: 45.90, unit: 'EA', material: '12mm Structural Plywood Sheet' },
-      'mdf 16mm': { price: 38.90, unit: 'EA', material: '16mm MDF Sheet' },
+      '90x35 pine': { price: 6.80, unit: 'LM', material: '90x35 Pine Framing Timber' },
+      'plywood': { price: 45.90, unit: 'EA', material: '12mm Structural Plywood Sheet 2400x1200' },
+      '12mm plywood': { price: 45.90, unit: 'EA', material: '12mm Structural Plywood Sheet 2400x1200' },
+      'mdf': { price: 38.90, unit: 'EA', material: '16mm MDF Sheet 2400x1200' },
+      '16mm mdf': { price: 38.90, unit: 'EA', material: '16mm MDF Sheet 2400x1200' },
       'liquid nails': { price: 12.50, unit: 'EA', material: 'Liquid Nails 320g Construction Adhesive' },
       'screws': { price: 18.90, unit: 'PACK', material: 'Timber Screws 8g x 50mm (500 Pack)' },
+      'timber screws': { price: 18.90, unit: 'PACK', material: 'Timber Screws 8g x 50mm (500 Pack)' },
+      'nails': { price: 15.40, unit: 'PACK', material: 'Bullet Head Nails 75mm (1kg)' },
+      'pine': { price: 8.50, unit: 'LM', material: '90x45 Pine Framing Timber' },
+      'cement': { price: 9.90, unit: 'EA', material: 'General Purpose Cement 20kg' },
+      'insulation': { price: 32.50, unit: 'PACK', material: 'R2.0 Wall Insulation Batts' },
+      'paint': { price: 68.90, unit: 'EA', material: 'Interior Paint Low Sheen 4L White' },
     };
 
     const key = searchTerm.toLowerCase();
-    const found = Object.keys(mockPrices).find(k => key.includes(k));
+    
+    // Try exact match first
+    if (mockPrices[key]) {
+      return {
+        material: mockPrices[key].material,
+        price: mockPrices[key].price,
+        unit: mockPrices[key].unit,
+        supplier: 'Bunnings Warehouse (Mock Data)',
+        lastUpdated: new Date(),
+        inStock: true,
+      };
+    }
+    
+    // Try partial match
+    const found = Object.keys(mockPrices).find(k => key.includes(k) || k.includes(key));
     
     if (found) {
       return {
         material: mockPrices[found].material,
         price: mockPrices[found].price,
         unit: mockPrices[found].unit,
-        supplier: 'Bunnings Warehouse',
+        supplier: 'Bunnings Warehouse (Mock Data)',
         lastUpdated: new Date(),
         inStock: true,
       };
     }
     
-    return null;
+    // Return a generic result if no match
+    return {
+      material: `${searchTerm} - Generic Material`,
+      price: 25.00,
+      unit: 'EA',
+      supplier: 'Bunnings Warehouse (Mock Data)',
+      lastUpdated: new Date(),
+      inStock: true,
+    };
   }
 }

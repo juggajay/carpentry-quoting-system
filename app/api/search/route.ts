@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -86,10 +86,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count for pagination
-    const totalCount = await prisma.quote.count({ where });
+    const totalCount = await db.quote.count({ where });
 
     // Get quotes with pagination
-    const quotes = await prisma.quote.findMany({
+    const quotes = await db.quote.findMany({
       where,
       include: {
         client: true,

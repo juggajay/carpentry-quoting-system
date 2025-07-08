@@ -124,18 +124,19 @@ export function MaterialScraperDialog({
                 <div className="space-y-2">
                   <Label>Product List Selector</Label>
                   <Input
-                    placeholder=".product-item"
+                    placeholder=".product-item, div.product, article, li.item"
                     value={customSelectors.productList}
                     onChange={(e) => setCustomSelectors(prev => ({
                       ...prev,
                       productList: e.target.value
                     }))}
                   />
+                  <p className="text-xs text-gray-500">Container element for each product</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Price Selector</Label>
                   <Input
-                    placeholder=".price"
+                    placeholder=".price, span.price, .product-price"
                     value={customSelectors.price}
                     onChange={(e) => setCustomSelectors(prev => ({
                       ...prev,
@@ -146,7 +147,7 @@ export function MaterialScraperDialog({
                 <div className="space-y-2">
                   <Label>Title Selector</Label>
                   <Input
-                    placeholder=".product-name"
+                    placeholder=".product-name, h3, .title, a"
                     value={customSelectors.title}
                     onChange={(e) => setCustomSelectors(prev => ({
                       ...prev,
@@ -155,9 +156,9 @@ export function MaterialScraperDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Unit Selector</Label>
+                  <Label>Unit Selector (Optional)</Label>
                   <Input
-                    placeholder=".price-unit"
+                    placeholder=".unit, .price-unit, .qty"
                     value={customSelectors.unit}
                     onChange={(e) => setCustomSelectors(prev => ({
                       ...prev,

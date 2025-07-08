@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       ];
     }
 
-    const laborRates = await prisma.laborRate.findMany({
+    const laborRates = await db.laborRate.findMany({
       where,
       orderBy: { title: 'asc' },
     });

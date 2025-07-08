@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import VerificationLayout from "./verification-layout";
 import PageContainer from "@/components/layout/PageContainer";
 import ContentCard from "@/components/layout/ContentCard";
@@ -27,14 +27,14 @@ export default async function VerifyPage({
     if (!userId) return notFound();
 
     // Get user
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) return notFound();
 
     // Get file
-    const file = await prisma.uploadedFile.findUnique({
+    const file = await db.uploadedFile.findUnique({
       where: { 
         id: resolvedParams.fileId,
         userId: user.id,

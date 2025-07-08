@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { RetryButton } from "@/components/ui/RetryButton";
@@ -12,7 +12,7 @@ async function getDashboardData() {
     const { userId } = await auth();
     if (!userId) return null;
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId },
     });
 
@@ -28,33 +28,33 @@ async function getDashboardData() {
       currentMonthQuotes,
       lastMonthQuotes,
     ] = await Promise.all([
-    prisma.quote.count({ where: { userId: user.id } }),
-    prisma.quote.count({ where: { userId: user.id, status: "ACCEPTED" } }),
-    prisma.client.count({ where: { userId: user.id } }),
-    prisma.quote.findMany({
-      where: { userId: user.id },
+    db.quote.count({ where: { createdById: user.id } }),
+    db.quote.count({ where: { createdById: user.id, status: "ACCEPTED" } }),
+    db.client.count({ where: { userId: user.id } }),
+    db.quote.findMany({
+      where: { createdById: user.id },
       orderBy: { createdAt: "desc" },
       take: 5,
       include: { client: true },
     }),
-    prisma.uploadedFile.findMany({
+    db.uploadedFile.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 5,
     }),
     // Current month quotes
-    prisma.quote.count({
+    db.quote.count({
       where: {
-        userId: user.id,
+        createdById: user.id,
         createdAt: {
           gte: new Date(new Date().setDate(1)),
         },
       },
     }),
     // Last month quotes
-    prisma.quote.count({
+    db.quote.count({
       where: {
-        userId: user.id,
+        createdById: user.id,
         createdAt: {
           gte: new Date(new Date().setMonth(new Date().getMonth() - 1, 1)),
           lt: new Date(new Date().setDate(1)),

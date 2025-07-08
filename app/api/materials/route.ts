@@ -1,7 +1,7 @@
 // app/api/materials/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 export async function GET(request: Request) {
   try {
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch materials
-    const materials = await prisma.material.findMany({
+    const materials = await db.material.findMany({
       where,
       orderBy: [
         { category: "asc" },

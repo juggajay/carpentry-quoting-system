@@ -5,10 +5,10 @@ export async function GET() {
 
   try {
     // Test basic connection
-    await prisma.$connect();
+    await db.$connect();
     
     // Try to count users
-    const userCount = await prisma.user.count();
+    const userCount = await db.user.count();
     
     return NextResponse.json({ 
       success: true, 
@@ -24,6 +24,6 @@ export async function GET() {
       databaseUrl: process.env.DATABASE_URL?.replace(/:[^:]*@/, ':****@') // Hide password
     }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }

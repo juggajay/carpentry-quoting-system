@@ -1,5 +1,5 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
     const currentUser = await clerk.users.getUser(userId);
     
     // Ensure user exists in our database
-    const user = await prisma.user.upsert({
+    const user = await db.user.upsert({
       where: { clerkId: userId },
       update: {
         email: currentUser.emailAddresses[0]?.emailAddress || "",

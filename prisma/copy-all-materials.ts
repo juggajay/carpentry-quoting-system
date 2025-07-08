@@ -13,7 +13,7 @@ async function copyAllMaterials() {
     console.log('🚀 Starting to copy ALL materials...');
     
     // Find target user
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await db.user.findUnique({
       where: { email: TARGET_USER_EMAIL }
     });
     
@@ -26,7 +26,7 @@ async function copyAllMaterials() {
     console.log(`👤 Copying all materials to: ${TARGET_USER_EMAIL}`);
     
     // Get ALL materials from the database
-    const allMaterials = await prisma.material.findMany({
+    const allMaterials = await db.material.findMany({
       orderBy: { name: 'asc' }
     });
     
@@ -51,7 +51,7 @@ async function copyAllMaterials() {
     for (const [name, material] of uniqueMaterials) {
       try {
         // Check if user already has this material
-        const existing = await prisma.material.findFirst({
+        const existing = await db.material.findFirst({
           where: {
             name: material.name,
             userId: targetUser.id
@@ -66,7 +66,7 @@ async function copyAllMaterials() {
         // Create copy for target user
         const { id, userId, createdAt, updatedAt, ...materialData } = material;
         
-        await prisma.material.create({
+        await db.material.create({
           data: {
             ...materialData,
             userId: targetUser.id
@@ -88,7 +88,7 @@ async function copyAllMaterials() {
   } catch (error) {
     console.error('❌ Error:', error);
   } finally {
-    await prisma.$disconnect();
+    await db.$disconnect();
   }
 }
 

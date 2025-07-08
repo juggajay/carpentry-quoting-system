@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user details
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { clerkId: userId }
     });
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     for (const material of materials) {
       try {
         // Check if material already exists (by name and supplier)
-        const existing = await prisma.material.findFirst({
+        const existing = await db.material.findFirst({
           where: {
             name: material.material,
             supplier: material.supplier,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
         if (existing) {
           // Update existing material
-          await prisma.material.update({
+          await db.material.update({
             where: { id: existing.id },
             data: {
               pricePerUnit: material.price,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
           updated++;
         } else {
           // Create new material
-          await prisma.material.create({
+          await db.material.create({
             data: {
               name: material.material,
               supplier: material.supplier,

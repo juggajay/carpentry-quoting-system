@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
@@ -24,8 +24,8 @@ export async function GET() {
 
   // Check Database
   try {
-    await prisma.$connect();
-    await prisma.$disconnect();
+    await db.$connect();
+    await db.$disconnect();
     checks.checks.database = true;
   } catch (error) {
     checks.errors.push(`Database connection failed: ${error}`);

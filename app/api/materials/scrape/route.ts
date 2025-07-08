@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { MaterialWebScraper } from '@/lib/material-prices/web-scraper';
 import { ScraperConfigSchema, SCRAPER_SOURCES } from '@/lib/material-prices/scraper-config';
 import { MaterialPrice } from '@/lib/material-prices';
+import * as cheerio from 'cheerio';
 
 export async function POST(request: NextRequest) {
   const { userId } = await auth();
@@ -72,7 +73,22 @@ export async function POST(request: NextRequest) {
         }
 
         const html = await response.text();
+        console.log(`Fetched HTML length: ${html.length} characters`);
+        console.log(`Using selectors:`, source.selectors);
+        
         const scrapedResults = await scraper.parseHtml(html, term, source);
+        console.log(`Found ${scrapedResults.length} products for "${term}"`);
+        
+        if (scrapedResults.length === 0) {
+          // Try to help debug by showing what's in the HTML
+          const $ = cheerio.load(html);
+          console.log(`Tried selector "${source.selectors.productList}" - found ${$(source.selectors.productList).length} elements`);
+          
+          // Show a sample of what's in the HTML to help debug
+          const bodyText = $('body').text().substring(0, 200);
+          console.log(`Sample HTML content: ${bodyText}...`);
+        }
+        
         results.push(...scrapedResults);
       } catch (error) {
         console.error(`Error scraping ${term}:`, error);
