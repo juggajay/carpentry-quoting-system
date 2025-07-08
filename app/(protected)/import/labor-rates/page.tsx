@@ -9,6 +9,7 @@ import { LaborRateTable } from '@/components/labor-rates/labor-rate-table';
 import { LaborRateCalculator } from '@/components/labor-rates/labor-rate-calculator';
 import { ExtractionProgress } from '@/components/labor-rates/extraction-progress';
 import { ManualRateForm } from '@/components/labor-rates/manual-rate-form';
+import { ManualRateFormDB } from '@/components/labor-rates/manual-rate-form-db';
 import { getLaborRateTemplates, deleteLaborRateTemplates } from './actions';
 import { toast } from 'sonner';
 import { NormalizedRate } from '@/lib/rate-extraction/rate-normalizer';
@@ -26,6 +27,9 @@ export default function LaborRatesPage() {
   const [isLoading, setIsLoading] = useState(true); // eslint-disable-line @typescript-eslint/no-unused-vars
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showManualForm, setShowManualForm] = useState(false);
+  
+  // Feature flag: set to true to use the carpentry_rates database schema
+  const USE_CARPENTRY_RATES_DB = false;
 
   useEffect(() => {
     loadRates();
@@ -160,7 +164,11 @@ export default function LaborRatesPage() {
                 </div>
                 
                 {showManualForm ? (
-                  <ManualRateForm onRateAdded={loadRates} />
+                  USE_CARPENTRY_RATES_DB ? (
+                    <ManualRateFormDB onRateAdded={loadRates} />
+                  ) : (
+                    <ManualRateForm onRateAdded={loadRates} />
+                  )
                 ) : (
                   <LaborRateUploader onRatesExtracted={handleRatesExtracted} />
                 )}

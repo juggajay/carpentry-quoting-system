@@ -287,3 +287,4 @@ model LaborRateTemplate {
   @@index([category])
   @@unique([userId, activity, unit])
 }
+
