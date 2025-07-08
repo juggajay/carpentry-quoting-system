@@ -48,6 +48,7 @@ export interface QuoteFormData {
   items: Array<{
     type?: "custom" | "material" | "labor";
     materialId?: string;
+    laborRateId?: string;
     description: string;
     quantity: number;
     unit: string;

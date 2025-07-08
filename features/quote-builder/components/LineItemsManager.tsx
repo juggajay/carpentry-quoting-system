@@ -23,6 +23,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { MaterialSelectorPanel } from "@/components/quote/MaterialSelectorPanel";
+import { LaborRateSelector } from "@/components/quote/LaborRateSelector";
 import { type QuoteFormData } from "./QuoteForm";
 import { Material } from "@/types";
 import { useState } from "react";
@@ -30,6 +31,7 @@ import { useState } from "react";
 interface LineItem {
   type?: "custom" | "material" | "labor";
   materialId?: string;
+  laborRateId?: string;
   description: string;
   quantity: number;
   unit: string;
@@ -56,6 +58,7 @@ function SortableLineItem({
   onUpdate: () => void;
 }) {
   const [showMaterialSelector, setShowMaterialSelector] = useState(false);
+  const [showLaborSelector, setShowLaborSelector] = useState(false);
   const {
     attributes,
     listeners,
@@ -97,6 +100,16 @@ function SortableLineItem({
     }
   };
 
+  const handleLaborSelect = (labor: any) => {
+    setValue(`items.${index}.laborRateId`, labor.rate_id.toString());
+    setValue(`items.${index}.description`, labor.item_name || labor.activity);
+    setValue(`items.${index}.unitPrice`, labor.typical_rate || labor.rate);
+    setValue(`items.${index}.unit`, labor.unit);
+    setValue(`items.${index}.total`, currentItem.quantity * (labor.typical_rate || labor.rate));
+    onUpdate();
+    setShowLaborSelector(false);
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -131,7 +144,7 @@ function SortableLineItem({
         </select>
       </div>
 
-      {/* Description Field with Material Browse Button */}
+      {/* Description Field with Material/Labor Browse Button */}
       <div className="col-span-3">
         {itemType === "material" ? (
           <div className="flex gap-2">
@@ -150,6 +163,28 @@ function SortableLineItem({
               size="sm"
               variant="secondary"
               onClick={() => setShowMaterialSelector(true)}
+              className="px-3 whitespace-nowrap"
+            >
+              Browse
+            </Button>
+          </div>
+        ) : itemType === "labor" ? (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Click Browse to select labor rate"
+              {...register(`items.${index}.description`, {
+                required: "Description is required",
+              })}
+              error={descriptionError}
+              readOnly
+              className="cursor-pointer"
+              onClick={() => setShowLaborSelector(true)}
+            />
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setShowLaborSelector(true)}
               className="px-3 whitespace-nowrap"
             >
               Browse
@@ -198,7 +233,7 @@ function SortableLineItem({
             onChange: onUpdate,
           })}
           error={unitPriceError}
-          readOnly={itemType === "material"}
+          readOnly={itemType === "material" || itemType === "labor"}
         />
       </div>
       <div className="col-span-1">
@@ -232,6 +267,14 @@ function SortableLineItem({
         onSelect={handleMaterialSelect}
         multiple={false}
       />
+
+      {/* Labor Rate Selector */}
+      {showLaborSelector && (
+        <LaborRateSelector
+          onSelect={handleLaborSelect}
+          onClose={() => setShowLaborSelector(false)}
+        />
+      )}
     </div>
   );
 }
