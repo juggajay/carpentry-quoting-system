@@ -596,8 +596,10 @@ export class MCPManager {
           console.log('Brave Search request:', { query, hasApiKey: !!apiKey, apiKeyLength: apiKey.length });
           
           const response = await fetch(url, {
+            method: 'GET',
             headers: {
               'Accept': 'application/json',
+              'Accept-Encoding': 'gzip',
               'X-Subscription-Token': apiKey
             }
           });
