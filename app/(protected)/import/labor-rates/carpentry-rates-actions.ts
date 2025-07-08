@@ -54,6 +54,37 @@ export async function getCategories() {
   }
 }
 
+// Get categories with labor rate counts
+export async function getCategoriesWithCounts() {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, data: [], error: 'Unauthorized' };
+    }
+
+    const categoryCounts = await db.$queryRaw<Array<{ category_name: string; count: bigint }>>`
+      SELECT 
+        c.category_name,
+        COUNT(lr.rate_id) as count
+      FROM carpentry_rates.categories c
+      LEFT JOIN carpentry_rates.labour_rates lr ON c.category_id = lr.category_id
+      GROUP BY c.category_id, c.category_name
+      ORDER BY c.category_name
+    `;
+
+    // Convert bigint to number for easier handling
+    const formattedCounts = categoryCounts.map(item => ({
+      category: item.category_name,
+      count: Number(item.count)
+    }));
+
+    return { success: true, data: formattedCounts };
+  } catch (error) {
+    console.error('Error fetching category counts:', error);
+    return { success: false, data: [], error: 'Failed to fetch category counts' };
+  }
+}
+
 // Get units from carpentry_rates schema
 export async function getUnits() {
   try {
