@@ -6,13 +6,14 @@ import { Material, LaborRate, LineItem, LineItemUpdate } from '@/types';
 
 interface DatabaseLaborRate {
   rate_id: number;
-  category_name: string;
+  category: string;
+  category_name?: string;
   activity: string;
-  item_name?: string;
+  item_name: string;
   description: string | null;
   unit: string;
   rate: number;
-  typical_rate?: number;
+  typical_rate: number;
   min_rate: number;
   max_rate: number;
 }

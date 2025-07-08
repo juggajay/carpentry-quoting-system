@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search } from 'lucide-react';
-import { getLabourRates } from '@/app/(protected)/import/labor-rates/carpentry-rates-actions';
+import { searchLabourRates } from '@/app/(protected)/import/labor-rates/carpentry-rates-actions';
+import { AddLaborRateModal } from './AddLaborRateModal';
 
 interface LaborRate {
   rate_id: number;
-  category_name: string;
+  category: string;
+  category_name?: string;
   activity: string;
-  item_name?: string; // alias for activity
+  item_name: string;
   description: string | null;
   unit: string;
   rate: number;
-  typical_rate?: number; // alias for rate
+  typical_rate: number;
   min_rate: number;
   max_rate: number;
 }
@@ -22,163 +22,106 @@ interface LaborRateSelectorProps {
 }
 
 export function LaborRateSelector({ onSelect, onClose }: LaborRateSelectorProps) {
-  const [laborRates, setLaborRates] = useState<LaborRate[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [search, setSearch] = useState('');
+  const [rates, setRates] = useState<LaborRate[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  // Fetch labor rates
   useEffect(() => {
-    const fetchLaborRates = async () => {
-      setIsLoading(true);
-      try {
-        const result = await getLabourRates(searchTerm, selectedCategory || undefined);
-        if (result.success) {
-          // Add aliases for compatibility
-          const ratesWithAliases = result.data.map(rate => ({
-            ...rate,
-            item_name: rate.activity,
-            typical_rate: rate.rate
-          }));
-          setLaborRates(ratesWithAliases);
-          
-          // Extract unique categories
-          const uniqueCategories = [...new Set(result.data.map(r => r.category_name))];
-          setCategories(uniqueCategories);
-        }
-      } catch (error) {
-        console.error('Error fetching labor rates:', error);
-      } finally {
-        setIsLoading(false);
+    const debounced = setTimeout(() => {
+      loadRates();
+    }, 300);
+    return () => clearTimeout(debounced);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  const loadRates = async () => {
+    setLoading(true);
+    try {
+      const result = await searchLabourRates(search);
+      if (result.success) {
+        // Map the data to match expected structure
+        const mappedRates = result.data.map(rate => ({
+          ...rate,
+          category: rate.category_name,
+          item_name: rate.activity,
+          typical_rate: rate.rate
+        }));
+        setRates(mappedRates);
       }
-    };
-
-    fetchLaborRates();
-  }, [searchTerm, selectedCategory]);
-
-  const handleSelect = (labor: LaborRate) => {
-    onSelect(labor);
+    } catch (error) {
+      console.error('Error loading rates:', error);
+    }
+    setLoading(false);
   };
 
   return (
-    <AnimatePresence>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 bg-black/50 z-40"
-      />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-hidden">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold text-white">Select Labor Rate</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
 
-      {/* Modal */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ type: 'tween', duration: 0.2 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div className="bg-dark-surface border border-gray-700 rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h2 className="text-xl font-semibold text-white">Select Labor Rate</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-dark-elevated rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-400" />
-            </button>
-          </div>
+        <input
+          type="text"
+          placeholder="Search labor activities..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white mb-4"
+        />
 
-          {/* Search and Filters */}
-          <div className="p-4 border-b border-gray-700 space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search labor activities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-dark-elevated border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                  selectedCategory === null
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-dark-elevated text-gray-300 hover:bg-dark-hover'
-                }`}
-              >
-                All Categories
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-3 py-1 rounded-md text-sm transition-colors ${
-                    selectedCategory === category
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-dark-elevated text-gray-300 hover:bg-dark-hover'
-                  }`}
+        <div className="overflow-y-auto max-h-96 mb-4">
+          {loading ? (
+            <div className="text-center py-4 text-gray-400">Loading...</div>
+          ) : rates.length === 0 ? (
+            <div className="text-center py-4 text-gray-400">No rates found</div>
+          ) : (
+            <div className="space-y-2">
+              {rates.map((rate) => (
+                <div
+                  key={rate.rate_id}
+                  onClick={() => onSelect(rate)}
+                  className="p-3 bg-gray-800 rounded-md hover:bg-gray-700 cursor-pointer"
                 >
-                  {category}
-                </button>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="text-white font-medium">{rate.item_name}</div>
+                      <div className="text-gray-400 text-sm">{rate.category}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-white">${rate.typical_rate}</div>
+                      <div className="text-gray-400 text-sm">per {rate.unit}</div>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
-          </div>
-
-          {/* Labor Rates Grid */}
-          <div className="flex-1 overflow-y-auto p-4">
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-400">Loading...</div>
-            ) : laborRates.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">No labor rates found</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {laborRates.map((labor) => (
-                  <button
-                    key={labor.rate_id}
-                    onClick={() => handleSelect(labor)}
-                    className="p-4 bg-dark-elevated hover:bg-dark-hover border border-gray-700 rounded-lg transition-colors text-left"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-white">
-                          {labor.activity}
-                        </h3>
-                        <p className="text-sm text-gray-400 mt-1">
-                          {labor.category_name}
-                        </p>
-                        {labor.description && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            {labor.description}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right ml-4">
-                        <div className="text-lg font-semibold text-emerald-400">
-                          ${labor.rate}/{labor.unit}
-                        </div>
-                        {labor.min_rate !== labor.max_rate && (
-                          <div className="text-xs text-gray-500">
-                            ${labor.min_rate} - ${labor.max_rate}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      </motion.div>
-    </AnimatePresence>
+
+        <button
+          onClick={() => setShowAddForm(true)}
+          className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          + Add New Labor Rate
+        </button>
+
+        {showAddForm && (
+          <AddLaborRateModal
+            onSuccess={(newRate) => {
+              onSelect(newRate);
+              setShowAddForm(false);
+            }}
+            onClose={() => setShowAddForm(false)}
+          />
+        )}
+      </div>
+    </div>
   );
 }
