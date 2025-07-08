@@ -28,7 +28,7 @@ export async function GET() {
         status: conn.status,
         toolCount: conn.tools.length
       })),
-      tests: {}
+      tests: {} as Record<string, unknown>
     };
 
     // Test PostgreSQL

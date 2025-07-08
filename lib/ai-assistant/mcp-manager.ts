@@ -537,7 +537,6 @@ export class MCPManager {
 
   private async callFilesystemTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>) {
     const fs = await import('fs/promises');
-    const path = await import('path');
     
     try {
       // In production/Vercel, adjust paths to be relative to the deployment root
