@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { userId: currentUserId } = await auth();
@@ -22,7 +22,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { userId } = params;
+    const { userId } = await params;
     const data = await req.json();
 
     // Prevent users from modifying their own role

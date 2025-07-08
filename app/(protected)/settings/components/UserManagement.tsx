@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { toast } from "sonner";
 import { Loader2, UserCog, Shield, User } from "lucide-react";
-import { Modal } from "@/components/ui/Modal";
+import { 
+  Modal, 
+  ModalContent, 
+  ModalHeader, 
+  ModalTitle, 
+  ModalDescription,
+  ModalFooter 
+} from "@/components/ui/Modal";
 import { Label } from "@/components/ui/label";
 
 type UserRole = "OWNER" | "ADMIN" | "USER";
@@ -187,9 +194,9 @@ export default function UserManagement() {
       case "OWNER":
         return "primary" as const;
       case "ADMIN":
-        return "secondary" as const;
+        return "info" as const;
       default:
-        return "outline" as const;
+        return "default" as const;
     }
   };
 
@@ -237,7 +244,6 @@ export default function UserManagement() {
                       <Select
                         value={user.role}
                         onValueChange={(value) => updateUserRole(user.id, value as UserRole)}
-                        disabled={savingUserId === user.id}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -319,16 +325,21 @@ export default function UserManagement() {
       </div>
 
       <Modal
-        isOpen={showPermissionsDialog}
-        onClose={() => setShowPermissionsDialog(false)}
-        title={`Custom Permissions for ${selectedUser?.firstName} ${selectedUser?.lastName}`}
+        open={showPermissionsDialog}
+        onOpenChange={setShowPermissionsDialog}
       >
-        {selectedUser && (
-          <>
+        <ModalContent>
+          <ModalHeader>
+            <ModalTitle>
+              Custom Permissions for {selectedUser?.firstName} {selectedUser?.lastName}
+            </ModalTitle>
+            <ModalDescription>
+              Override default role permissions with custom settings
+            </ModalDescription>
+          </ModalHeader>
+          
+          {selectedUser && (
             <div className="space-y-4 py-4">
-              <p className="text-dark-text-secondary">
-                Override default role permissions with custom settings
-              </p>
               <div className="space-y-3">
                 {[
                   { key: "canCreateQuotes", label: "Can Create Quotes" },
@@ -357,24 +368,24 @@ export default function UserManagement() {
                 ))}
               </div>
             </div>
+          )}
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={updateUserPermissions}
-                disabled={savingUserId === selectedUser?.id}
-                variant="primary"
-              >
-                {savingUserId === selectedUser?.id && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save Permissions
-              </Button>
-            </div>
-          </>
-        )}
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={updateUserPermissions}
+              disabled={savingUserId === selectedUser?.id}
+              variant="primary"
+            >
+              {savingUserId === selectedUser?.id && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Save Permissions
+            </Button>
+          </ModalFooter>
+        </ModalContent>
       </Modal>
     </>
   );
