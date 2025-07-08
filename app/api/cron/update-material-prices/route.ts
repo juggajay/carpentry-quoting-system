@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/prisma';
 import { MaterialWebScraper } from '@/lib/material-prices/web-scraper';
 import { headers } from 'next/headers';
 

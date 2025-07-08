@@ -1,5 +1,5 @@
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {

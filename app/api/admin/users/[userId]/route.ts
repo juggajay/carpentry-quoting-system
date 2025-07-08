@@ -5,7 +5,7 @@ import { UserRole } from "@prisma/client";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   const { userId: currentUserId } = await auth();
   
@@ -23,10 +23,11 @@ export async function PATCH(
     }
 
     const body = await req.json();
+    const { userId } = await params;
     
     // Don't allow users to change their own role or the owner's role
     const targetUser = await db.user.findUnique({
-      where: { id: params.userId },
+      where: { id: userId },
     });
 
     if (!targetUser) {
@@ -37,7 +38,7 @@ export async function PATCH(
       return new NextResponse("Cannot modify owner", { status: 403 });
     }
 
-    if (currentUser.id === params.userId && body.role) {
+    if (currentUser.id === userId && body.role) {
       return new NextResponse("Cannot modify your own role", { status: 403 });
     }
 
@@ -48,7 +49,7 @@ export async function PATCH(
     } : body;
 
     const updatedUser = await db.user.update({
-      where: { id: params.userId },
+      where: { id: userId },
       data: updateData,
     });
 

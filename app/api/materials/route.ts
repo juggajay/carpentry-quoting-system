@@ -1,7 +1,7 @@
 // app/api/materials/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET(request: Request) {
   try {
