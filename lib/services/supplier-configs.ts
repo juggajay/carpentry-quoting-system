@@ -214,9 +214,8 @@ export const supplierConfigs: Record<string, SupplierConfig> = {
         name: 'All Timber',
         path: '/collections/timber-all',
         subcategories: {
-          decking: '/collections/decking',
-          flooring: '/collections/flooring',
-          structural: '/collections/structural-timber',
+          // Removed subcategories as they return 404
+          // Will only use the main timber-all collection
         },
       },
     },

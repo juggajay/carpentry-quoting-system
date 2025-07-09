@@ -95,6 +95,43 @@ export async function POST(req: NextRequest) {
       }
 
       let firecrawl;
+      
+      // For Canterbury, we can use alternative scraper directly without Firecrawl
+      if (supplier === 'canterbury') {
+        console.log('[Scrape API] Canterbury detected - using alternative scraper directly');
+        const { AlternativeScraper } = await import('@/lib/services/alternative-scraper');
+        const allProducts: any[] = [];
+        
+        for (const url of scrapeUrls) {
+          try {
+            console.log(`[Scrape API] Scraping Canterbury URL: ${url}`);
+            const products = await AlternativeScraper.scrapeDirectly(url);
+            allProducts.push(...products.map(p => ({
+              name: p.name,
+              price: p.price,
+              unit: p.unit || 'EA',
+              inStock: p.inStock ?? true,
+              description: p.description,
+              sku: p.sku,
+              supplier: 'Canterbury Timbers',
+            })));
+          } catch (urlError) {
+            console.error(`[Scrape API] Error scraping ${url}:`, urlError);
+          }
+        }
+        
+        return {
+          products: allProducts,
+          summary: {
+            total: allProducts.length,
+            new: allProducts.length,
+            existing: 0,
+            errors: 0,
+          },
+        };
+      }
+      
+      // For other suppliers, use Firecrawl
       try {
         firecrawl = getFirecrawlService();
       } catch (serviceError) {
@@ -113,16 +150,23 @@ export async function POST(req: NextRequest) {
       };
 
       // Scrape products with timeout
-      console.log(`Starting scrape for ${supplier} - URLs:`, scrapeUrls);
+      console.log(`[Scrape API] Starting scrape for ${supplier} - URLs:`, scrapeUrls);
+      console.log(`[Scrape API] Supplier config:`, { supplier, category, customUrl });
       
       const scrapePromise = firecrawl.scrapeWithConfig(config, scrapeUrls);
       const timeoutPromise = new Promise<never>((_, reject) => {
         // Longer timeout for Canterbury Timbers
         const timeoutMs = supplier === 'canterbury' ? 60000 : 30000;
-        setTimeout(() => reject(new Error(`Scraping timeout after ${timeoutMs/1000} seconds`)), timeoutMs);
+        console.log(`[Scrape API] Setting timeout for ${supplier}: ${timeoutMs}ms`);
+        setTimeout(() => {
+          console.log(`[Scrape API] ❌ Timeout reached for ${supplier} after ${timeoutMs/1000} seconds`);
+          reject(new Error(`Scraping timeout after ${timeoutMs/1000} seconds`));
+        }, timeoutMs);
       });
       
+      console.log(`[Scrape API] Starting race between scrape and timeout`);
       const scrapedProducts = await Promise.race([scrapePromise, timeoutPromise]);
+      console.log(`[Scrape API] ✅ Scrape completed, got ${scrapedProducts.length} products`);
 
       // Transform to our material format
       const transformedProducts = transformBatch(

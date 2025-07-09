@@ -70,14 +70,19 @@ export class FirecrawlService {
   async scrapeSupplier(config: SupplierConfig, urls: string[]): Promise<ScrapedProduct[]> {
     const products: ScrapedProduct[] = [];
     console.log(`[FirecrawlService] Starting scrape for ${config.name} with ${urls.length} URLs`);
+    console.log(`[FirecrawlService] URLs to scrape:`, urls);
     
     // For Canterbury Timbers, use alternative scraper directly
     if (config.name === 'Canterbury Timbers') {
-      console.log(`[FirecrawlService] Using alternative scraper for Canterbury Timbers`);
+      console.log(`[FirecrawlService] ✅ Canterbury Timbers detected - using alternative scraper`);
       for (const url of urls) {
         try {
-          console.log(`[AlternativeScraper] Scraping URL: ${url}`);
+          console.log(`[AlternativeScraper] Starting scrape for URL: ${url}`);
+          const startTime = Date.now();
           const altProducts = await AlternativeScraper.scrapeDirectly(url);
+          const elapsedTime = Date.now() - startTime;
+          console.log(`[AlternativeScraper] Scrape completed in ${elapsedTime}ms`);
+          
           const mappedProducts = altProducts.map(p => ({
             name: p.name,
             price: p.price,
@@ -88,12 +93,20 @@ export class FirecrawlService {
             category: config.name,
           }));
           products.push(...mappedProducts);
-          console.log(`[AlternativeScraper] Found ${mappedProducts.length} products from ${url}`);
+          console.log(`[AlternativeScraper] ✅ Found ${mappedProducts.length} products from ${url}`);
+          if (mappedProducts.length > 0) {
+            console.log(`[AlternativeScraper] Sample product:`, mappedProducts[0]);
+          }
           await this.delay(this.rateLimitDelay);
         } catch (error) {
-          console.error(`Alternative scraper error for ${url}:`, error);
+          console.error(`[AlternativeScraper] ❌ Error for ${url}:`, error);
+          console.error(`[AlternativeScraper] Error details:`, {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+          });
         }
       }
+      console.log(`[FirecrawlService] ✅ Canterbury scraping complete. Total products: ${products.length}`);
       return products;
     }
     
@@ -399,6 +412,8 @@ export class FirecrawlService {
   async scrapeWithConfig(config: ScraperConfig, urls: string[]): Promise<ScrapedProduct[]> {
     let products: ScrapedProduct[] = [];
     
+    console.log(`[FirecrawlService.scrapeWithConfig] Processing ${config.supplier} with ${urls.length} URLs`);
+    
     switch (config.supplier) {
       case 'bunnings':
         products = await this.scrapeBunnings(urls);
@@ -407,6 +422,7 @@ export class FirecrawlService {
         products = await this.scrapeBlacktown(urls);
         break;
       case 'canterbury':
+        console.log(`[FirecrawlService.scrapeWithConfig] Routing to scrapeCanterbury`);
         products = await this.scrapeCanterbury(urls);
         break;
       case 'custom':
