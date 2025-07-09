@@ -111,7 +111,26 @@ export default function AIAssistantTestPage() {
       addTestResult('chat', 'error', 'Chat request failed', error);
     }
 
-    // Test 5: Check AI Assistant status
+    // Test 5: Check OpenAI configuration and functionality
+    addTestResult('openai', 'testing', 'Testing OpenAI configuration...');
+    try {
+      const openaiTestResponse = await fetch('/api/ai-assistant/test-openai');
+      const openaiTestData = await openaiTestResponse.json();
+      
+      if (openaiTestResponse.ok) {
+        addTestResult('openai', 
+          openaiTestData.summary?.status === 'working' ? 'success' : 'error', 
+          openaiTestData.summary?.message || 'OpenAI test completed', 
+          openaiTestData
+        );
+      } else {
+        addTestResult('openai', 'error', 'OpenAI test failed', openaiTestData);
+      }
+    } catch (error) {
+      addTestResult('openai', 'error', 'OpenAI test failed', error);
+    }
+
+    // Test 6: Check AI Assistant status
     addTestResult('env', 'testing', 'Checking AI Assistant configuration...');
     try {
       const statusResponse = await fetch('/api/ai-assistant/status');
@@ -133,7 +152,7 @@ export default function AIAssistantTestPage() {
       addTestResult('env', 'error', 'Status check failed', error);
     }
 
-    // Test 6: Check MCP connections
+    // Test 7: Check MCP connections
     addTestResult('mcp', 'testing', 'Checking MCP connections...');
     try {
       const mcpResponse = await fetch('/api/mcp/connections');
