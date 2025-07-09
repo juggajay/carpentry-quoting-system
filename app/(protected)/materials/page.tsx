@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import type { Material } from '@prisma/client';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
+import { ScrapingDiagnostics } from '@/components/features/materials/ScrapingDiagnostics';
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -231,6 +232,13 @@ export default function MaterialsPage() {
           </div>
         )}
       </div>
+
+      {/* Scraping Diagnostics - Hidden by default, shown with ?debug=true */}
+      {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === 'true' && (
+        <div className="mt-8">
+          <ScrapingDiagnostics />
+        </div>
+      )}
     </PageContainer>
   );
 }

@@ -2,6 +2,7 @@ import FirecrawlApp from 'firecrawl';
 import * as cheerio from 'cheerio';
 import { errorHandler } from './firecrawl-error-handler';
 import { getSupplierConfig } from './supplier-configs';
+import { AlternativeScraper } from './alternative-scraper';
 
 interface ScrapedProduct {
   name: string;
@@ -113,10 +114,53 @@ export class FirecrawlService {
           console.log(`No products found with markdown, trying HTML for ${url}`);
           parsedProducts = this.parseProducts((result as any).html, config);
         }
+        
+        // If still no products and it's a problematic site, try alternative scraper
+        if (parsedProducts.length === 0 && (config.name === 'Canterbury Timbers' || url.includes('canterburytimbers'))) {
+          console.log(`[FirecrawlService] No products found, trying alternative scraper for ${url}`);
+          try {
+            const altProducts = await AlternativeScraper.scrapeDirectly(url);
+            parsedProducts = altProducts.map(p => ({
+              name: p.name,
+              price: p.price,
+              unit: p.unit || 'EA',
+              inStock: p.inStock ?? true,
+              description: p.description,
+              sku: p.sku,
+              category: config.name,
+            }));
+            console.log(`[AlternativeScraper] Found ${parsedProducts.length} products`);
+          } catch (altError) {
+            console.error('Alternative scraper failed:', altError);
+          }
+        }
+        
         products.push(...parsedProducts);
         
       } catch (error) {
         console.error(`Error scraping ${url}:`, error);
+        
+        // Try alternative scraper for problematic sites
+        if (config.name === 'Canterbury Timbers' || config.name.includes('Canterbury')) {
+          console.log(`[FirecrawlService] Trying alternative scraper for ${url}`);
+          try {
+            const altProducts = await AlternativeScraper.scrapeDirectly(url);
+            const mappedProducts = altProducts.map(p => ({
+              name: p.name,
+              price: p.price,
+              unit: p.unit || 'EA',
+              inStock: p.inStock ?? true,
+              description: p.description,
+              sku: p.sku,
+              category: config.name,
+            }));
+            products.push(...mappedProducts);
+            console.log(`[AlternativeScraper] Found ${mappedProducts.length} products`);
+          } catch (altError) {
+            console.error('Alternative scraper also failed:', altError);
+          }
+        }
+        
         errorHandler.handleApiError(error, { supplier: config.name, url });
       }
     }
