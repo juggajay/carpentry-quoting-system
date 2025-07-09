@@ -94,7 +94,17 @@ export async function POST(req: NextRequest) {
         };
       }
 
-      const firecrawl = getFirecrawlService();
+      let firecrawl;
+      try {
+        firecrawl = getFirecrawlService();
+      } catch (serviceError) {
+        console.error('Failed to initialize Firecrawl service:', serviceError);
+        return {
+          error: `Firecrawl initialization failed: ${serviceError instanceof Error ? serviceError.message : 'Unknown error'}`,
+          products: [],
+          summary: { total: 0, new: 0, existing: 0, errors: 0 },
+        };
+      }
       const config: ScraperConfig = {
         supplier: supplier as any,
         category,
