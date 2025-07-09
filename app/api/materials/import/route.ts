@@ -46,6 +46,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Log first product for debugging
+    console.log('Import request - first product:', products[0]);
+    console.log('Import request - product count:', products.length);
+    
     // Validate all products first
     const { valid: validProducts, invalid } = DataValidator.validateBatch(products);
 
@@ -112,7 +116,7 @@ export async function POST(req: NextRequest) {
                   name: product.name,
                   description: product.description,
                   pricePerUnit: product.pricePerUnit,
-                  unit: product.unit,
+                  unit: product.unit as any, // Cast to enum type
                   category: product.category,
                   inStock: product.inStock,
                   gstInclusive: product.gstInclusive,
@@ -132,7 +136,7 @@ export async function POST(req: NextRequest) {
                   description: product.description,
                   sku: product.sku || generateSKU(product.name, product.supplier),
                   supplier: product.supplier,
-                  unit: product.unit,
+                  unit: product.unit as any, // Cast to enum type
                   pricePerUnit: product.pricePerUnit,
                   gstInclusive: product.gstInclusive,
                   category: product.category,
@@ -189,7 +193,11 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Import error:', error);
     return NextResponse.json(
-      { error: 'Failed to import materials' },
+      { 
+        error: 'Failed to import materials',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
+      },
       { status: 500 }
     );
   }
