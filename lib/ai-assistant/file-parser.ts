@@ -9,6 +9,10 @@ export interface ParsedFileContent {
     pages?: number;
     sheets?: string[];
     rows?: number;
+    scale?: string;
+    drawing_type?: 'floor_plan' | 'elevation' | 'section' | 'detail' | 'site_plan' | 'unknown';
+    dimensions_found?: number;
+    elements_detected?: string[];
   };
 }
 
@@ -54,11 +58,18 @@ async function parsePDF(filePath: string): Promise<ParsedFileContent> {
     const dataBuffer = await fs.readFile(filePath);
     const data = await pdfParse(dataBuffer);
     
+    // Enhanced drawing analysis
+    const drawingAnalysis = analyzeDrawingContent(data.text);
+    
     return {
       text: data.text,
       type: 'pdf',
       metadata: {
-        pages: data.numpages
+        pages: data.numpages,
+        scale: drawingAnalysis.scale,
+        drawing_type: drawingAnalysis.drawing_type,
+        dimensions_found: drawingAnalysis.dimensions_found,
+        elements_detected: drawingAnalysis.elements_detected
       }
     };
   } catch (error) {
@@ -68,7 +79,10 @@ async function parsePDF(filePath: string): Promise<ParsedFileContent> {
       text: 'PDF parsing failed. Please try uploading an Excel or CSV file instead.',
       type: 'pdf',
       metadata: {
-        pages: 0
+        pages: 0,
+        drawing_type: 'unknown',
+        dimensions_found: 0,
+        elements_detected: []
       }
     };
   }
@@ -119,6 +133,100 @@ async function parseCSV(filePath: string): Promise<ParsedFileContent> {
     metadata: {
       rows
     }
+  };
+}
+
+/**
+ * Analyze drawing content to extract architectural information
+ */
+function analyzeDrawingContent(text: string): {
+  scale: string;
+  drawing_type: 'floor_plan' | 'elevation' | 'section' | 'detail' | 'site_plan' | 'unknown';
+  dimensions_found: number;
+  elements_detected: string[];
+} {
+  const lowerText = text.toLowerCase();
+  
+  // Detect scale
+  let scale = 'unknown';
+  const scalePatterns = [
+    /scale\s*[:\-]?\s*1\s*[:\-]\s*(\d+)/i,
+    /1\s*[:\-]\s*(\d+)/i,
+    /@\s*1\s*[:\-]\s*(\d+)/i
+  ];
+  
+  for (const pattern of scalePatterns) {
+    const match = text.match(pattern);
+    if (match) {
+      scale = `1:${match[1]}`;
+      break;
+    }
+  }
+  
+  // Detect drawing type
+  let drawing_type: 'floor_plan' | 'elevation' | 'section' | 'detail' | 'site_plan' | 'unknown' = 'unknown';
+  
+  if (lowerText.includes('floor plan') || lowerText.includes('ground floor') || lowerText.includes('first floor')) {
+    drawing_type = 'floor_plan';
+  } else if (lowerText.includes('elevation') || lowerText.includes('front view') || lowerText.includes('side view')) {
+    drawing_type = 'elevation';
+  } else if (lowerText.includes('section') || lowerText.includes('cross section')) {
+    drawing_type = 'section';
+  } else if (lowerText.includes('detail') || lowerText.includes('enlarged')) {
+    drawing_type = 'detail';
+  } else if (lowerText.includes('site plan') || lowerText.includes('survey')) {
+    drawing_type = 'site_plan';
+  }
+  
+  // Count dimensions found
+  const dimensionPatterns = [
+    /\d+(?:\.\d+)?\s*mm/gi,
+    /\d+(?:\.\d+)?\s*m(?!\w)/gi,
+    /\d+(?:\.\d+)?\s*x\s*\d+(?:\.\d+)?/gi,
+    /\d+(?:\.\d+)?\s*m²/gi,
+    /\d+(?:\.\d+)?\s*sqm/gi
+  ];
+  
+  let dimensions_found = 0;
+  dimensionPatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) {
+      dimensions_found += matches.length;
+    }
+  });
+  
+  // Detect building elements
+  const elementPatterns = {
+    'walls': /\b(wall|partition|stud|brick|block)\b/gi,
+    'doors': /\b(door|entrance|entry|opening)\b/gi,
+    'windows': /\b(window|glazing|glass|opening)\b/gi,
+    'stairs': /\b(stair|step|landing|handrail)\b/gi,
+    'roof': /\b(roof|rafter|truss|ridge|gutter)\b/gi,
+    'floor': /\b(floor|slab|joist|bearer|deck)\b/gi,
+    'ceiling': /\b(ceiling|cornice|bulkhead)\b/gi,
+    'kitchen': /\b(kitchen|bench|cupboard|pantry)\b/gi,
+    'bathroom': /\b(bathroom|toilet|shower|basin|bath)\b/gi,
+    'bedroom': /\b(bedroom|bed|wardrobe)\b/gi,
+    'living': /\b(living|lounge|family|dining)\b/gi,
+    'garage': /\b(garage|carport|car space)\b/gi,
+    'balcony': /\b(balcony|deck|verandah|patio)\b/gi,
+    'structural': /\b(beam|column|lintel|pier|footing)\b/gi
+  };
+  
+  const elements_detected: string[] = [];
+  
+  Object.entries(elementPatterns).forEach(([element, pattern]) => {
+    const matches = text.match(pattern);
+    if (matches && matches.length > 0) {
+      elements_detected.push(element);
+    }
+  });
+  
+  return {
+    scale,
+    drawing_type,
+    dimensions_found,
+    elements_detected
   };
 }
 
