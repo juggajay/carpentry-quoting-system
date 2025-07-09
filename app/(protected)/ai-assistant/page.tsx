@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import ChatInterface from "./components/ChatInterface";
@@ -26,6 +26,23 @@ export default function AIAssistantPage() {
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [debugStatus, setDebugStatus] = useState('READY');
   const [seniorEstimatorData, setSeniorEstimatorData] = useState<any>(null);
+  const [liveUpdates, setLiveUpdates] = useState<string[]>([]);
+  const updatesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll for live updates
+  const scrollUpdatesToBottom = () => {
+    updatesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  useEffect(() => {
+    scrollUpdatesToBottom();
+  }, [liveUpdates]);
+  
+  // Add live update helper
+  const addLiveUpdate = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLiveUpdates(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
 
   // Load existing MCP connections and check for Senior Estimator data
   useEffect(() => {
@@ -53,6 +70,8 @@ export default function AIAssistantPage() {
         try {
           const takeoffData = JSON.parse(data);
           setSeniorEstimatorData(takeoffData);
+          addLiveUpdate("📥 Received takeoffs from Senior Estimator");
+          addLiveUpdate(`📊 ${takeoffData.quantities.length} items to price with ${takeoffData.project_summary.confidence}% confidence`);
           
           // Auto-send a message to start the Junior Estimator workflow
           const autoMessage = `I've received quantity takeoffs from the Senior Estimator. Please help me create a detailed quote using our materials database and labor rates.
@@ -72,6 +91,7 @@ Please start by searching our materials database for pricing on these items and 
 
           // Clear the session storage
           sessionStorage.removeItem('senior_estimator_takeoff');
+          addLiveUpdate("🤖 Starting Junior Estimator workflow...");
           
           // Send the auto message after a short delay
           setTimeout(() => {
@@ -357,7 +377,26 @@ Please start by searching our materials database for pricing on these items and 
           </Card>
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
+          {/* Live Updates */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              📡 Live Updates
+            </h3>
+            <div className="h-40 overflow-y-auto bg-gray-50 rounded-lg p-3 text-xs font-mono">
+              {liveUpdates.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No activity yet...</p>
+              ) : (
+                liveUpdates.map((update, index) => (
+                  <div key={index} className="mb-1 text-gray-700">
+                    {update}
+                  </div>
+                ))
+              )}
+              <div ref={updatesEndRef} />
+            </div>
+          </Card>
+          
           {generatedQuote ? (
             <QuotePreview 
               quote={generatedQuote} 

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import FileDropZone from "../ai-assistant/components/FileDropZone";
 import { Input } from "@/components/ui/Input";
-import type { FileAttachment } from "@/lib/ai-assistant/types";
+import type { FileAttachment, ChatMessage } from "@/lib/ai-assistant/types";
 
 interface SeniorEstimatorResult {
   scope_analysis: {
@@ -42,6 +42,37 @@ export default function SeniorEstimatorPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<SeniorEstimatorResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // AI Chat Interface State
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [liveUpdates, setLiveUpdates] = useState<string[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const updatesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll functions
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  const scrollUpdatesToBottom = () => {
+    updatesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  useEffect(() => {
+    scrollUpdatesToBottom();
+  }, [liveUpdates]);
+  
+  // Add live update helper
+  const addLiveUpdate = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLiveUpdates(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
 
   const handleFileUpload = async (files: File[]) => {
     const newAttachments: FileAttachment[] = files.map(file => ({
@@ -113,8 +144,10 @@ export default function SeniorEstimatorPage() {
 
     setIsAnalyzing(true);
     setError(null);
+    addLiveUpdate("🔍 Starting project analysis...");
 
     try {
+      addLiveUpdate("📋 Parsing scope of work...");
       const response = await fetch('/api/test-senior-estimator', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -127,17 +160,97 @@ export default function SeniorEstimatorPage() {
       });
 
       const data = await response.json();
+      addLiveUpdate("⚡ Processing with AI Senior Estimator...");
 
       if (response.ok && data.success) {
+        addLiveUpdate("✅ Analysis complete! Reviewing confidence scores...");
         setResult(data.results);
+        addLiveUpdate(`📊 Found ${data.results.quote_items.length} items with ${data.results.confidence_summary.overall_confidence.score}% confidence`);
       } else {
         throw new Error(data.error || 'Analysis failed');
       }
     } catch (error) {
       console.error('Senior Estimator error:', error);
+      addLiveUpdate(`❌ Error: ${error instanceof Error ? error.message : 'Analysis failed'}`);
       setError(error instanceof Error ? error.message : 'Analysis failed');
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+  
+  // AI Chat Handler
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isProcessing) return;
+
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: inputValue,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue("");
+    setIsProcessing(true);
+    addLiveUpdate("🤖 AI Senior Estimator thinking...");
+
+    try {
+      // Include current context in the message
+      const contextualMessage = `Context: I'm working on a ${projectType} project in ${location}. 
+
+Scope: ${scopeText || 'No scope entered yet'}
+
+Attached Files: ${attachedFiles.length} files
+
+Current Analysis: ${result ? `${result.quote_items.length} items analyzed with ${result.confidence_summary.overall_confidence.score}% confidence` : 'No analysis yet'}
+
+Question: ${inputValue}`;
+
+      const response = await fetch('/api/ai-assistant/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          attachments: attachedFiles,
+          context: { 
+            userId,
+            skipSeniorEstimator: true,
+            seniorEstimatorContext: {
+              scopeText,
+              projectType,
+              location,
+              result
+            }
+          }
+        }),
+      });
+
+      const data = await response.json();
+      addLiveUpdate("💭 AI response received");
+
+      if (response.ok) {
+        const assistantMessage: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: data.message || 'No response generated',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(data.error || 'Chat request failed');
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      addLiveUpdate(`❌ Chat error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -197,10 +310,10 @@ export default function SeniorEstimatorPage() {
         </Badge>
       </div>
 
-      {/* Input Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Scope & Settings */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:col-span-1">
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">📋 Scope of Work</h2>
             <div className="space-y-4">
@@ -216,15 +329,15 @@ export default function SeniorEstimatorPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Project Type</label>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Project Type</label>
                   <select
                     value={projectType}
                     onChange={(e) => setProjectType(e.target.value as 'residential' | 'commercial' | 'industrial')}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="residential">Residential</option>
-                    <option value="commercial">Commercial</option>
-                    <option value="industrial">Industrial</option>
+                    <option value="residential" className="bg-background text-foreground">Residential</option>
+                    <option value="commercial" className="bg-background text-foreground">Commercial</option>
+                    <option value="industrial" className="bg-background text-foreground">Industrial</option>
                   </select>
                 </div>
                 
@@ -267,8 +380,8 @@ export default function SeniorEstimatorPage() {
           </Button>
         </div>
 
-        {/* Right Column - Results */}
-        <div className="space-y-6">
+        {/* Middle Column - Results */}
+        <div className="space-y-6 lg:col-span-1">
           {error && (
             <Card className="p-6 border-red-200 bg-red-50">
               <div className="flex items-center gap-2 text-red-700">
@@ -398,6 +511,104 @@ export default function SeniorEstimatorPage() {
               </div>
             </Card>
           )}
+        </div>
+        
+        {/* Right Column - AI Chat & Live Updates */}
+        <div className="space-y-6 lg:col-span-1">
+          {/* Live Updates */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              📡 Live Updates
+            </h3>
+            <div className="h-32 overflow-y-auto bg-gray-50 rounded-lg p-3 text-xs font-mono">
+              {liveUpdates.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No activity yet...</p>
+              ) : (
+                liveUpdates.map((update, index) => (
+                  <div key={index} className="mb-1 text-gray-700">
+                    {update}
+                  </div>
+                ))
+              )}
+              <div ref={updatesEndRef} />
+            </div>
+          </Card>
+          
+          {/* AI Chat Interface */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              🤖 Ask Senior Estimator AI
+            </h3>
+            
+            {/* Messages */}
+            <div className="h-64 overflow-y-auto border rounded-lg p-3 mb-4 bg-gray-50">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  <div className="text-4xl mb-2">👷‍♂️</div>
+                  <p className="text-sm">Ask me anything about your project!</p>
+                  <p className="text-xs mt-1">e.g., &quot;What materials do I need?&quot; or &quot;How long will this take?&quot;</p>
+                </div>
+              ) : (
+                messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`mb-3 p-3 rounded-lg ${
+                      message.role === 'user'
+                        ? 'bg-blue-100 ml-8'
+                        : 'bg-white mr-8 shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm">
+                        {message.role === 'user' ? '👤' : '👷‍♂️'}
+                      </span>
+                      <div className="flex-1">
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+              {isProcessing && (
+                <div className="mb-3 p-3 rounded-lg bg-white mr-8 shadow-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm animate-pulse">👷‍♂️</span>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500 italic">Senior Estimator is thinking...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            
+            {/* Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Ask about materials, timeline, costs..."
+                className="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isProcessing}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim() || isProcessing}
+                size="sm"
+              >
+                {isProcessing ? (
+                  <span className="animate-spin">⚙️</span>
+                ) : (
+                  '📤'
+                )}
+              </Button>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
