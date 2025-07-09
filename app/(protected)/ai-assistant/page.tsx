@@ -25,8 +25,9 @@ export default function AIAssistantPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [debugStatus, setDebugStatus] = useState('READY');
+  const [seniorEstimatorData, setSeniorEstimatorData] = useState<any>(null);
 
-  // Load existing MCP connections on component mount
+  // Load existing MCP connections and check for Senior Estimator data
   useEffect(() => {
     const loadMCPConnections = async () => {
       try {
@@ -45,8 +46,47 @@ export default function AIAssistantPage() {
       }
     };
 
+    // Check for Senior Estimator takeoff data
+    const checkSeniorEstimatorData = () => {
+      const data = sessionStorage.getItem('senior_estimator_takeoff');
+      if (data) {
+        try {
+          const takeoffData = JSON.parse(data);
+          setSeniorEstimatorData(takeoffData);
+          
+          // Auto-send a message to start the Junior Estimator workflow
+          const autoMessage = `I've received quantity takeoffs from the Senior Estimator. Please help me create a detailed quote using our materials database and labor rates.
+
+Project Summary:
+- Scope: ${takeoffData.project_summary.scope}
+- Project Type: ${takeoffData.project_summary.project_type}
+- Location: ${takeoffData.project_summary.location}
+- Overall Confidence: ${takeoffData.project_summary.confidence}%
+
+Items to Price:
+${takeoffData.quantities.map((item: any, index: number) => 
+  `${index + 1}. ${item.description} - ${item.quantity} ${item.unit} (${item.confidence}% confidence)`
+).join('\n')}
+
+Please start by searching our materials database for pricing on these items and suggest appropriate labor rates.`;
+
+          // Clear the session storage
+          sessionStorage.removeItem('senior_estimator_takeoff');
+          
+          // Send the auto message after a short delay
+          setTimeout(() => {
+            handleSendMessage(autoMessage);
+          }, 1000);
+          
+        } catch (error) {
+          console.error('Error parsing Senior Estimator data:', error);
+        }
+      }
+    };
+
     if (userId) {
       loadMCPConnections();
+      checkSeniorEstimatorData();
     }
   }, [userId]);
 
@@ -264,9 +304,14 @@ export default function AIAssistantPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">AI Quote Assistant</h1>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            🤖 Junior Estimator (AI Assistant)
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Upload BOQ files and let AI help you generate accurate quotes
+            {seniorEstimatorData 
+              ? "Using Senior Estimator takeoffs to create detailed quotes with database pricing"
+              : "Upload BOQ files and let AI help you generate accurate quotes"
+            }
           </p>
         </div>
         <Button

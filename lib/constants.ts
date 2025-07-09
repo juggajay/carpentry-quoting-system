@@ -4,7 +4,11 @@ export const navigationLinks = [
     href: "/dashboard",
   },
   {
-    name: "AI Assistant",
+    name: "👷‍♂️ Senior Estimator",
+    href: "/senior-estimator",
+  },
+  {
+    name: "🤖 Junior Estimator",
     href: "/ai-assistant",
   },
   {

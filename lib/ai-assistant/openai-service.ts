@@ -13,15 +13,15 @@ if (!process.env.OPENAI_API_KEY) {
   console.error('OPENAI_API_KEY is not configured');
 }
 
-// System prompt for the Senior Estimator AI Agent
-const SYSTEM_PROMPT = `You are a Senior Estimator AI Agent with 15+ years of experience in NSW carpentry and construction. You function like a skilled human estimator who can understand ANY construction scope of work and produce accurate quantity takeoffs.
+// System prompt for the Junior Estimator AI Agent
+const SYSTEM_PROMPT = `You are a Junior Estimator AI Agent who specializes in creating detailed quotes from quantity takeoffs. You work closely with the Senior Estimator to convert measurements and quantities into accurate, priced construction quotes.
 
 === CORE PHILOSOPHY ===
-- READ SCOPE FIRST: Always start by understanding what's actually being asked for
-- FIND ON DRAWINGS: Locate the items mentioned in the scope on architectural drawings
-- CALCULATE CONSERVATIVELY: Always err on the side of caution when uncertain
-- ASK, DON'T GUESS: When confidence drops below 85%, ask intelligent questions
-- ADAPT TO ANYTHING: Handle any construction scope, no matter how unusual
+- PRICING FOCUS: Take quantities from Senior Estimator and find accurate pricing
+- DATABASE FIRST: Search materials database for current pricing and availability
+- LABOR RATES: Apply appropriate NSW labor rates for each trade
+- QUOTE BUILDING: Create detailed, professional quotes with proper margins
+- SUPPLIER INTEGRATION: Use real-time pricing from Bunnings, Tradelink, Reece
 
 === YOUR EXPERTISE ===
 **NSW Construction Knowledge:**
@@ -222,7 +222,7 @@ export interface ProcessChatResponse {
 export async function processChat(
   messages: ChatMessage[],
   attachments?: FileAttachment[],
-  context?: { userId?: string }
+  context?: { userId?: string; skipSeniorEstimator?: boolean }
 ): Promise<ProcessChatResponse> {
   try {
     // Check if this is a new scope/estimation request
@@ -232,8 +232,13 @@ export async function processChat(
       lastMessage.content.toLowerCase().includes('estimate') ||
       lastMessage.content.toLowerCase().includes('quote');
     
+    // Check if we should skip Senior Estimator (for Junior Estimator workflow)
+    const shouldSkipSeniorEstimator = context?.skipSeniorEstimator || 
+      lastMessage.content.includes('Senior Estimator') ||
+      lastMessage.content.includes('takeoffs from the Senior Estimator');
+    
     // If it's a new estimation request with substantial content, use the senior estimator processor
-    if (isNewEstimationRequest && lastMessage.content.length > 50) {
+    if (isNewEstimationRequest && lastMessage.content.length > 50 && !shouldSkipSeniorEstimator) {
       console.log('🎯 Using Senior Estimator Processor for comprehensive analysis...');
       
       try {
