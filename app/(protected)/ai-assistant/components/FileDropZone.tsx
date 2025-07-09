@@ -2,7 +2,6 @@
 
 import { useCallback, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { simpleLog } from "@/components/simple-debug";
 import type { FileAttachment } from "@/lib/ai-assistant/types";
 import FilePreview from "./FilePreview";
 
@@ -26,26 +25,19 @@ export default function FileDropZone({
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
 
-    simpleLog(`FileDropZone: ${files.length} file(s)`);
-
     const validFiles: File[] = [];
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > MAX_FILE_SIZE) {
-        simpleLog(`File too large: ${file.name}`);
         alert(`File ${file.name} is too large. Maximum size is 10MB.`);
         continue;
       }
-      simpleLog(`Valid file: ${file.name}`);
       validFiles.push(file);
     }
 
     if (validFiles.length > 0) {
-      simpleLog(`Passing ${validFiles.length} file(s) up`);
       onFileUpload(validFiles);
-    } else {
-      simpleLog('No valid files');
     }
   }, [onFileUpload]);
 
@@ -53,33 +45,26 @@ export default function FileDropZone({
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    simpleLog(`DROP EVENT: ${e.dataTransfer.files.length} files`);
     handleFiles(e.dataTransfer.files);
   }, [handleFiles]);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isDragActive) {
-      simpleLog('DRAG OVER');
-    }
     setIsDragActive(true);
-  }, [isDragActive]);
+  }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    simpleLog('DRAG LEAVE');
   }, []);
 
   const handleClick = () => {
-    simpleLog('CLICK TO SELECT');
     inputRef.current?.click();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    simpleLog('FILE INPUT CHANGED');
     handleFiles(e.target.files);
   };
 

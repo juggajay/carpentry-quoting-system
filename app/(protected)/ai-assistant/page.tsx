@@ -9,7 +9,7 @@ import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@clerk/nextjs";
-import { SimpleDebug, simpleLog } from "@/components/simple-debug";
+import { DebugIndicator } from "./components/DebugIndicator";
 import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from "@/lib/ai-assistant/types";
 
 export default function AIAssistantPage() {
@@ -24,13 +24,7 @@ export default function AIAssistantPage() {
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-
-  // Simple debug status
-  useEffect(() => {
-    if (isDebug) {
-      simpleLog('Page loaded');
-    }
-  }, [isDebug]);
+  const [debugStatus, setDebugStatus] = useState('READY');
 
   // Load existing MCP connections on component mount
   useEffect(() => {
@@ -110,7 +104,7 @@ export default function AIAssistantPage() {
   };
 
   const handleFileUpload = async (files: File[]) => {
-    simpleLog(`DROPPED: ${files.length} file(s)`);
+    if (isDebug) setDebugStatus(`DROPPED: ${files.length}`);
 
     const newAttachments: FileAttachment[] = files.map(file => ({
       id: crypto.randomUUID(),
@@ -127,13 +121,13 @@ export default function AIAssistantPage() {
       const attachment = newAttachments.find(a => a.name === file.name);
       if (!attachment) continue;
 
-      simpleLog(`UPLOADING: ${file.name}`);
+      if (isDebug) setDebugStatus('UPLOADING');
 
       try {
         const formData = new FormData();
         formData.append('file', file);
 
-        simpleLog(`CALLING API for ${file.name}`);
+        if (isDebug) setDebugStatus('CALLING API');
 
         const response = await fetch('/api/ai-assistant/upload', {
           method: 'POST',
@@ -142,7 +136,7 @@ export default function AIAssistantPage() {
 
         const data = await response.json();
 
-        simpleLog(`RESPONSE: ${response.status} ${response.ok ? 'OK' : 'ERROR'}`);
+        if (isDebug) setDebugStatus(`RESPONSE: ${response.status}`);
 
         if (response.ok) {
           setAttachedFiles(prev => 
@@ -152,12 +146,12 @@ export default function AIAssistantPage() {
                 : f
             )
           );
-          simpleLog(`SUCCESS: ${file.name}`);
+          if (isDebug) setDebugStatus('SUCCESS');
         } else {
           throw new Error(data.error || 'Upload failed');
         }
       } catch (error) {
-        simpleLog(`ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        if (isDebug) setDebugStatus(`ERROR: ${error instanceof Error ? error.message : 'ERROR'}`);
         
         setAttachedFiles(prev => 
           prev.map(f => 
@@ -221,22 +215,12 @@ export default function AIAssistantPage() {
         </Button>
       </div>
 
-      {/* Debug indicator and simple status */}
+      {/* Debug indicator */}
       {isDebug && (
-        <>
-          <div className="fixed top-4 right-4 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-mono z-40">
-            DEBUG MODE ON
-          </div>
-          <div className="fixed top-4 left-4 bg-black/80 text-white p-2 rounded text-xs font-mono z-40 max-w-xs">
-            <div>Files attached: {attachedFiles.length}</div>
-            <div>Processing: {isProcessing ? 'YES' : 'NO'}</div>
-            {attachedFiles.map(f => (
-              <div key={f.id} className="truncate">
-                {f.name} - {f.status}
-              </div>
-            ))}
-          </div>
-        </>
+        <DebugIndicator 
+          status={debugStatus} 
+          color={debugStatus.includes('ERROR') ? 'red' : debugStatus.includes('SUCCESS') ? 'green' : 'yellow'}
+        />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -330,8 +314,6 @@ export default function AIAssistantPage() {
         />
       )}
 
-      {/* Simple Debug */}
-      <SimpleDebug isEnabled={isDebug} />
     </div>
   );
 }
