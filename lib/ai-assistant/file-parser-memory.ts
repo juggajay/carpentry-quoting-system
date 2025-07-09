@@ -21,6 +21,12 @@ export async function parseFileFromBuffer(
 ): Promise<ParsedFileContent> {
   const ext = filename.toLowerCase().split('.').pop();
   
+  console.log('[FileParser] Parsing file:', {
+    filename,
+    extension: ext,
+    bufferSize: buffer.length
+  });
+  
   try {
     switch (ext) {
       case 'pdf':
@@ -50,9 +56,17 @@ export async function parseFileFromBuffer(
 
 async function parsePDFFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
   try {
+    console.log('[FileParser] Starting PDF parse, buffer size:', buffer.length);
+    
     // Dynamic import to avoid build issues
     const pdfParse = (await import('pdf-parse')).default;
     const data = await pdfParse(buffer);
+    
+    console.log('[FileParser] PDF parse complete:', {
+      pages: data.numpages,
+      textLength: data.text?.length || 0,
+      hasText: !!data.text && data.text.trim().length > 0
+    });
     
     // Check if we got any text
     if (!data.text || data.text.trim().length === 0) {
@@ -67,7 +81,11 @@ async function parsePDFFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
       };
     }
     
-    console.log(`PDF parsed successfully: ${data.numpages} pages, ${data.text.length} characters`);
+    console.log('[FileParser] PDF parsed successfully:', {
+      pages: data.numpages,
+      characters: data.text.length,
+      preview: data.text.substring(0, 200) + '...'
+    });
     
     return {
       text: data.text,
@@ -148,6 +166,8 @@ export function extractBOQItems(text: string): string {
   // Return the full text for AI to parse - it's better at understanding context
   // Just do some basic cleaning
   
+  console.log('[FileParser] Extracting BOQ items from text of length:', text.length);
+  
   const lines = text.split('\n');
   const cleanedLines: string[] = [];
   
@@ -164,5 +184,11 @@ export function extractBOQItems(text: string): string {
   });
   
   // Return cleaned text, preserving structure for AI to parse
-  return cleanedLines.join('\n');
+  const result = cleanedLines.join('\n');
+  console.log('[FileParser] BOQ extraction complete:', {
+    originalLength: text.length,
+    cleanedLength: result.length,
+    linesRemoved: lines.length - cleanedLines.length
+  });
+  return result;
 }

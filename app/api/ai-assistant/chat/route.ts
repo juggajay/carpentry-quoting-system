@@ -38,7 +38,14 @@ export async function POST(request: NextRequest) {
       message: message?.substring(0, 100) + '...',
       sessionId,
       attachmentsCount: attachments?.length || 0,
-      attachments: attachments?.map((a: FileAttachment) => ({ name: a.name, type: a.type, size: a.size }))
+      attachments: attachments?.map((a: FileAttachment) => ({ 
+        name: a.name, 
+        type: a.type, 
+        size: a.size,
+        hasContent: !!a.content,
+        contentLength: a.content?.length || 0,
+        parseError: a.parseError
+      }))
     });
 
     if (!message || typeof message !== 'string') {
@@ -75,7 +82,21 @@ export async function POST(request: NextRequest) {
     const messages = [...(session.messages as unknown as ChatMessage[]), userMessage];
 
     // Process with OpenAI
-    console.log('[CHAT API] Sending to AI with', messages.length, 'messages');
+    console.log('[CHAT API] Sending to AI with', messages.length, 'messages and', attachments?.length || 0, 'attachments');
+    
+    // Debug log what we're sending to OpenAI
+    if (attachments && attachments.length > 0) {
+      console.log('[CHAT API] Attachment details being sent to OpenAI:', 
+        attachments.map((a: FileAttachment) => ({
+          name: a.name,
+          hasContent: !!a.content,
+          contentLength: a.content?.length || 0,
+          contentPreview: a.content?.substring(0, 100) + '...',
+          parseError: a.parseError
+        }))
+      );
+    }
+    
     const aiResponse = await processChat(messages, attachments);
     console.log('[CHAT API] AI Response:', aiResponse.substring(0, 200) + '...');
 

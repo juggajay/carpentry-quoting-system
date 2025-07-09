@@ -53,6 +53,17 @@ export default function AIAssistantPage() {
   const handleSendMessage = async (content: string) => {
     if (!userId) return;
 
+    // Debug log attached files
+    console.log('[AI-Assistant] Sending message with attachments:', {
+      attachmentCount: attachedFiles.length,
+      attachments: attachedFiles.map(f => ({
+        name: f.name,
+        hasContent: !!f.content,
+        contentLength: f.content?.length || 0,
+        parseError: f.parseError
+      }))
+    });
+
     const newMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
@@ -158,10 +169,20 @@ export default function AIAssistantPage() {
           if (isDebug) setDebugStatus('SUCCESS');
           
           // Log the extracted content for debugging
+          console.log('[AI-Assistant] Upload response:', {
+            hasContent: !!uploadedFile.content,
+            contentLength: uploadedFile.content?.length || 0,
+            parseError: uploadedFile.parseError,
+            fileName: file.name
+          });
+          
           if (uploadedFile.content) {
-            console.log(`[Upload] Extracted ${uploadedFile.content.length} characters from ${file.name}`);
+            console.log(`[AI-Assistant] Extracted content preview (first 500 chars):`);
+            console.log(uploadedFile.content.substring(0, 500));
+          } else if (uploadedFile.parseError) {
+            console.log(`[AI-Assistant] Parse error: ${uploadedFile.parseError}`);
           } else {
-            console.log(`[Upload] No content extracted from ${file.name}`);
+            console.log(`[AI-Assistant] No content extracted from ${file.name}`);
           }
         } else {
           throw new Error(data.error || 'Upload failed');

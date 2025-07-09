@@ -78,6 +78,16 @@ export async function processChat(
 
     // If there are attachments, add their content to the context
     if (attachments && attachments.length > 0) {
+      console.log('[OpenAI Service] Processing attachments:', {
+        count: attachments.length,
+        attachments: attachments.map(a => ({
+          name: a.name,
+          hasContent: !!a.content,
+          contentLength: a.content?.length || 0,
+          parseError: a.parseError
+        }))
+      });
+      
       let fileContext = '\n\n=== UPLOADED BOQ FILES (Content Already Extracted) ===\n';
       fileContext += 'The following is the extracted text content from the uploaded file(s). Please analyze and parse this into structured BOQ line items:\n';
       
@@ -110,7 +120,10 @@ export async function processChat(
       const lastMessage = openAIMessages[openAIMessages.length - 1];
       lastMessage.content += fileContext;
       
-      console.log('[OpenAI Service] Added BOQ file context, content length:', fileContext.length);
+      console.log('[OpenAI Service] Added BOQ file context:', {
+        totalContextLength: fileContext.length,
+        messageContent: lastMessage.content.substring(0, 500) + '...'
+      });
     }
 
     // Convert MCP tools to OpenAI function format
