@@ -84,10 +84,13 @@ export function MaterialImportButton() {
         setScraperOpen(false);
         setPreviewOpen(true);
       } else {
-        toast.error(data.error || 'Scraping failed', { id: toastId });
+        const errorMsg = data.details ? `${data.error}: ${data.details}` : data.error || 'Scraping failed';
+        toast.error(errorMsg, { id: toastId });
+        console.error('Scraping error:', data);
       }
-    } catch {
-      toast.error('Connection error');
+    } catch (error) {
+      toast.error('Connection error - check console for details');
+      console.error('Fetch error:', error);
     } finally {
       setScraping(false);
     }

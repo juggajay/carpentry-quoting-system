@@ -68,20 +68,30 @@ export class FirecrawlService {
 
   async scrapeSupplier(config: SupplierConfig, urls: string[]): Promise<ScrapedProduct[]> {
     const products: ScrapedProduct[] = [];
+    console.log(`[FirecrawlService] Starting scrape for ${config.name} with ${urls.length} URLs`);
     
     for (const url of urls) {
       try {
+        console.log(`[FirecrawlService] Scraping URL: ${url}`);
         await this.delay(this.rateLimitDelay);
         
         const result = await errorHandler.withRetry(
           async () => {
+            console.log(`[FirecrawlService] Calling Firecrawl API for ${url}`);
             const res = await this.firecrawl.scrapeUrl(url, {
               formats: ['html', 'markdown'],
               waitFor: 3000,
               onlyMainContent: false,
             });
             
-            if (!res.success || (!res.html && !res.markdown)) {
+            console.log(`[FirecrawlService] Firecrawl response:`, { 
+              success: res.success, 
+              hasHtml: !!(res as any).html, 
+              hasMarkdown: !!(res as any).markdown,
+              htmlLength: (res as any).html?.length || 0 
+            });
+            
+            if (!res.success || (!(res as any).html && !(res as any).markdown)) {
               throw new Error(`Failed to scrape ${url}: No content returned`);
             }
             
@@ -92,14 +102,14 @@ export class FirecrawlService {
 
         // Try HTML parsing first, fallback to markdown
         let parsedProducts: ScrapedProduct[] = [];
-        if (result.html) {
-          parsedProducts = this.parseProducts(result.html, config);
+        if ((result as any).html) {
+          parsedProducts = this.parseProducts((result as any).html, config);
         }
         
         // If no products found with HTML, try markdown parsing
-        if (parsedProducts.length === 0 && result.markdown) {
+        if (parsedProducts.length === 0 && (result as any).markdown) {
           console.log(`No products found with HTML, trying markdown for ${url}`);
-          parsedProducts = this.parseProductsFromMarkdown(result.markdown, config);
+          parsedProducts = this.parseProductsFromMarkdown((result as any).markdown, config);
         }
         products.push(...parsedProducts);
         
@@ -387,6 +397,7 @@ export function getFirecrawlService(): FirecrawlService {
     if (!apiKey) {
       throw new Error('FIRECRAWL_API_KEY environment variable is required');
     }
+    console.log('[FirecrawlService] Initializing with API key:', apiKey.substring(0, 10) + '...');
     firecrawlInstance = new FirecrawlService(apiKey);
   }
   return firecrawlInstance;

@@ -9,6 +9,8 @@ import { DataValidator } from '@/lib/services/data-validator';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 
 export async function POST(req: NextRequest) {
+  let body: any;
+  
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
     const rateLimitResponse = await withRateLimit(req, rateLimiters.scrape, userId);
     if (rateLimitResponse) return rateLimitResponse;
 
-    const body = await req.json();
+    body = await req.json();
     const { supplier, category, urls, options, customUrl } = body as {
       supplier: string;
       category?: string;
@@ -79,8 +81,15 @@ export async function POST(req: NextRequest) {
         options,
       };
 
-      // Scrape products
-      const scrapedProducts = await firecrawl.scrapeWithConfig(config, scrapeUrls);
+      // Scrape products with timeout
+      console.log(`Starting scrape for ${supplier} - URLs:`, scrapeUrls);
+      
+      const scrapePromise = firecrawl.scrapeWithConfig(config, scrapeUrls);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Scraping timeout after 30 seconds')), 30000);
+      });
+      
+      const scrapedProducts = await Promise.race([scrapePromise, timeoutPromise]);
 
       // Transform to our material format
       const transformedProducts = transformBatch(
@@ -163,8 +172,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error('Scraping error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to scrape products' },
+      { 
+        error: 'Failed to scrape products',
+        details: errorMessage,
+        supplier: body?.supplier 
+      },
       { status: 500 }
     );
   }
