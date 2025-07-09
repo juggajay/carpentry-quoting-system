@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { MaterialScraperDialog } from './MaterialScraperDialog';
 import { ImportPreview } from '@/components/materials/ImportPreview';
 import { ImportProgress } from '@/components/materials/ImportProgress';
+import { AsyncImportProgress } from '@/components/materials/AsyncImportProgress';
 import { 
   Modal,
   ModalContent,
@@ -51,6 +52,7 @@ export function MaterialImportButton() {
   const [scraping, setScraping] = useState(false);
   const [scrapedProducts, setScrapedProducts] = useState<ScrapedProduct[]>([]);
   const [importProgress, setImportProgress] = useState<ProgressUpdate | null>(null);
+  const [asyncJobId, setAsyncJobId] = useState<string | null>(null);
   const router = useRouter();
 
   const handleScrape = async (config: { source: string; category?: string; materials?: string[]; customUrl?: string }) => {
@@ -98,17 +100,23 @@ export function MaterialImportButton() {
 
   const handleImport = async (selectedProducts: ScrapedProduct[]) => {
     setImporting(true);
-    setImportProgress({
-      total: selectedProducts.length,
-      processed: 0,
-      imported: 0,
-      updated: 0,
-      skipped: 0,
-      errors: 0,
-      currentBatch: 0,
-      totalBatches: Math.ceil(selectedProducts.length / 50),
-      percentComplete: 0,
-    });
+    
+    // For large imports, show async progress
+    if (selectedProducts.length > 100) {
+      setImportProgress(null);
+    } else {
+      setImportProgress({
+        total: selectedProducts.length,
+        processed: 0,
+        imported: 0,
+        updated: 0,
+        skipped: 0,
+        errors: 0,
+        currentBatch: 0,
+        totalBatches: Math.ceil(selectedProducts.length / 50),
+        percentComplete: 0,
+      });
+    }
 
     try {
       const response = await fetch('/api/materials/import', {
@@ -126,12 +134,19 @@ export function MaterialImportButton() {
       const data = await response.json();
       
       if (response.ok) {
-        toast.success(`Successfully imported ${data.results.imported} new and updated ${data.results.updated} existing materials`);
-        setScrapedProducts([]);
-        setPreviewOpen(false);
-        setImportProgress(null);
-        // Refresh the page to show new materials
-        router.refresh();
+        if (data.async && data.jobId) {
+          // Handle async import
+          setAsyncJobId(data.jobId);
+          toast.info(data.message || `Processing ${selectedProducts.length} items in background`);
+        } else {
+          // Handle sync import
+          toast.success(`Successfully imported ${data.results.imported} new and updated ${data.results.updated} existing materials`);
+          setScrapedProducts([]);
+          setPreviewOpen(false);
+          setImportProgress(null);
+          // Refresh the page to show new materials
+          router.refresh();
+        }
       } else {
         toast.error(data.error || 'Import failed');
       }
@@ -140,6 +155,21 @@ export function MaterialImportButton() {
     } finally {
       setImporting(false);
     }
+  };
+
+  const handleAsyncImportComplete = () => {
+    toast.success('Import completed successfully!');
+    setScrapedProducts([]);
+    setPreviewOpen(false);
+    setAsyncJobId(null);
+    // Refresh the page to show new materials
+    router.refresh();
+  };
+
+  const handleAsyncImportCancel = () => {
+    toast.info('Import cancelled');
+    setAsyncJobId(null);
+    setPreviewOpen(false);
   };
 
   return (
@@ -173,7 +203,13 @@ export function MaterialImportButton() {
             </ModalDescription>
           </ModalHeader>
           <div className="flex-1 overflow-y-auto min-h-0">
-            {importProgress ? (
+            {asyncJobId ? (
+              <AsyncImportProgress
+                jobId={asyncJobId}
+                onComplete={handleAsyncImportComplete}
+                onCancel={handleAsyncImportCancel}
+              />
+            ) : importProgress ? (
               <ImportProgress 
                 progress={importProgress} 
                 isVisible={true}

@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         for (const url of scrapeUrls) {
           try {
             console.log(`[Scrape API] Scraping Canterbury URL: ${url}`);
-            const products = await AlternativeScraper.scrapeDirectly(url, 20); // Fetch up to 20 pages
+            const products = await AlternativeScraper.scrapeDirectly(url, 50); // Fetch up to 50 pages for Canterbury
             console.log(`[Scrape API] Found ${products.length} products from ${url}`);
             allProducts.push(...products.map(p => ({
               name: p.name,
@@ -159,8 +159,8 @@ export async function POST(req: NextRequest) {
       
       const scrapePromise = firecrawl.scrapeWithConfig(config, scrapeUrls);
       const timeoutPromise = new Promise<never>((_, reject) => {
-        // Longer timeout for Canterbury Timbers
-        const timeoutMs = supplier === 'canterbury' ? 60000 : 30000;
+        // Longer timeout for Canterbury Timbers (2 minutes for 1000+ items)
+        const timeoutMs = supplier === 'canterbury' ? 120000 : 30000;
         console.log(`[Scrape API] Setting timeout for ${supplier}: ${timeoutMs}ms`);
         setTimeout(() => {
           console.log(`[Scrape API] ❌ Timeout reached for ${supplier} after ${timeoutMs/1000} seconds`);

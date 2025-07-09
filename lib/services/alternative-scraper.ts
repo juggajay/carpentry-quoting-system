@@ -13,7 +13,7 @@ export class AlternativeScraper {
   /**
    * Scrape using direct fetch with proper headers and pagination support
    */
-  static async scrapeDirectly(url: string, maxPages: number = 5): Promise<AlternativeScrapedProduct[]> {
+  static async scrapeDirectly(url: string, maxPages: number = 50): Promise<AlternativeScrapedProduct[]> {
     console.log(`[AlternativeScraper.scrapeDirectly] Starting fetch for: ${url}`);
     
     const allProducts: AlternativeScrapedProduct[] = [];

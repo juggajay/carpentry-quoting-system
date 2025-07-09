@@ -44,6 +44,7 @@ model User {
   laborRateTemplates LaborRateTemplate[]
   settings        Settings?
   aiSessions      AISession[]
+  importJobs      ImportJob[]
 
   @@index([clerkId])
   @@index([email])
@@ -379,5 +380,44 @@ model MCPConnection {
   
   @@index([type])
   @@index([status])
+}
+
+// ImportJob model - tracks background import processes
+model ImportJob {
+  id               String    @id @default(cuid())
+  userId           String
+  status           ImportJobStatus @default(PENDING)
+  type             String    @default("materials") // materials, labor_rates
+  source           String    // canterbury, bunnings, etc
+  totalItems       Int       @default(0)
+  processedItems   Int       @default(0)
+  importedItems    Int       @default(0)
+  updatedItems     Int       @default(0)
+  skippedItems     Int       @default(0)
+  errorItems       Int       @default(0)
+  currentBatch     Int       @default(0)
+  totalBatches     Int       @default(0)
+  percentComplete  Int       @default(0)
+  data             Json?     // Raw import data
+  errors           Json?     // Error details
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  // Relations
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ImportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 

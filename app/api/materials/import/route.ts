@@ -5,6 +5,7 @@ import { cuid } from '@/lib/utils';
 import { DataValidator } from '@/lib/services/data-validator';
 import { importProgress } from '@/lib/services/import-progress';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
+import { ChunkedImportService } from '@/lib/services/chunked-import';
 
 interface ImportProduct {
   name: string;
@@ -50,6 +51,35 @@ export async function POST(req: NextRequest) {
     console.log('Import request - first product:', products[0]);
     console.log('Import request - product count:', products.length);
     
+    // For large imports (> 100 items), use chunked import service
+    if (products.length > 100) {
+      try {
+        const jobId = await ChunkedImportService.createImportJob(
+          userId,
+          products[0]?.supplier || 'unknown',
+          products,
+          options
+        );
+        
+        return NextResponse.json({
+          success: true,
+          jobId,
+          message: `Import job created. Processing ${products.length} items in background.`,
+          async: true,
+        });
+      } catch (error) {
+        console.error('Failed to create import job:', error);
+        return NextResponse.json(
+          { 
+            error: 'Failed to create import job',
+            details: error instanceof Error ? error.message : 'Unknown error',
+          },
+          { status: 500 }
+        );
+      }
+    }
+    
+    // For smaller imports, process synchronously as before
     // Validate all products first
     const { valid: validProducts, invalid } = DataValidator.validateBatch(products);
 

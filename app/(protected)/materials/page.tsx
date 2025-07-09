@@ -10,6 +10,7 @@ import type { Material } from '@prisma/client';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/Badge';
 import { ScrapingDiagnostics } from '@/components/features/materials/ScrapingDiagnostics';
+import { ImportJobsList } from '@/components/materials/ImportJobsList';
 
 export default function MaterialsPage() {
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -115,6 +116,8 @@ export default function MaterialsPage() {
         </div>
       }
     >
+      <ImportJobsList />
+      
       <div className="bg-dark-elevated rounded-lg shadow">
         {isLoading ? (
           <div className="p-8 text-center text-muted-foreground">
