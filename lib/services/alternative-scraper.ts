@@ -52,6 +52,7 @@ export class AlternativeScraper {
 
     // Common Shopify product selectors
     const productSelectors = [
+      '.m-product-item',  // Canterbury Timbers specific
       '.product-item',
       '.grid__item',
       '.collection-product-card',
@@ -92,6 +93,8 @@ export class AlternativeScraper {
     
     // Try multiple name selectors
     const nameSelectors = [
+      '.m-product-card__name',  // Canterbury Timbers specific
+      '.m-product-card__title', // Canterbury Timbers specific
       '.product-item__title',
       '.product-card__title',
       '.product__title',
@@ -107,6 +110,9 @@ export class AlternativeScraper {
 
     // Try multiple price selectors
     const priceSelectors = [
+      '.m-price-item--sale',     // Canterbury Timbers specific
+      '.m-price-item--regular',  // Canterbury Timbers specific
+      '.m-price-item',          // Canterbury Timbers specific
       '.price',
       '.product-price',
       '.money',
