@@ -1,132 +1,206 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { db } from '@/lib/db';
-import { Unit } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { cuid } from '@/lib/utils';
+import { DataValidator } from '@/lib/services/data-validator';
+import { importProgress } from '@/lib/services/import-progress';
+import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 
-export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+interface ImportProduct {
+  name: string;
+  description?: string | null;
+  sku?: string | null;
+  supplier: string;
+  unit: string;
+  pricePerUnit: number;
+  gstInclusive: boolean;
+  category?: string | null;
+  inStock: boolean;
+  notes?: string | null;
+}
 
+export async function POST(req: NextRequest) {
   try {
-    const { materials } = await request.json();
-    
-    if (!materials || !Array.isArray(materials)) {
-      return NextResponse.json({ error: 'Invalid materials data' }, { status: 400 });
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user details
-    const user = await db.user.findUnique({
-      where: { clerkId: userId }
-    });
+    // Apply rate limiting
+    const rateLimitResponse = await withRateLimit(req, rateLimiters.import, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    const body = await req.json();
+    const { products, options } = body as {
+      products: ImportProduct[];
+      options: {
+        updateExisting: boolean;
+        importNew: boolean;
+      };
+    };
+
+    if (!products || products.length === 0) {
+      return NextResponse.json(
+        { error: 'No products to import' },
+        { status: 400 }
+      );
     }
 
-    let imported = 0;
-    let updated = 0;
+    // Validate all products first
+    const { valid: validProducts, invalid } = DataValidator.validateBatch(products);
+
+    if (validProducts.length === 0) {
+      return NextResponse.json(
+        { 
+          error: 'No valid products to import',
+          details: invalid,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Start progress tracking
+    importProgress.start(validProducts.length);
+
+    const results = {
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: 0,
+      details: [] as any[],
+    };
+
+    // Process in batches to avoid overwhelming the database
+    const batchSize = 50;
+    let batchNumber = 0;
     
-    for (const material of materials) {
-      try {
-        // Check if material already exists (by name and supplier)
-        const existing = await db.material.findFirst({
-          where: {
-            name: material.material,
-            supplier: material.supplier,
-            userId: user.id
+    for (let i = 0; i < validProducts.length; i += batchSize) {
+      batchNumber++;
+      importProgress.updateBatch(batchNumber);
+      
+      const batch = validProducts.slice(i, i + batchSize);
+      
+      // Get existing materials by SKU
+      const skus = batch
+        .map(p => p.sku)
+        .filter((sku): sku is string => !!sku);
+
+      const existingMaterials = await prisma.material.findMany({
+        where: {
+          sku: { in: skus },
+          userId,
+        },
+      });
+
+      const existingSkuMap = new Map(
+        existingMaterials.map(m => [m.sku!, m.id])
+      );
+
+      // Process each product in the batch
+      const operations = [];
+      
+      for (const product of batch) {
+        try {
+          const existingId = product.sku ? existingSkuMap.get(product.sku) : null;
+
+          if (existingId && options.updateExisting) {
+            // Update existing material
+            operations.push(
+              prisma.material.update({
+                where: { id: existingId },
+                data: {
+                  name: product.name,
+                  description: product.description,
+                  pricePerUnit: product.pricePerUnit,
+                  unit: product.unit,
+                  category: product.category,
+                  inStock: product.inStock,
+                  gstInclusive: product.gstInclusive,
+                  updatedAt: new Date(),
+                },
+              })
+            );
+            results.updated++;
+            importProgress.recordUpdated(1, product.name);
+          } else if (!existingId && options.importNew) {
+            // Create new material
+            operations.push(
+              prisma.material.create({
+                data: {
+                  id: cuid(),
+                  name: product.name,
+                  description: product.description,
+                  sku: product.sku || generateSKU(product.name, product.supplier),
+                  supplier: product.supplier,
+                  unit: product.unit,
+                  pricePerUnit: product.pricePerUnit,
+                  gstInclusive: product.gstInclusive,
+                  category: product.category,
+                  inStock: product.inStock,
+                  notes: product.notes,
+                  userId,
+                },
+              })
+            );
+            results.imported++;
+            importProgress.recordImported(1, product.name);
+          } else {
+            results.skipped++;
+            importProgress.recordSkipped(1, product.name);
           }
-        });
-
-        // Map unit string to enum
-        const unit = mapUnitToEnum(material.unit);
-
-        if (existing) {
-          // Update existing material
-          await db.material.update({
-            where: { id: existing.id },
-            data: {
-              pricePerUnit: material.price,
-              unit,
-              inStock: material.inStock,
-              lastScrapedAt: new Date(),
-              sourceUrl: material.sourceUrl,
-              scraperType: 'bunnings'
-            }
+        } catch (error) {
+          console.error('Error processing product:', error);
+          results.errors++;
+          importProgress.recordError(1, product.name);
+          results.details.push({
+            product: product.name,
+            error: error instanceof Error ? error.message : 'Unknown error',
           });
-          updated++;
-        } else {
-          // Create new material
-          await db.material.create({
-            data: {
-              name: material.material,
-              supplier: material.supplier,
-              pricePerUnit: material.price,
-              unit,
-              inStock: material.inStock,
-              category: categorizeProduct(material.material),
-              userId: user.id,
-              lastScrapedAt: new Date(),
-              sourceUrl: material.sourceUrl,
-              scraperType: 'bunnings'
-            }
-          });
-          imported++;
         }
-      } catch (error) {
-        console.error(`Error importing material ${material.material}:`, error);
+      }
+
+      // Execute all operations in a transaction
+      if (operations.length > 0) {
+        try {
+          await prisma.$transaction(operations);
+        } catch (error) {
+          console.error('Transaction error:', error);
+          results.errors += operations.length;
+          // Reset counts as transaction failed
+          results.imported -= operations.filter(op => 'create' in op).length;
+          results.updated -= operations.filter(op => 'update' in op).length;
+        }
       }
     }
 
+    // Add validation errors to results
+    results.errors += invalid.length;
+
+    // Complete progress tracking
+    importProgress.complete();
+
     return NextResponse.json({
       success: true,
-      imported,
-      updated,
-      total: imported + updated
+      results: {
+        ...results,
+        validationErrors: invalid.length,
+      },
     });
   } catch (error) {
     console.error('Import error:', error);
     return NextResponse.json(
-      { error: 'Import failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to import materials' },
       { status: 500 }
     );
   }
 }
 
-function mapUnitToEnum(unit: string): Unit {
-  const unitMap: Record<string, Unit> = {
-    'EA': Unit.EA,
-    'LM': Unit.LM,
-    'SQM': Unit.SQM,
-    'HR': Unit.HR,
-    'DAY': Unit.DAY,
-    'PACK': Unit.PACK,
-    'KG': Unit.KG,
-    'L': Unit.L,
-  };
-  
-  return unitMap[unit] || Unit.EA;
-}
-
-function categorizeProduct(productName: string): string {
-  const name = productName.toLowerCase();
-  
-  if (name.includes('timber') || name.includes('pine') || name.includes('wood')) {
-    return 'Timber';
-  }
-  if (name.includes('plywood') || name.includes('mdf') || name.includes('sheet')) {
-    return 'Sheet Materials';
-  }
-  if (name.includes('screw') || name.includes('nail') || name.includes('bolt')) {
-    return 'Fasteners';
-  }
-  if (name.includes('adhesive') || name.includes('glue') || name.includes('liquid nails')) {
-    return 'Adhesives';
-  }
-  if (name.includes('paint') || name.includes('primer') || name.includes('stain')) {
-    return 'Paint & Finishes';
-  }
-  
-  return 'General';
+function generateSKU(name: string, supplier: string): string {
+  const prefix = supplier.substring(0, 3).toUpperCase();
+  const namePart = name
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 10)
+    .toUpperCase();
+  const timestamp = Date.now().toString().slice(-6);
+  return `${prefix}-${namePart}-${timestamp}`;
 }

@@ -1,115 +1,168 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { MaterialWebScraper } from '@/lib/material-prices/web-scraper';
-import { ScraperConfigSchema, SCRAPER_SOURCES } from '@/lib/material-prices/scraper-config';
-import { MaterialPrice } from '@/lib/material-prices';
-import * as cheerio from 'cheerio';
+import { getFirecrawlService, ScraperConfig } from '@/lib/services/firecrawl-service';
+import { transformBatch } from '@/lib/services/material-mapper';
+import { prisma } from '@/lib/prisma';
+import { scrapeCache, requestDeduplicator } from '@/lib/services/firecrawl-cache';
+import { getCategoryUrls } from '@/lib/services/supplier-configs';
+import { DataValidator } from '@/lib/services/data-validator';
+import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 
-export async function POST(request: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    
-    // Validate the configuration
-    const configResult = ScraperConfigSchema.safeParse(body);
-    if (!configResult.success) {
-      return NextResponse.json({ 
-        error: 'Invalid configuration',
-        details: configResult.error.errors 
-      }, { status: 400 });
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const config = configResult.data;
+    // Apply rate limiting
+    const rateLimitResponse = await withRateLimit(req, rateLimiters.scrape, userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    const body = await req.json();
+    const { supplier, category, urls, options } = body as {
+      supplier: string;
+      category?: string;
+      urls?: string[];
+      options: {
+        updateExisting: boolean;
+        importNew: boolean;
+        includeGST: boolean;
+      };
+    };
+
+    // Validate supplier
+    if (!supplier || !DataValidator.isValidSupplier(supplier)) {
+      return NextResponse.json(
+        { error: 'Invalid supplier' },
+        { status: 400 }
+      );
+    }
+
+    if (!options) {
+      return NextResponse.json(
+        { error: 'Options are required' },
+        { status: 400 }
+      );
+    }
+
+    // Check cache first
+    const cacheKey = scrapeCache.generateKey(supplier, category, urls);
+    const cachedData = scrapeCache.get<any>(cacheKey);
     
-    // If no materials specified, use default common materials
-    const materialsToSearch = config.materials && config.materials.length > 0 
-      ? config.materials 
-      : [
-          '90x45 pine',
-          '12mm plywood',
-          'liquid nails',
-          'timber screws',
-          '16mm mdf'
-        ];
-    
-    // Initialize results array
-    const results: MaterialPrice[] = [];
-    const scraper = new MaterialWebScraper(config);
-    const source = config.source === 'customUrl' 
-      ? {
-          name: 'Custom Supplier',
-          baseUrl: config.customUrl || '',
-          searchPath: '',
-          selectors: config.customSelectors || SCRAPER_SOURCES.customUrl.selectors
-        }
-      : SCRAPER_SOURCES[config.source];
+    if (cachedData) {
+      return NextResponse.json({
+        ...cachedData,
+        cached: true,
+      });
+    }
 
-    // Fetch and scrape each material on the server side
-    for (const term of materialsToSearch) {
-      try {
-        const url = `${source.baseUrl}${source.searchPath}${encodeURIComponent(term)}`;
-        
-        // Server-side fetch with proper headers
-        const response = await fetch(url, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-          },
-        });
-
-        if (!response.ok) {
-          console.error(`Failed to fetch ${url}: ${response.status}`);
-          // Try mock data as fallback
-          const mockResults = await scraper.getMockPrices([term]);
-          results.push(...mockResults);
-          continue;
-        }
-
-        const html = await response.text();
-        console.log(`Fetched HTML length: ${html.length} characters`);
-        console.log(`Using selectors:`, source.selectors);
-        
-        const scrapedResults = await scraper.parseHtml(html, term, source);
-        console.log(`Found ${scrapedResults.length} products for "${term}"`);
-        
-        if (scrapedResults.length === 0) {
-          // Try to help debug by showing what's in the HTML
-          const $ = cheerio.load(html);
-          console.log(`Tried selector "${source.selectors.productList}" - found ${$(source.selectors.productList).length} elements`);
-          
-          // Show a sample of what's in the HTML to help debug
-          const bodyText = $('body').text().substring(0, 200);
-          console.log(`Sample HTML content: ${bodyText}...`);
-        }
-        
-        results.push(...scrapedResults);
-      } catch (error) {
-        console.error(`Error scraping ${term}:`, error);
-        // Fall back to mock data
-        const mockResults = await scraper.getMockPrices([term]);
-        results.push(...mockResults);
+    // Deduplicate concurrent requests
+    const result = await requestDeduplicator.deduplicate(cacheKey, async () => {
+      // Get URLs from supplier config
+      const scrapeUrls = urls || getCategoryUrls(supplier, category);
+      
+      if (scrapeUrls.length === 0) {
+        return {
+          error: 'No URLs to scrape',
+          products: [],
+          summary: { total: 0, new: 0, existing: 0, errors: 0 },
+        };
       }
-    }
-    
-    return NextResponse.json({
-      success: true,
-      count: results.length,
-      materials: results.map(m => ({
-        ...m,
-        lastUpdated: m.lastUpdated.toISOString() // Ensure dates are serialized
-      }))
+
+      const firecrawl = getFirecrawlService();
+      const config: ScraperConfig = {
+        supplier: supplier as any,
+        category,
+        options,
+      };
+
+      // Scrape products
+      const scrapedProducts = await firecrawl.scrapeWithConfig(config, scrapeUrls);
+
+      // Transform to our material format
+      const transformedProducts = transformBatch(
+        scrapedProducts.map(p => ({
+          title: p.name,
+          price: p.price?.toString() || '0',
+          url: '',
+          metadata: {
+            sku: p.sku,
+            availability: p.inStock,
+            unit: p.unit,
+            description: p.description,
+          },
+        })),
+        supplier,
+        userId
+      );
+
+      // Validate all products
+      const { valid, invalid } = DataValidator.validateBatch(transformedProducts);
+      
+      // Check which valid products already exist
+      const skus = valid
+        .map(p => p.sku)
+        .filter((sku): sku is string => !!sku);
+
+      const existingMaterials = await prisma.material.findMany({
+        where: {
+          sku: { in: skus },
+          userId,
+        },
+        select: { sku: true },
+      });
+
+      const existingSkus = new Set(existingMaterials.map(m => m.sku));
+
+      // Mark products with their status
+      const productsWithStatus = valid.map(product => ({
+        ...product,
+        status: existingSkus.has(product.sku || '') ? 'existing' : 'new',
+      }));
+
+      // Add invalid products with error status
+      const invalidWithStatus = invalid.map(({ data, errors }) => ({
+        ...data,
+        status: 'error',
+        error: errors.join(', '),
+      }));
+
+      const allProducts = [...productsWithStatus, ...invalidWithStatus];
+
+      // Calculate summary
+      const summary = {
+        total: allProducts.length,
+        new: productsWithStatus.filter(p => p.status === 'new').length,
+        existing: productsWithStatus.filter(p => p.status === 'existing').length,
+        errors: invalidWithStatus.length,
+      };
+
+      const responseData = {
+        products: allProducts,
+        summary,
+      };
+
+      // Cache successful results
+      if (summary.errors === 0) {
+        scrapeCache.set(cacheKey, responseData);
+      }
+
+      return responseData;
     });
+
+    if ('error' in result && result.error) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Scraping error:', error);
     return NextResponse.json(
-      { error: 'Scraping failed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to scrape products' },
       { status: 500 }
     );
   }

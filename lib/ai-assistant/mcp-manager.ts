@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma';
+import { MCPTool as BaseMCPTool } from './types';
 
-export interface MCPTool {
-  name: string;
-  description: string;
+export interface MCPTool extends BaseMCPTool {
   inputSchema: Record<string, unknown>;
   server: string;
 }
@@ -51,6 +50,9 @@ export class MCPManager {
           config: (dbConnection.config as Record<string, unknown>) || {}
         });
       }
+
+      // Add Firecrawl connection
+      await this.connectFirecrawl();
 
       this.initialized = true;
     } catch (error) {
@@ -258,6 +260,78 @@ export class MCPManager {
     ];
   }
 
+  private async connectFirecrawl() {
+    // Create a virtual Firecrawl connection
+    const connection: MCPConnection = {
+      id: 'firecrawl',
+      name: 'Firecrawl Web Scraper',
+      type: 'firecrawl' as unknown as 'postgresql' | 'filesystem' | 'brave' | 'memory', // Custom type
+      status: 'connected',
+      tools: [
+        {
+          name: 'scrape_supplier',
+          description: 'Scrape products from supplier website (Bunnings, Tradelink, Reece)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              supplier: {
+                type: 'string',
+                enum: ['bunnings', 'tradelink', 'reece'],
+                description: 'The supplier to scrape from',
+              },
+              category: {
+                type: 'string',
+                description: 'Product category to filter (e.g., timber, plumbing, hardware)',
+              },
+              limit: {
+                type: 'number',
+                description: 'Maximum number of products to scrape',
+                default: 50,
+              },
+            },
+            required: ['supplier'],
+          },
+          server: 'firecrawl'
+        },
+        {
+          name: 'import_materials',
+          description: 'Import scraped materials to the database',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              products: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    sku: { type: 'string' },
+                    supplier: { type: 'string' },
+                    unit: { type: 'string' },
+                    pricePerUnit: { type: 'number' },
+                    category: { type: 'string' },
+                    inStock: { type: 'boolean' },
+                  },
+                  required: ['name', 'supplier', 'unit', 'pricePerUnit'],
+                },
+                description: 'Array of products to import',
+              },
+              updateExisting: {
+                type: 'boolean',
+                description: 'Whether to update existing materials with matching SKUs',
+                default: false,
+              },
+            },
+            required: ['products'],
+          },
+          server: 'firecrawl'
+        }
+      ]
+    };
+    
+    this.connections.set(connection.id, connection);
+  }
+
   async disconnectMCP(connectionId: string) {
     const connection = this.connections.get(connectionId);
     if (connection) {
@@ -272,7 +346,7 @@ export class MCPManager {
     }
   }
 
-  async callTool(toolName: string, args: Record<string, unknown>, connectionId?: string): Promise<{ content: Array<{ type: string; text: string }> }> {
+  async callTool(toolName: string, args: Record<string, unknown>, connectionId?: string, context?: { userId?: string }): Promise<{ content: Array<{ type: string; text: string }> }> {
     // Find the connection that has this tool
     let targetConnection: MCPConnection | undefined;
     
@@ -306,6 +380,8 @@ export class MCPManager {
         return await this.callBraveTool(targetConnection, toolName, args);
       case 'memory':
         return await this.callMemoryTool(targetConnection, toolName, args);
+      case 'firecrawl' as unknown as 'postgresql' | 'filesystem' | 'brave' | 'memory':
+        return await this.callFirecrawlTool(targetConnection, toolName, args, context);
       default:
         throw new Error(`Unsupported MCP type: ${targetConnection.type}`);
     }
@@ -773,6 +849,38 @@ export class MCPManager {
         };
       default:
         throw new Error(`Unknown memory tool: ${toolName}`);
+    }
+  }
+
+  private async callFirecrawlTool(connection: MCPConnection, toolName: string, args: Record<string, unknown>, context?: { userId?: string }) {
+    try {
+      // Dynamically import the Firecrawl tools
+      const { firecrawlTools } = await import('@/lib/ai-assistant/mcp-implementations/firecrawl');
+      
+      const tool = firecrawlTools[toolName];
+      if (!tool) {
+        throw new Error(`Unknown Firecrawl tool: ${toolName}`);
+      }
+      
+      // Get the current user ID from the context
+      const userId = context?.userId || 'default-user-id';
+      
+      const result = tool.handler ? await tool.handler(args, { userId }) : null;
+      
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2)
+        }]
+      };
+    } catch (error) {
+      console.error('Firecrawl tool error:', error);
+      return {
+        content: [{
+          type: 'text',
+          text: `Error calling Firecrawl tool: ${error instanceof Error ? error.message : 'Unknown error'}`
+        }]
+      };
     }
   }
 

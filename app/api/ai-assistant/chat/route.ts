@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const aiResponse = await processChat(messages, attachments);
+    const aiResponse = await processChat(messages, attachments, { userId: dbUser.id });
     console.log('[CHAT API] AI Response:', {
       contentLength: aiResponse.content.length,
       hasQuote: !!aiResponse.quoteDraft,

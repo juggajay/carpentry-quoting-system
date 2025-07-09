@@ -75,12 +75,21 @@ export interface GeneratedQuote {
   createdAt: Date;
 }
 
+export interface MCPTool {
+  name: string;
+  description: string;
+  inputSchema?: any;
+  parameters?: any;
+  handler?: (args: any, context?: any) => Promise<any>;
+}
+
 export interface MCPConnection {
   id: string;
   name: string;
   type: 'postgresql' | 'filesystem' | 'memory' | 'brave';
   status: 'connected' | 'disconnected' | 'error';
   config?: Record<string, unknown>;
+  tools?: MCPTool[];
 }
 
 export function getConfidenceIndicator(score: number): ConfidenceLevel['indicator'] {

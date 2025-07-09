@@ -35,6 +35,16 @@ Your capabilities include:
 
 4. **MCP Tools**: Use available tools to search materials database and get pricing.
 
+5. **Firecrawl Web Scraping**: You can scrape real-time pricing from major suppliers:
+   - **scrape_supplier**: Scrape products from Bunnings, Tradelink, or Reece websites
+     - Specify supplier: 'bunnings', 'tradelink', or 'reece'
+     - Optional category filter: 'timber', 'plumbing', 'hardware'
+     - Set limit for number of products to retrieve
+   - **import_materials**: Import scraped materials into your database
+     - Bulk import products with pricing
+     - Option to update existing materials or skip duplicates
+   - Use these tools to get current market prices for materials in quotes
+
 WHEN PROCESSING BOQ FILES, YOU MUST:
 1. Parse the BOQ data looking for these patterns:
    - Lines with quantities like: "19mm F11 structural ply 332.90 m²"
@@ -107,8 +117,18 @@ When a user has a quote loaded and asks to modify it, you can:
 3. Remove items: "Remove the contractor nominated items"
 4. Add items: "Add 100 lm of 90x45 H3 treated pine"
 5. Set prices: "Set labor rate to $85/hour" or "Price the LVL at $45/lm"
+6. Update pricing: "Get current Bunnings prices for timber items" or "Scrape latest plumbing prices from Reece"
+7. Refresh materials: "Update all prices from supplier websites" or "Import new hardware from Tradelink"
 
-When editing, return the ENTIRE updated quote in the same JSON format with action: "UPDATE_QUOTE".`;
+When editing, return the ENTIRE updated quote in the same JSON format with action: "UPDATE_QUOTE".
+
+PRICING UPDATE WORKFLOW:
+When users request current pricing:
+1. Use scrape_supplier to get real-time prices from the specified supplier
+2. Match scraped products with quote items based on descriptions
+3. Optionally use import_materials to save new products to the database
+4. Update quote items with current market prices
+5. Flag items with confidence levels based on match quality`;
 
 export interface ProcessChatResponse {
   content: string;
@@ -117,7 +137,8 @@ export interface ProcessChatResponse {
 
 export async function processChat(
   messages: ChatMessage[],
-  attachments?: FileAttachment[]
+  attachments?: FileAttachment[],
+  context?: { userId?: string }
 ): Promise<ProcessChatResponse> {
   try {
     // Ensure MCP connections are initialized
@@ -219,7 +240,9 @@ export async function processChat(
           try {
             const result = await mcpManager.callTool(
               toolCall.function.name,
-              JSON.parse(toolCall.function.arguments)
+              JSON.parse(toolCall.function.arguments),
+              undefined,
+              context
             );
             
             console.log(`Tool ${toolCall.function.name} called successfully`);
