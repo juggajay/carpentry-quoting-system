@@ -283,16 +283,7 @@ function getSupplierUrls(supplier: string, category?: string): string[] {
     },
     canterbury: {
       timber: [
-        'https://canterburytimbers.com.au/product-category/timber/',
-      ],
-      decking: [
-        'https://canterburytimbers.com.au/product-category/decking/',
-      ],
-      flooring: [
-        'https://canterburytimbers.com.au/product-category/flooring/',
-      ],
-      cladding: [
-        'https://canterburytimbers.com.au/product-category/cladding/',
+        'https://www.canterburytimbers.com.au/collections/timber-all',
       ],
     },
   };

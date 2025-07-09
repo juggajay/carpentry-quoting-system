@@ -28,18 +28,22 @@ const SUPPLIERS = {
   bunnings: {
     name: 'Bunnings',
     categories: ['Timber', 'Plumbing', 'Hardware', 'Concrete'],
+    note: '',
   },
   blacktown: {
     name: 'Blacktown Building Supplies',
     categories: ['Timber', 'Hardware', 'Building Materials', 'Tools'],
+    note: '',
   },
   canterbury: {
     name: 'Canterbury Timbers',
-    categories: ['Timber', 'Decking', 'Flooring', 'Cladding'],
+    categories: ['Timber'],
+    note: '',
   },
   custom: {
     name: 'Custom URL',
     categories: ['Timber', 'Plumbing', 'Hardware', 'Building Materials', 'Tools', 'Other'],
+    note: 'Paste any supplier product page URL to scrape individual products.',
   },
 };
 
@@ -134,26 +138,26 @@ export function MaterialScraperDialog({
             </div>
           )}
 
+          {/* Supplier Note */}
+          {SUPPLIERS[source].note && (
+            <div className="flex items-start space-x-2 p-4 bg-amber-900/20 border border-amber-700 rounded-md">
+              <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-amber-300">
+                {SUPPLIERS[source].note}
+              </p>
+            </div>
+          )}
+
           {/* Custom URL Configuration */}
           {source === 'custom' && (
-            <>
-              <div className="space-y-2">
-                <Label>Website URL</Label>
-                <Input
-                  placeholder="https://example.com"
-                  value={customUrl}
-                  onChange={(e) => setCustomUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-start space-x-2 p-4 bg-amber-900/20 border border-amber-700 rounded-md">
-                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-amber-300">
-                  <p>Custom URL scraping is experimental.</p>
-                  <p className="mt-1">Make sure the URL points to a product listing page.</p>
-                </div>
-              </div>
-            </>
+            <div className="space-y-2">
+              <Label>Website URL</Label>
+              <Input
+                placeholder="https://example.com/products/timber-decking"
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+              />
+            </div>
           )}
 
 

@@ -208,53 +208,27 @@ export const supplierConfigs: Record<string, SupplierConfig> = {
   
   canterbury: {
     name: 'Canterbury Timbers',
-    baseUrl: 'https://canterburytimbers.com.au',
+    baseUrl: 'https://www.canterburytimbers.com.au',
     categories: {
       timber: {
-        name: 'Timber',
-        path: '/product-category/timber/',
+        name: 'All Timber',
+        path: '/collections/timber-all',
         subcategories: {
-          structural: '/product-category/timber/structural/',
-          treated: '/product-category/timber/treated-pine/',
-          hardwood: '/product-category/timber/hardwood/',
-        },
-      },
-      decking: {
-        name: 'Decking',
-        path: '/product-category/decking/',
-        subcategories: {
-          composite: '/product-category/decking/composite/',
-          hardwood: '/product-category/decking/hardwood-decking/',
-          treated_pine: '/product-category/decking/treated-pine-decking/',
-        },
-      },
-      flooring: {
-        name: 'Flooring',
-        path: '/product-category/flooring/',
-        subcategories: {
-          solid: '/product-category/flooring/solid-timber/',
-          engineered: '/product-category/flooring/engineered/',
-          laminate: '/product-category/flooring/laminate/',
-        },
-      },
-      cladding: {
-        name: 'Cladding',
-        path: '/product-category/cladding/',
-        subcategories: {
-          weatherboard: '/product-category/cladding/weatherboard/',
-          shiplap: '/product-category/cladding/shiplap/',
+          decking: '/collections/decking',
+          flooring: '/collections/flooring',
+          structural: '/collections/structural-timber',
         },
       },
     },
     selectors: {
-      products: '.products .product, li.product',
-      name: '.woocommerce-loop-product__title, .product-title, h2.woocommerce-loop-product__title',
-      price: '.price, .amount, bdi',
-      sku: '.sku, .product-sku',
+      products: '.product-item, .grid-product, .product-card, article.product',
+      name: '.product-item__title, .grid-product__title, .product-card__title, h3.product-title, .product__title',
+      price: '.price__regular, .product-price, .price--highlight, .money, .product-item__price',
+      sku: '.product__sku, .product-sku, .variant-sku',
       unit: '.product-unit, .unit',
-      stock: '.stock, .in-stock, .out-of-stock',
-      image: '.attachment-woocommerce_thumbnail, .product-image img',
-      description: '.product-short-description, .product-description',
+      stock: '.product__inventory, .availability',
+      image: '.product__media img, .product-item__image img',
+      description: '.product__description, .product-description',
     },
     priceFormat: {
       currency: '$',
