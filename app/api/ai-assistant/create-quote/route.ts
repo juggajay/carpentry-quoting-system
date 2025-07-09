@@ -111,6 +111,7 @@ export async function POST(request: NextRequest) {
     }
     
     console.log('[Create Quote] Creating quote with', quoteDraft.items.length, 'items');
+    console.log('[Create Quote] User ID:', user.id);
     
     // Get user settings for defaults
     const settings = await prisma.settings.findUnique({
@@ -128,6 +129,12 @@ export async function POST(request: NextRequest) {
     const taxRate = settings?.defaultTaxRate || 10;
     const tax = subtotal * (taxRate / 100);
     const total = subtotal + tax;
+    
+    // Verify user exists and has an ID
+    if (!user.id) {
+      console.error('[Create Quote] User has no ID:', user);
+      return NextResponse.json({ error: "User ID is missing" }, { status: 500 });
+    }
     
     // Create the quote with all items
     const quote = await prisma.quote.create({
@@ -193,6 +200,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('[Create Quote] Error:', error);
+    
+    // Log more details for Prisma errors
+    if (error instanceof Error && error.message.includes('prisma')) {
+      console.error('[Create Quote] Full error:', JSON.stringify(error, null, 2));
+    }
+    
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to create quote" },
       { status: 500 }
