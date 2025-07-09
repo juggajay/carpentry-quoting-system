@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
       
       const scrapePromise = firecrawl.scrapeWithConfig(config, scrapeUrls);
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Scraping timeout after 30 seconds')), 30000);
+        // Longer timeout for Canterbury Timbers
+        const timeoutMs = supplier === 'canterbury' ? 60000 : 30000;
+        setTimeout(() => reject(new Error(`Scraping timeout after ${timeoutMs/1000} seconds`)), timeoutMs);
       });
       
       const scrapedProducts = await Promise.race([scrapePromise, timeoutPromise]);

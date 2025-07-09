@@ -71,6 +71,32 @@ export class FirecrawlService {
     const products: ScrapedProduct[] = [];
     console.log(`[FirecrawlService] Starting scrape for ${config.name} with ${urls.length} URLs`);
     
+    // For Canterbury Timbers, use alternative scraper directly
+    if (config.name === 'Canterbury Timbers') {
+      console.log(`[FirecrawlService] Using alternative scraper for Canterbury Timbers`);
+      for (const url of urls) {
+        try {
+          console.log(`[AlternativeScraper] Scraping URL: ${url}`);
+          const altProducts = await AlternativeScraper.scrapeDirectly(url);
+          const mappedProducts = altProducts.map(p => ({
+            name: p.name,
+            price: p.price,
+            unit: p.unit || 'EA',
+            inStock: p.inStock ?? true,
+            description: p.description,
+            sku: p.sku,
+            category: config.name,
+          }));
+          products.push(...mappedProducts);
+          console.log(`[AlternativeScraper] Found ${mappedProducts.length} products from ${url}`);
+          await this.delay(this.rateLimitDelay);
+        } catch (error) {
+          console.error(`Alternative scraper error for ${url}:`, error);
+        }
+      }
+      return products;
+    }
+    
     for (const url of urls) {
       try {
         console.log(`[FirecrawlService] Scraping URL: ${url}`);
