@@ -195,7 +195,7 @@ export class AlternativeScraper {
     if (!name || price === 0) return null;
 
     // Extract unit from various sources
-    let unit = AlternativeScraper.extractUnit($element, name, priceText);
+    const unit = AlternativeScraper.extractUnit($element, name, priceText);
     
 
     return {
