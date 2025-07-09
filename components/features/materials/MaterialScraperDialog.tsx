@@ -20,13 +20,33 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Globe, Search, AlertCircle } from 'lucide-react';
-import { SCRAPER_SOURCES, ScraperSource } from '@/lib/material-prices/scraper-config';
 import { toast } from 'sonner';
+
+type SupplierType = 'bunnings' | 'tradelink' | 'reece' | 'custom';
+
+const SUPPLIERS = {
+  bunnings: {
+    name: 'Bunnings',
+    categories: ['Timber', 'Plumbing', 'Hardware', 'Concrete'],
+  },
+  tradelink: {
+    name: 'Tradelink',
+    categories: ['Plumbing', 'Bathroom', 'Hot Water'],
+  },
+  reece: {
+    name: 'Reece',
+    categories: ['Plumbing', 'Bathroom', 'HVAC-R'],
+  },
+  custom: {
+    name: 'Custom URL',
+    categories: [],
+  },
+};
 
 interface MaterialScraperDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onScrape: (config: { source: string; materials?: string[]; customUrl?: string; customSelectors?: Record<string, string> }) => Promise<void>;
+  onScrape: (config: { source: string; category?: string; materials?: string[]; customUrl?: string }) => Promise<void>;
 }
 
 export function MaterialScraperDialog({ 
@@ -34,33 +54,23 @@ export function MaterialScraperDialog({
   onOpenChange,
   onScrape 
 }: MaterialScraperDialogProps) {
-  const [source, setSource] = useState<ScraperSource>('bunnings');
+  const [source, setSource] = useState<SupplierType>('bunnings');
+  const [category, setCategory] = useState<string>('');
   const [customUrl, setCustomUrl] = useState('');
-  const [materials, setMaterials] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  // Custom selector fields
-  const [customSelectors, setCustomSelectors] = useState({
-    productList: '',
-    price: '',
-    title: '',
-    unit: '',
-  });
 
   const handleScrape = async () => {
     setLoading(true);
     try {
       const config = {
         source,
-        ...(source === 'customUrl' && {
+        category: category || undefined,
+        ...(source === 'custom' && {
           customUrl,
-          customSelectors,
         }),
-        materials: materials.split('\n').filter(m => m.trim()),
       };
 
       await onScrape(config);
-      toast.success('Scraping completed');
       onOpenChange(false);
     } catch {
       toast.error('Scraping failed');
@@ -86,12 +96,12 @@ export function MaterialScraperDialog({
           {/* Source Selection */}
           <div className="space-y-2">
             <Label>Supplier Website</Label>
-            <Select value={source} onValueChange={(v) => setSource(v as ScraperSource)}>
+            <Select value={source} onValueChange={(v) => setSource(v as SupplierType)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(SCRAPER_SOURCES).map(([key, config]) => (
+                {Object.entries(SUPPLIERS).map(([key, config]) => (
                   <SelectItem key={key} value={key}>
                     {config.name}
                   </SelectItem>
@@ -100,8 +110,28 @@ export function MaterialScraperDialog({
             </Select>
           </div>
 
+          {/* Category Selection for supported suppliers */}
+          {source !== 'custom' && SUPPLIERS[source].categories.length > 0 && (
+            <div className="space-y-2">
+              <Label>Category (Optional)</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All categories</SelectItem>
+                  {SUPPLIERS[source].categories.map((cat) => (
+                    <SelectItem key={cat} value={cat.toLowerCase()}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Custom URL Configuration */}
-          {source === 'customUrl' && (
+          {source === 'custom' && (
             <>
               <div className="space-y-2">
                 <Label>Website URL</Label>
@@ -115,90 +145,26 @@ export function MaterialScraperDialog({
               <div className="flex items-start space-x-2 p-4 bg-amber-900/20 border border-amber-700 rounded-md">
                 <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
                 <p className="text-sm text-amber-300">
-                  Custom scraping requires CSS selectors for the website&apos;s HTML structure.
-                  This is an advanced feature.
+                  Custom URL scraping is coming soon. For now, please use one of the supported suppliers.
                 </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Product List Selector</Label>
-                  <Input
-                    placeholder=".product-item, div.product, article, li.item"
-                    value={customSelectors.productList}
-                    onChange={(e) => setCustomSelectors(prev => ({
-                      ...prev,
-                      productList: e.target.value
-                    }))}
-                  />
-                  <p className="text-xs text-gray-500">Container element for each product</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Price Selector</Label>
-                  <Input
-                    placeholder=".price, span.price, .product-price"
-                    value={customSelectors.price}
-                    onChange={(e) => setCustomSelectors(prev => ({
-                      ...prev,
-                      price: e.target.value
-                    }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Title Selector</Label>
-                  <Input
-                    placeholder=".product-name, h3, .title, a"
-                    value={customSelectors.title}
-                    onChange={(e) => setCustomSelectors(prev => ({
-                      ...prev,
-                      title: e.target.value
-                    }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Unit Selector (Optional)</Label>
-                  <Input
-                    placeholder=".unit, .price-unit, .qty"
-                    value={customSelectors.unit}
-                    onChange={(e) => setCustomSelectors(prev => ({
-                      ...prev,
-                      unit: e.target.value
-                    }))}
-                  />
-                </div>
               </div>
             </>
           )}
 
-          {/* Materials to Search */}
-          <div className="space-y-2">
-            <Label>Materials to Search (one per line)</Label>
-            <textarea
-              className="flex min-h-[120px] w-full rounded-lg border border-gray-700 bg-dark-surface px-4 py-3 text-sm text-white ring-offset-dark-surface placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-royal-blue focus-visible:border-royal-blue disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-600 transition-all duration-200"
-              placeholder="90x45 Pine 2.4m
-12mm Plywood
-Liquid Nails 320g"
-              value={materials}
-              onChange={(e) => setMaterials(e.target.value)}
-              rows={5}
-            />
-            <p className="text-sm text-muted-foreground">
-              Leave empty to scrape all materials from the selected category
-            </p>
-          </div>
 
           {/* Preview of what will be scraped */}
           <div className="flex items-start space-x-2 p-4 bg-blue-900/20 border border-blue-700 rounded-md">
             <Search className="h-4 w-4 text-blue-400 mt-0.5" />
             <p className="text-sm text-blue-300">
-              {source !== 'customUrl' ? (
+              {source !== 'custom' ? (
                 <>
-                  Will scrape from <strong>{SCRAPER_SOURCES[source].name}</strong>
-                  {materials && ` for ${materials.split('\n').filter(m => m.trim()).length} materials`}
+                  Will scrape from <strong>{SUPPLIERS[source].name}</strong>
+                  {category && ` - ${category} category`}
+                  {!category && ' - all categories'}
                 </>
               ) : (
                 <>
-                  Will scrape from custom URL: <strong>{customUrl || 'Not specified'}</strong>
+                  Custom URL scraping: <strong>{customUrl || 'Not specified'}</strong>
                 </>
               )}
             </p>
@@ -211,7 +177,7 @@ Liquid Nails 320g"
           </Button>
           <Button 
             onClick={handleScrape} 
-            disabled={loading || (source === 'customUrl' && !customUrl)}
+            disabled={loading || (source === 'custom')}
           >
             {loading ? 'Scraping...' : 'Start Scraping'}
           </Button>
