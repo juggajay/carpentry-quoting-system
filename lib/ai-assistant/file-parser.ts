@@ -16,6 +16,135 @@ export interface ParsedFileContent {
   };
 }
 
+class FileParser {
+  /**
+   * Parse a file from a buffer
+   */
+  async parseFile(buffer: Buffer, fileName: string, mimeType: string): Promise<ParsedFileContent | null> {
+    const ext = path.extname(fileName).toLowerCase();
+    
+    try {
+      switch (ext) {
+        case '.pdf':
+          return await this.parsePDFFromBuffer(buffer);
+        
+        case '.xlsx':
+        case '.xls':
+          return await this.parseExcelFromBuffer(buffer);
+        
+        case '.csv':
+          return await this.parseCSVFromBuffer(buffer);
+        
+        case '.txt':
+          return {
+            text: buffer.toString('utf-8'),
+            type: 'text'
+          };
+        
+        case '.docx':
+          // For now, we'll return a placeholder for DOCX
+          return {
+            text: 'DOCX parsing not yet implemented. Please use PDF or Excel format.',
+            type: 'docx'
+          };
+        
+        default:
+          console.warn(`Unsupported file type: ${ext}`);
+          return null;
+      }
+    } catch (error) {
+      console.error(`Error parsing file ${fileName}:`, error);
+      return null;
+    }
+  }
+
+  private async parsePDFFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
+    try {
+      // Dynamic import to avoid build issues
+      const pdfParse = (await import('pdf-parse')).default;
+      const data = await pdfParse(buffer);
+      
+      // Enhanced drawing analysis
+      const drawingAnalysis = analyzeDrawingContent(data.text);
+      
+      return {
+        text: data.text,
+        type: 'pdf',
+        metadata: {
+          pages: data.numpages,
+          scale: drawingAnalysis.scale,
+          drawing_type: drawingAnalysis.drawing_type,
+          dimensions_found: drawingAnalysis.dimensions_found,
+          elements_detected: drawingAnalysis.elements_detected
+        }
+      };
+    } catch (error) {
+      console.error('Error parsing PDF:', error);
+      // Fallback if pdf-parse fails
+      return {
+        text: 'PDF parsing failed. Please try uploading an Excel or CSV file instead.',
+        type: 'pdf',
+        metadata: {
+          pages: 0,
+          drawing_type: 'unknown',
+          dimensions_found: 0,
+          elements_detected: []
+        }
+      };
+    }
+  }
+
+  private async parseExcelFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const sheetNames = workbook.SheetNames;
+    let fullText = '';
+    let totalRows = 0;
+    
+    // Process each sheet
+    sheetNames.forEach(sheetName => {
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      fullText += `\n=== Sheet: ${sheetName} ===\n`;
+      
+      // Convert each row to text
+      jsonData.forEach((row) => {
+        if (Array.isArray(row) && row.some(cell => cell !== null && cell !== undefined && cell !== '')) {
+          fullText += row.map(cell => String(cell ?? '')).join('\t') + '\n';
+          totalRows++;
+        }
+      });
+    });
+    
+    return {
+      text: fullText.trim(),
+      type: 'excel',
+      metadata: {
+        sheets: sheetNames,
+        rows: totalRows
+      }
+    };
+  }
+
+  private async parseCSVFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
+    const content = buffer.toString('utf-8');
+    
+    // Simple CSV parsing - for production, consider using a CSV parser library
+    const lines = content.split('\n').filter(line => line.trim());
+    const rows = lines.length;
+    
+    return {
+      text: content,
+      type: 'csv',
+      metadata: {
+        rows
+      }
+    };
+  }
+}
+
+export const fileParser = new FileParser();
+
 /**
  * Parse various file types and extract text content
  */

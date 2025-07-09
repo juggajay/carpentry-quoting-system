@@ -45,6 +45,7 @@ model User {
   settings        Settings?
   aiSessions      AISession[]
   importJobs      ImportJob[]
+  estimatorSessions EstimatorSession[]
 
   @@index([clerkId])
   @@index([email])
@@ -419,5 +420,100 @@ enum ImportJobStatus {
   COMPLETED
   FAILED
   CANCELLED
+}
+
+// Senior Estimator Models
+
+// EstimatorSession model - stores senior estimator sessions
+model EstimatorSession {
+  id          String   @id @default(cuid())
+  userId      String
+  status      EstimatorSessionStatus @default(ACTIVE)
+  context     Json?    // Stores session context and messages
+  projectId   String?  // Link to a project if applicable
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyses    EstimatorAnalysis[]
+  questions   EstimatorQuestion[]
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// EstimatorAnalysis model - stores analysis results
+model EstimatorAnalysis {
+  id                String   @id @default(cuid())
+  sessionId         String
+  scopeAnalysis     Json     // Stores ScopeAnalysis result
+  drawingAnalyses   Json     // Stores DrawingAnalysis[] results
+  quoteItems        Json     // Stores QuoteItem[] results
+  confidenceSummary Json     // Stores confidence summary
+  auditTrail        Json     // Stores audit trail
+  status            EstimatorAnalysisStatus @default(PENDING)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  session           EstimatorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questions         EstimatorQuestion[]
+  
+  @@index([sessionId])
+  @@index([status])
+}
+
+// EstimatorQuestion model - stores generated questions
+model EstimatorQuestion {
+  id              String   @id @default(cuid())
+  sessionId       String
+  analysisId      String
+  question        String
+  questionType    String   // dimension, material, method, specification, quantity, location
+  priority        EstimatorQuestionPriority @default(MEDIUM)
+  context         Json?    // Additional context for the question
+  defaultAnswer   String?  // Suggested answer
+  userAnswer      String?  // User's response
+  status          EstimatorQuestionStatus @default(PENDING)
+  answeredAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  session         EstimatorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  analysis        EstimatorAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  @@index([sessionId])
+  @@index([analysisId])
+  @@index([status])
+  @@index([priority])
+}
+
+enum EstimatorSessionStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum EstimatorAnalysisStatus {
+  PENDING
+  PROCESSING
+  READY_FOR_PRICING
+  NEEDS_CLARIFICATION
+  COMPLETED
+  FAILED
+}
+
+enum EstimatorQuestionPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum EstimatorQuestionStatus {
+  PENDING
+  ANSWERED
+  SKIPPED
 }
 

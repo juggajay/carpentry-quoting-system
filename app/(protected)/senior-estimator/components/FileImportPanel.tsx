@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Upload, FileText, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import { useEstimator } from '../context/EstimatorContext'
 
 interface ImportedFile {
   id: string
@@ -11,10 +12,15 @@ interface ImportedFile {
   type: string
   status: 'uploading' | 'processing' | 'ready' | 'error'
   uploadProgress?: number
+  file: File
+  error?: string
 }
 
 export function FileImportPanel() {
   const [files, setFiles] = useState<ImportedFile[]>([])
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -22,46 +28,129 @@ export function FileImportPanel() {
       name: file.name,
       size: file.size,
       type: file.type,
-      status: 'uploading' as const,
-      uploadProgress: 0
+      status: 'ready' as const,
+      uploadProgress: 100,
+      file: file
     }))
 
     setFiles(prev => [...prev, ...newFiles])
-
-    // Simulate file upload
+    
+    // Add activity for each file
     newFiles.forEach(file => {
-      simulateFileUpload(file.id)
+      addActivity({
+        type: 'file',
+        message: `Added file: ${file.name}`
+      })
     })
-  }, [])
+  }, [addActivity])
 
-  const simulateFileUpload = (fileId: string) => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 10
-      setFiles(prev => prev.map(f => 
-        f.id === fileId 
-          ? { ...f, uploadProgress: progress }
-          : f
-      ))
+  const analyzeFiles = async () => {
+    if (files.length === 0 || isAnalyzing) return
 
-      if (progress >= 100) {
-        clearInterval(interval)
-        setFiles(prev => prev.map(f => 
-          f.id === fileId 
-            ? { ...f, status: 'processing' }
-            : f
-        ))
-
-        // Simulate processing
-        setTimeout(() => {
-          setFiles(prev => prev.map(f => 
-            f.id === fileId 
-              ? { ...f, status: 'ready' }
-              : f
-          ))
-        }, 2000)
+    setIsAnalyzing(true)
+    
+    try {
+      // Create FormData with all files
+      const formData = new FormData()
+      files.forEach(file => {
+        formData.append('files', file.file)
+      })
+      
+      if (sessionId) {
+        formData.append('sessionId', sessionId)
       }
-    }, 200)
+      
+      formData.append('projectType', 'residential')
+      formData.append('location', 'NSW, Australia')
+      
+      // Mark all files as processing
+      setFiles(prev => prev.map(f => ({ ...f, status: 'processing' })))
+      
+      addActivity({
+        type: 'analysis',
+        message: `Analyzing ${files.length} files...`
+      })
+      
+      const response = await fetch('/api/senior-estimator/analyze', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Analysis failed: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // Update session ID
+      if (!sessionId && data.sessionId) {
+        setSessionId(data.sessionId)
+      }
+      
+      // Process the estimation result
+      const result = data.result
+      
+      // Update job details
+      if (result.scope_analysis.extractedItems.length > 0) {
+        updateJobDetails({
+          projectType: 'residential',
+          location: 'NSW, Australia',
+          estimatedCost: 0,
+          estimatedDays: parseInt(result.estimated_duration)
+        })
+      }
+      
+      // Add extracted items to estimates
+      result.quote_items.forEach((item: any) => {
+        addEstimateItem({
+          id: item.id,
+          category: item.category || 'General',
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          rate: item.unitPrice || 0,
+          total: item.totalPrice || 0,
+          confidence: item.confidence.score >= 85 ? 'high' : 
+                      item.confidence.score >= 70 ? 'medium' : 'low'
+        })
+      })
+      
+      // Update scope summary
+      const scopeItems = result.scope_analysis.extractedItems.map((item: any) => 
+        `${item.description} (${item.confidence.score}% confidence)`
+      )
+      updateScopeSummary(scopeItems)
+      
+      // Add next steps as todos
+      result.next_steps.forEach((step: string) => {
+        addTodoItem(step, 'medium')
+      })
+      
+      // Mark files as ready
+      setFiles(prev => prev.map(f => ({ ...f, status: 'ready' })))
+      
+      addActivity({
+        type: 'complete',
+        message: `Analysis complete: ${result.scope_analysis.extractedItems.length} items found`
+      })
+      
+    } catch (error) {
+      console.error('Error analyzing files:', error)
+      
+      // Mark files as error
+      setFiles(prev => prev.map(f => ({ 
+        ...f, 
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Analysis failed'
+      })))
+      
+      addActivity({
+        type: 'error',
+        message: 'Failed to analyze files'
+      })
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const removeFile = (fileId: string) => {
@@ -115,8 +204,26 @@ export function FileImportPanel() {
           </p>
         </div>
 
+        {/* Analyze Button */}
+        {files.length > 0 && (
+          <button
+            onClick={analyzeFiles}
+            disabled={isAnalyzing || files.every(f => f.status === 'ready')}
+            className="mt-4 w-full bg-electric-magenta text-white rounded-lg px-4 py-2 font-medium hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing Files...
+              </>
+            ) : (
+              'Analyze Files'
+            )}
+          </button>
+        )}
+
         {/* File List */}
-        <div className="mt-4 space-y-2">
+        <div className={files.length > 0 ? "mt-4 space-y-2" : "mt-4 space-y-2"}>
           {files.map(file => (
             <div 
               key={file.id} 
@@ -131,6 +238,11 @@ export function FileImportPanel() {
                 <p className="text-xs text-gray-400">
                   {formatFileSize(file.size)}
                 </p>
+                
+                {/* Error message */}
+                {file.error && (
+                  <p className="text-xs text-critical-red mt-1">{file.error}</p>
+                )}
                 
                 {/* Progress bar */}
                 {file.status === 'uploading' && (

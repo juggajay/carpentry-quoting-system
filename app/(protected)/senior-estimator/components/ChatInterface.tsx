@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Send, Paperclip, Bot, User } from 'lucide-react'
+import { Send, Paperclip, Bot, User, AlertCircle } from 'lucide-react'
 import { useEstimator } from '../context/EstimatorContext'
 
 interface Message {
@@ -10,6 +10,12 @@ interface Message {
   sender: 'user' | 'assistant'
   timestamp: Date
   attachments?: string[]
+  analysisResult?: any
+}
+
+interface EstimatorSession {
+  id: string
+  status: string
 }
 
 export function ChatInterface() {
@@ -23,8 +29,17 @@ export function ChatInterface() {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [session, setSession] = useState<EstimatorSession | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { addActivity } = useEstimator()
+  const { 
+    addActivity, 
+    addEstimateItem, 
+    updateJobDetails,
+    updateScopeSummary,
+    addTodoItem
+  } = useEstimator()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -35,7 +50,7 @@ export function ChatInterface() {
   }, [messages])
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -47,6 +62,8 @@ export function ChatInterface() {
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsTyping(true)
+    setIsLoading(true)
+    setError(null)
 
     // Add activity
     addActivity({
@@ -54,22 +71,125 @@ export function ChatInterface() {
       message: `User: ${input.substring(0, 50)}${input.length > 50 ? '...' : ''}`
     })
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Call the Senior Estimator API
+      const response = await fetch('/api/senior-estimator/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          sessionId: session?.id,
+          projectType: 'residential', // This should be configurable
+          location: 'NSW, Australia' // This should be configurable
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Update session
+      if (!session) {
+        setSession({ id: data.sessionId, status: 'active' })
+      }
+
+      // Process the estimation result
+      const result = data.result
+      
+      // Update job details if extracted
+      if (result.scope_analysis.extractedItems.length > 0) {
+        updateJobDetails({
+          projectType: 'residential',
+          location: 'NSW, Australia',
+          estimatedCost: 0, // Will be calculated after pricing
+          estimatedDays: parseInt(result.estimated_duration)
+        })
+      }
+
+      // Add extracted items to estimates
+      result.quote_items.forEach((item: any) => {
+        addEstimateItem({
+          id: item.id,
+          category: item.category || 'General',
+          description: item.description,
+          quantity: item.quantity,
+          unit: item.unit,
+          rate: item.unitPrice || 0,
+          total: item.totalPrice || 0,
+          confidence: item.confidence.score >= 85 ? 'high' : 
+                      item.confidence.score >= 70 ? 'medium' : 'low'
+        })
+      })
+
+      // Update scope summary
+      const scopeItems = result.scope_analysis.extractedItems.map((item: any) => 
+        `${item.description} (${item.confidence.score}% confidence)`
+      )
+      updateScopeSummary(scopeItems)
+
+      // Add next steps as todos
+      result.next_steps.forEach((step: string) => {
+        addTodoItem(step, 'medium')
+      })
+
+      // Create AI response message
+      let responseContent = `I've analyzed your scope and found:\n\n`
+      responseContent += `📋 **${result.scope_analysis.extractedItems.length} scope items** identified\n`
+      responseContent += `🎯 **Overall confidence:** ${result.confidence_summary.overall_confidence.score}%\n`
+      responseContent += `✅ **High confidence items:** ${result.confidence_summary.high_confidence_items}\n`
+      responseContent += `⚠️ **Items needing review:** ${result.confidence_summary.items_requiring_review}\n\n`
+      
+      if (result.questions.length > 0) {
+        responseContent += `I have **${result.questions.length} questions** to improve accuracy:\n`
+        result.questions.slice(0, 3).forEach((q: any, idx: number) => {
+          responseContent += `${idx + 1}. ${q.question}\n`
+        })
+        if (result.questions.length > 3) {
+          responseContent += `\n...and ${result.questions.length - 3} more questions`
+        }
+      }
+      
+      responseContent += `\n\n**Estimated completion time:** ${result.estimated_duration}`
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'I\'ve received your message. Let me analyze the information and provide you with detailed insights.',
+        content: responseContent,
+        sender: 'assistant',
+        timestamp: new Date(),
+        analysisResult: result
+      }
+      
+      setMessages(prev => [...prev, aiResponse])
+      
+      addActivity({
+        type: 'analysis',
+        message: `Analyzed ${result.scope_analysis.extractedItems.length} items with ${result.confidence_summary.overall_confidence.score}% confidence`
+      })
+
+    } catch (err) {
+      console.error('Error calling Senior Estimator API:', err)
+      setError(err instanceof Error ? err.message : 'Failed to analyze scope')
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'Sorry, I encountered an error while analyzing your request. Please try again.',
         sender: 'assistant',
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, aiResponse])
-      setIsTyping(false)
+      setMessages(prev => [...prev, errorMessage])
       
       addActivity({
-        type: 'response',
-        message: 'AI provided analysis'
+        type: 'error',
+        message: 'Failed to analyze scope'
       })
-    }, 2000)
+    } finally {
+      setIsTyping(false)
+      setIsLoading(false)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -146,6 +266,12 @@ export function ChatInterface() {
 
       {/* Input */}
       <div className="p-4 border-t border-gray-800">
+        {error && (
+          <div className="mb-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5" />
+            <p className="text-sm text-red-500">{error}</p>
+          </div>
+        )}
         <div className="flex gap-2">
           <button className="text-gray-400 hover:text-gray-200 transition-colors">
             <Paperclip className="h-5 w-5" />
@@ -157,13 +283,21 @@ export function ChatInterface() {
             placeholder="Type your message..."
             className="flex-1 resize-none rounded-lg bg-dark-surface border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-electric-magenta"
             rows={1}
+            disabled={isLoading}
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
-            className="bg-electric-magenta text-white rounded-lg px-4 py-2 hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!input.trim() || isLoading}
+            className="bg-electric-magenta text-white rounded-lg px-4 py-2 hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            <Send className="h-4 w-4" />
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="sr-only">Analyzing...</span>
+              </>
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
