@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import FirecrawlApp from 'firecrawl';
 
 export async function GET() {
   try {
@@ -14,7 +15,6 @@ export async function GET() {
     }
 
     // Try to import and initialize Firecrawl
-    const FirecrawlApp = require('firecrawl').default;
     const firecrawl = new FirecrawlApp({ apiKey });
 
     // Test a simple scrape
