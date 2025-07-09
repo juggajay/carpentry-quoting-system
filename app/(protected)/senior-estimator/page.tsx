@@ -9,37 +9,34 @@ import { EstimatorHeader } from './components/EstimatorHeader'
 import { EstimatorProvider } from './context/EstimatorContext'
 
 export default function SeniorEstimatorPage() {
-  const [estimatorMode, setEstimatorMode] = useState<'senior' | 'junior'>('senior')
   const [projectName, setProjectName] = useState('New Project')
 
   return (
     <EstimatorProvider>
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-col h-screen bg-dark-surface">
         {/* Header */}
         <EstimatorHeader 
           projectName={projectName}
-          estimatorMode={estimatorMode}
-          onModeToggle={setEstimatorMode}
           onProjectNameChange={setProjectName}
         />
         
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Column - 30% */}
-          <div className="w-[30%] flex flex-col border-r border-gray-200">
+          <div className="w-[30%] flex flex-col border-r border-gray-800">
             {/* File Import Panel - Top */}
             <div className="flex-1 overflow-hidden">
               <FileImportPanel />
             </div>
             
             {/* Activity Monitor - Bottom */}
-            <div className="h-[40%] border-t border-gray-200">
+            <div className="h-[40%] border-t border-gray-800">
               <ActivityMonitor />
             </div>
           </div>
           
           {/* Center Column - Chat Interface - 40% */}
-          <div className="w-[40%] border-r border-gray-200">
+          <div className="w-[40%] border-r border-gray-800">
             <ChatInterface />
           </div>
           

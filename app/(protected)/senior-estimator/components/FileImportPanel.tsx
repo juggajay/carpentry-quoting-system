@@ -86,10 +86,10 @@ export function FileImportPanel() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">File Import</h2>
-        <p className="text-sm text-gray-500 mt-1">Upload drawings, BOQs, and specifications</p>
+    <div className="h-full flex flex-col bg-dark-elevated">
+      <div className="p-4 border-b border-gray-800">
+        <h2 className="text-lg font-semibold text-white">File Import</h2>
+        <p className="text-sm text-gray-400 mt-1">Upload drawings, BOQs, and specifications</p>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
@@ -98,13 +98,13 @@ export function FileImportPanel() {
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
             isDragActive 
-              ? 'border-royal-blue bg-royal-blue/5' 
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-electric-magenta bg-electric-magenta/10' 
+              : 'border-gray-700 hover:border-gray-600'
           }`}
         >
           <input {...getInputProps()} />
           <Upload className="h-8 w-8 mx-auto text-gray-400 mb-3" />
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-300">
             {isDragActive 
               ? 'Drop files here...' 
               : 'Drag & drop files here, or click to select'
@@ -120,23 +120,23 @@ export function FileImportPanel() {
           {files.map(file => (
             <div 
               key={file.id} 
-              className="bg-gray-50 rounded-lg p-3 flex items-center gap-3"
+              className="bg-dark-surface border border-gray-800 rounded-lg p-3 flex items-center gap-3"
             >
-              <FileText className="h-5 w-5 text-gray-600 flex-shrink-0" />
+              <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
               
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-white truncate">
                   {file.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-400">
                   {formatFileSize(file.size)}
                 </p>
                 
                 {/* Progress bar */}
                 {file.status === 'uploading' && (
-                  <div className="mt-1 w-full bg-gray-200 rounded-full h-1">
+                  <div className="mt-1 w-full bg-gray-700 rounded-full h-1">
                     <div 
-                      className="bg-royal-blue h-1 rounded-full transition-all"
+                      className="bg-electric-magenta h-1 rounded-full transition-all"
                       style={{ width: `${file.uploadProgress}%` }}
                     />
                   </div>
@@ -146,23 +146,23 @@ export function FileImportPanel() {
               {/* Status indicator */}
               <div className="flex-shrink-0">
                 {file.status === 'uploading' && (
-                  <div className="text-xs text-gray-500">Uploading...</div>
+                  <div className="text-xs text-gray-400">Uploading...</div>
                 )}
                 {file.status === 'processing' && (
-                  <div className="text-xs text-royal-blue">Processing...</div>
+                  <div className="text-xs text-vibrant-cyan">Processing...</div>
                 )}
                 {file.status === 'ready' && (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <CheckCircle className="h-5 w-5 text-success-green" />
                 )}
                 {file.status === 'error' && (
-                  <AlertCircle className="h-5 w-5 text-red-500" />
+                  <AlertCircle className="h-5 w-5 text-critical-red" />
                 )}
               </div>
 
               {/* Remove button */}
               <button
                 onClick={() => removeFile(file.id)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-500 hover:text-gray-300 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>

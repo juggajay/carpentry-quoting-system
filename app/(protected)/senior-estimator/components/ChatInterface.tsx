@@ -80,10 +80,10 @@ export function ChatInterface() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Chat Assistant</h2>
-        <p className="text-sm text-gray-500 mt-1">Ask questions about your project</p>
+    <div className="h-full flex flex-col bg-dark-elevated">
+      <div className="p-4 border-b border-gray-800">
+        <h2 className="text-lg font-semibold text-white">Chat Assistant</h2>
+        <p className="text-sm text-gray-400 mt-1">Ask questions about your project</p>
       </div>
 
       {/* Messages */}
@@ -96,7 +96,7 @@ export function ChatInterface() {
             }`}
           >
             {message.sender === 'assistant' && (
-              <div className="flex-shrink-0 w-8 h-8 bg-royal-blue rounded-full flex items-center justify-center">
+              <div className="flex-shrink-0 w-8 h-8 bg-electric-magenta rounded-full flex items-center justify-center">
                 <Bot className="h-4 w-4 text-white" />
               </div>
             )}
@@ -104,14 +104,14 @@ export function ChatInterface() {
             <div
               className={`max-w-[80%] rounded-lg px-4 py-2 ${
                 message.sender === 'user'
-                  ? 'bg-royal-blue text-white'
-                  : 'bg-gray-100 text-gray-900'
+                  ? 'bg-dark-surface border border-gray-700 text-white'
+                  : 'bg-dark-surface border border-gray-800 text-gray-300'
               }`}
             >
               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               <p
                 className={`text-xs mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                  message.sender === 'user' ? 'text-gray-400' : 'text-gray-500'
                 }`}
               >
                 {message.timestamp.toLocaleTimeString()}
@@ -119,8 +119,8 @@ export function ChatInterface() {
             </div>
 
             {message.sender === 'user' && (
-              <div className="flex-shrink-0 w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-gray-700" />
+              <div className="flex-shrink-0 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-gray-300" />
               </div>
             )}
           </div>
@@ -128,14 +128,14 @@ export function ChatInterface() {
 
         {isTyping && (
           <div className="flex gap-3">
-            <div className="flex-shrink-0 w-8 h-8 bg-royal-blue rounded-full flex items-center justify-center">
+            <div className="flex-shrink-0 w-8 h-8 bg-electric-magenta rounded-full flex items-center justify-center">
               <Bot className="h-4 w-4 text-white" />
             </div>
-            <div className="bg-gray-100 rounded-lg px-4 py-2">
+            <div className="bg-dark-surface border border-gray-800 rounded-lg px-4 py-2">
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                <div className="w-2 h-2 bg-electric-magenta rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-electric-magenta rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-electric-magenta rounded-full animate-bounce delay-200" />
               </div>
             </div>
           </div>
@@ -145,9 +145,9 @@ export function ChatInterface() {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-800">
         <div className="flex gap-2">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button className="text-gray-400 hover:text-gray-200 transition-colors">
             <Paperclip className="h-5 w-5" />
           </button>
           <textarea
@@ -155,13 +155,13 @@ export function ChatInterface() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-royal-blue"
+            className="flex-1 resize-none rounded-lg bg-dark-surface border border-gray-700 px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-electric-magenta"
             rows={1}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="bg-royal-blue text-white rounded-lg px-4 py-2 hover:bg-royal-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-electric-magenta text-white rounded-lg px-4 py-2 hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="h-4 w-4" />
           </button>
