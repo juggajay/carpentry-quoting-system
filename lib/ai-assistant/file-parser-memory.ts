@@ -15,8 +15,7 @@ export interface ParsedFileContent {
  */
 export async function parseFileFromBuffer(
   buffer: Buffer,
-  filename: string,
-  mimeType: string
+  filename: string
 ): Promise<ParsedFileContent> {
   const ext = filename.toLowerCase().split('.').pop();
   

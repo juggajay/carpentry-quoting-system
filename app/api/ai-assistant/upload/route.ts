@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       let parseError = null;
       
       try {
-        const parsed = await parseFileFromBuffer(buffer, file.name, file.type);
+        const parsed = await parseFileFromBuffer(buffer, file.name);
         extractedContent = extractBOQItems(parsed.text);
         console.log('[API] Extracted content length:', extractedContent.length);
         console.log('[API] First 200 chars:', extractedContent.substring(0, 200));
