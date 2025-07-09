@@ -53,30 +53,42 @@ export async function POST(req: NextRequest) {
     
     // For large imports (> 100 items), use chunked import service
     if (products.length > 100) {
+      // Check if ImportJob table exists
+      let supportsAsync = false;
       try {
-        const jobId = await ChunkedImportService.createImportJob(
-          userId,
-          products[0]?.supplier || 'unknown',
-          products,
-          options
-        );
-        
-        return NextResponse.json({
-          success: true,
-          jobId,
-          message: `Import job created. Processing ${products.length} items in background.`,
-          async: true,
-        });
+        await prisma.$queryRaw`SELECT 1 FROM "ImportJob" LIMIT 1`;
+        supportsAsync = true;
       } catch (error) {
-        console.error('Failed to create import job:', error);
-        return NextResponse.json(
-          { 
-            error: 'Failed to create import job',
-            details: error instanceof Error ? error.message : 'Unknown error',
-          },
-          { status: 500 }
-        );
+        console.log('ImportJob table not found - using sync import');
       }
+      
+      if (supportsAsync) {
+        try {
+          const jobId = await ChunkedImportService.createImportJob(
+            userId,
+            products[0]?.supplier || 'unknown',
+            products,
+            options
+          );
+        
+          return NextResponse.json({
+            success: true,
+            jobId,
+            message: `Import job created. Processing ${products.length} items in background.`,
+            async: true,
+          });
+        } catch (error) {
+          console.error('Failed to create import job:', error);
+          return NextResponse.json(
+            { 
+              error: 'Failed to create import job',
+              details: error instanceof Error ? error.message : 'Unknown error',
+            },
+            { status: 500 }
+          );
+        }
+      }
+      // If async not supported, fall through to sync processing
     }
     
     // For smaller imports, process synchronously as before
