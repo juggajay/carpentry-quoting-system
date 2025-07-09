@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Download, Globe, Loader2 } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { MaterialScraperDialog } from './MaterialScraperDialog';
 import { ImportPreview } from '@/components/materials/ImportPreview';
 import { ImportProgress } from '@/components/materials/ImportProgress';
-import { Modal } from '@/components/ui/Modal';
+import { 
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+} from '@/components/ui/Modal';
 import { useRouter } from 'next/navigation';
 
 interface ScrapedProduct {
@@ -150,25 +156,27 @@ export function MaterialImportButton() {
         onScrape={handleScrape}
       />
 
-      <Modal
-        open={previewOpen}
-        onOpenChange={setPreviewOpen}
-        title="Import Materials Preview"
-        description="Review and select materials to import"
-        className="max-w-6xl"
-      >
-        {importProgress ? (
-          <ImportProgress 
-            progress={importProgress} 
-            isVisible={true}
-          />
-        ) : (
-          <ImportPreview
-            products={scrapedProducts}
-            onImport={handleImport}
-            isImporting={importing}
-          />
-        )}
+      <Modal open={previewOpen} onOpenChange={setPreviewOpen}>
+        <ModalContent className="max-w-6xl">
+          <ModalHeader>
+            <ModalTitle>Import Materials Preview</ModalTitle>
+            <ModalDescription>
+              Review and select materials to import
+            </ModalDescription>
+          </ModalHeader>
+          {importProgress ? (
+            <ImportProgress 
+              progress={importProgress} 
+              isVisible={true}
+            />
+          ) : (
+            <ImportPreview
+              products={scrapedProducts}
+              onImport={handleImport}
+              isImporting={importing}
+            />
+          )}
+        </ModalContent>
       </Modal>
     </>
   );
