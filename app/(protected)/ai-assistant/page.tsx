@@ -132,6 +132,9 @@ export default function AIAssistantPage() {
     }));
 
     setAttachedFiles(prev => [...prev, ...newAttachments]);
+    
+    // Track which files are BOQ files
+    const boqFiles: FileAttachment[] = [];
 
     // Upload files
     for (const file of files) {
@@ -185,6 +188,16 @@ export default function AIAssistantPage() {
           if (uploadedFile.content) {
             console.log(`[AI-Assistant] Extracted content preview (first 500 chars):`);
             console.log(uploadedFile.content.substring(0, 500));
+            
+            // Track BOQ files with content
+            const updatedFile = {
+              ...attachment,
+              status: 'complete' as const,
+              url: uploadedFile.url,
+              content: uploadedFile.content,
+              parseError: uploadedFile.parseError
+            };
+            boqFiles.push(updatedFile);
           } else if (uploadedFile.parseError) {
             console.log(`[AI-Assistant] Parse error: ${uploadedFile.parseError}`);
           } else {
@@ -204,6 +217,19 @@ export default function AIAssistantPage() {
           )
         );
       }
+    }
+    
+    // Automatically analyze BOQ files if any were successfully uploaded with content
+    if (boqFiles.length > 0) {
+      console.log('[AI-Assistant] Auto-analyzing BOQ files:', boqFiles.length);
+      
+      // Send automatic analysis message
+      const autoMessage = `Please analyze the uploaded BOQ file${boqFiles.length > 1 ? 's' : ''} and create a quote.`;
+      
+      // Wait a moment for state to update, then send the message
+      setTimeout(() => {
+        handleSendMessage(autoMessage);
+      }, 500);
     }
   };
 
@@ -289,6 +315,16 @@ export default function AIAssistantPage() {
         <div className="lg:col-span-1">
           {generatedQuote ? (
             <QuotePreview quote={generatedQuote} />
+          ) : isProcessing && attachedFiles.some(f => f.content) ? (
+            <Card className="p-6">
+              <div className="text-center text-muted-foreground">
+                <div className="text-4xl mb-4 animate-pulse">⚡</div>
+                <p className="font-medium">Analyzing BOQ...</p>
+                <p className="text-sm mt-2">
+                  Creating quote from uploaded files
+                </p>
+              </div>
+            </Card>
           ) : (
             <Card className="p-6">
               <div className="text-center text-muted-foreground">
