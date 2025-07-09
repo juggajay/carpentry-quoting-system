@@ -28,8 +28,14 @@ export interface Material {
 }
 
 // Parse price and normalize to per unit
-export function parsePrice(price: string, quantity: number = 1): number {
-  const basePrice = parseFloat(price.replace(/[$,]/g, ''));
+export function parsePrice(price: string | number | undefined, quantity: number = 1): number {
+  if (!price && price !== 0) return 0;
+  
+  const priceStr = typeof price === 'number' ? price.toString() : price;
+  const basePrice = parseFloat(priceStr.replace(/[$,]/g, ''));
+  
+  if (isNaN(basePrice)) return 0;
+  
   return Number((basePrice / quantity).toFixed(2));
 }
 

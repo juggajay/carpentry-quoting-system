@@ -189,7 +189,7 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
                 </td>
                 <td className="px-4 py-3">{product.unit}</td>
                 <td className="px-4 py-3 text-right font-medium">
-                  ${product.pricePerUnit.toFixed(2)}
+                  ${product.pricePerUnit ? product.pricePerUnit.toFixed(2) : '0.00'}
                   {product.gstInclusive && (
                     <span className="text-xs text-gray-600 ml-1">inc GST</span>
                   )}

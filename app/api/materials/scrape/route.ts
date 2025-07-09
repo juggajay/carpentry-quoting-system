@@ -108,12 +108,15 @@ export async function POST(req: NextRequest) {
             const products = await AlternativeScraper.scrapeDirectly(url);
             allProducts.push(...products.map(p => ({
               name: p.name,
-              price: p.price,
+              pricePerUnit: p.price || 0,
               unit: p.unit || 'EA',
               inStock: p.inStock ?? true,
               description: p.description,
               sku: p.sku,
               supplier: 'Canterbury Timbers',
+              gstInclusive: true,
+              category: 'Timber',
+              status: 'new',
             })));
           } catch (urlError) {
             console.error(`[Scrape API] Error scraping ${url}:`, urlError);
