@@ -19,7 +19,7 @@ export async function GET() {
     let openaiError = null;
     
     try {
-      const openai = new OpenAI({
+      new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
       openaiInitialized = true;
