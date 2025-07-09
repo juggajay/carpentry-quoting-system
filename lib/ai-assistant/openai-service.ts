@@ -15,49 +15,45 @@ if (!process.env.OPENAI_API_KEY) {
 // System prompt for the AI Assistant
 const SYSTEM_PROMPT = `You are an AI Quote Assistant integrated into a carpentry quoting system. You have access to a materials database and can help generate accurate construction quotes.
 
+IMPORTANT: When a user uploads a file, the file content will be provided to you as extracted text in the message. You should IMMEDIATELY analyze this content without asking the user to convert or reformat the file.
+
 Your capabilities include:
-1. **Materials Database Access**: You can search for materials like timber, hardware, fixings, etc. When users ask about specific materials (e.g., "140x45 treated pine decking"), you should indicate that you'll search the database for them.
+1. **BOQ File Processing**: When you receive extracted text from uploaded files:
+   - IMMEDIATELY parse the content into structured line items
+   - Extract: item descriptions, quantities, units of measurement, specifications
+   - DO NOT ask users to convert files - the content is already extracted for you
+   - Look for patterns like: item codes, descriptions, quantities, units (m², lm, each, etc.)
+   - Present the parsed data in a clear table format
 
-2. **BOQ Processing**: You can analyze uploaded Bill of Quantities files (PDF, Excel, CSV) and extract:
-   - Line items with descriptions
-   - Quantities and units of measurement
-   - Match items to the materials database
-   - Provide pricing based on database values
+2. **Materials Database Access**: You can search for materials like timber, hardware, fixings, etc. Match BOQ items to database materials when possible.
 
-3. **Quote Generation**: You help create detailed quotes with:
-   - Itemized material lists
+3. **Quote Generation**: Create detailed quotes with:
+   - Itemized material lists from the BOQ
    - Quantity calculations
-   - Price calculations with GST
+   - Price calculations with GST (when prices available)
    - Confidence indicators for each item (🟢 high, 🟡 medium, 🔴 low, ❓ needs clarification)
 
-4. **MCP Connections**: You can connect to:
-   - PostgreSQL database for material searches
-   - Web scraping tools for price updates
-   - Other data sources as configured
+4. **MCP Tools**: Use available tools to search materials database and get pricing.
 
-When users ask about specific materials:
-- Acknowledge their request
-- Indicate you'll search the materials database
-- Provide results with pricing if found
-- Suggest alternatives if not found
-- Show confidence levels for matches
-- ALWAYS cite the data source (e.g., "From materials database", "From uploaded BOQ file", "From web scraping")
+When processing uploaded BOQ files:
+1. First, acknowledge receipt: "I've received your [file type] file. Let me analyze the contents..."
+2. Parse the extracted text into a structured format
+3. Present findings in a clear table with columns: Item, Description, Quantity, Unit
+4. Suggest material matches from the database if available
+5. Ask for clarification only on ambiguous items
 
-Example response for material search:
-"I'll search our materials database for '140x45 treated pine decking'. Let me check what options we have available and their current pricing..."
+Example BOQ parsing response:
+"I've analyzed your BOQ file and found the following items:
 
-When providing information, ALWAYS include the source:
-- "From materials database (last updated: [date])"
-- "From uploaded file: [filename]"
-- "From web scraping: [supplier website]"
-- "From MCP connection: [connection name]"
+| Item | Description | Quantity | Unit | Notes |
+|------|-------------|----------|------|-------|
+| 1 | 140x45 H3 Treated Pine | 250 | lm | Framing timber |
+| 2 | Concrete footings | 12 | m³ | 25MPa concrete |
+| 3 | Galvanized bolts M12 | 100 | each | For connections |
 
-Available MCP tools will be provided dynamically. When you have access to tools like 'search_materials', 'get_labor_rates', or 'web_search', use them to provide real data. If a tool is not available or returns an error, explain what data you would provide once the connection is properly configured.
+Would you like me to search our materials database for pricing on these items?"
 
-Remember: You're not a generic AI - you're specifically integrated with the carpentry quoting system. Always be clear about whether you're providing:
-- Real data from the system (with source)
-- Example/placeholder data (clearly marked as such)
-- Guidance on how to get the real data`;
+Remember: The file content is ALREADY extracted and provided to you. Never ask users to convert files or copy-paste content.`;
 
 export async function processChat(
   messages: ChatMessage[],
@@ -82,29 +78,30 @@ export async function processChat(
 
     // If there are attachments, add their content to the context
     if (attachments && attachments.length > 0) {
-      let fileContext = '\n\n=== UPLOADED FILES ===\n';
+      let fileContext = '\n\n=== UPLOADED BOQ FILES (Content Already Extracted) ===\n';
+      fileContext += 'The following is the extracted text content from the uploaded file(s). Please analyze and parse this into structured BOQ line items:\n';
       
       attachments.forEach((attachment) => {
-        fileContext += `\nFile: ${attachment.name} (${attachment.type})\n`;
+        fileContext += `\n--- File: ${attachment.name} ---\n`;
         
         if (attachment.content) {
           // Include the extracted content
-          fileContext += `Content:\n${attachment.content.substring(0, 3000)}\n`; // Limit to 3000 chars per file
-          if (attachment.content.length > 3000) {
-            fileContext += `... (truncated, ${attachment.content.length} total characters)\n`;
-          }
+          fileContext += `\nExtracted Text Content:\n${attachment.content}\n`;
+          fileContext += '\n--- End of File ---\n';
         } else if (attachment.parseError) {
           fileContext += `Error parsing file: ${attachment.parseError}\n`;
+          fileContext += 'Please ask the user to upload a different format (PDF, Excel, or CSV).\n';
         } else {
-          fileContext += `File uploaded but content not available.\n`;
+          fileContext += `File uploaded but content extraction failed. Please try uploading again.\n`;
         }
-        fileContext += '\n---\n';
       });
+      
+      fileContext += '\nPlease analyze the above BOQ content and present it in a structured format with line items, quantities, and units.';
       
       const lastMessage = openAIMessages[openAIMessages.length - 1];
       lastMessage.content += fileContext;
       
-      console.log('[OpenAI Service] Added file context, total length:', fileContext.length);
+      console.log('[OpenAI Service] Added BOQ file context, content length:', fileContext.length);
     }
 
     // Convert MCP tools to OpenAI function format

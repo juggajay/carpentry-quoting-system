@@ -121,18 +121,24 @@ function parseCSVFromBuffer(buffer: Buffer): ParsedFileContent {
  * Extract BOQ-specific information from parsed text
  */
 export function extractBOQItems(text: string): string {
+  // Return the full text for AI to parse - it's better at understanding context
+  // Just do some basic cleaning
+  
   const lines = text.split('\n');
-  const boqLines: string[] = [];
+  const cleanedLines: string[] = [];
   
   lines.forEach(line => {
     const trimmed = line.trim();
-    if (trimmed && !trimmed.match(/^(page|sheet|date|total)/i)) {
-      // Look for lines that might contain quantities and items
-      if (trimmed.match(/\d+/) || trimmed.match(/\b(m²|m2|lm|sqm|each|ea|pcs|pieces)\b/i)) {
-        boqLines.push(trimmed);
-      }
+    // Remove empty lines and obvious headers/footers
+    if (trimmed && 
+        !trimmed.match(/^page\s*\d+/i) && 
+        !trimmed.match(/^copyright/i) &&
+        !trimmed.match(/^confidential/i) &&
+        trimmed.length > 2) {
+      cleanedLines.push(trimmed);
     }
   });
   
-  return boqLines.join('\n');
+  // Return cleaned text, preserving structure for AI to parse
+  return cleanedLines.join('\n');
 }

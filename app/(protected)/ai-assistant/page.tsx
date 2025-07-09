@@ -156,6 +156,13 @@ export default function AIAssistantPage() {
             )
           );
           if (isDebug) setDebugStatus('SUCCESS');
+          
+          // Log the extracted content for debugging
+          if (uploadedFile.content) {
+            console.log(`[Upload] Extracted ${uploadedFile.content.length} characters from ${file.name}`);
+          } else {
+            console.log(`[Upload] No content extracted from ${file.name}`);
+          }
         } else {
           throw new Error(data.error || 'Upload failed');
         }
