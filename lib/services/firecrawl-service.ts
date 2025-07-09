@@ -1,4 +1,5 @@
 import FirecrawlApp from 'firecrawl';
+import * as cheerio from 'cheerio';
 import { errorHandler } from './firecrawl-error-handler';
 import { getSupplierConfig } from './supplier-configs';
 
@@ -75,11 +76,12 @@ export class FirecrawlService {
         const result = await errorHandler.withRetry(
           async () => {
             const res = await this.firecrawl.scrapeUrl(url, {
-              formats: ['html'],
-              waitFor: 2000,
+              formats: ['html', 'markdown'],
+              waitFor: 3000,
+              onlyMainContent: false,
             });
             
-            if (!res.success || !res.html) {
+            if (!res.success || (!res.html && !res.markdown)) {
               throw new Error(`Failed to scrape ${url}: No content returned`);
             }
             
@@ -88,7 +90,17 @@ export class FirecrawlService {
           { supplier: config.name, url }
         );
 
-        const parsedProducts = result.html ? this.parseProducts(result.html, config) : [];
+        // Try HTML parsing first, fallback to markdown
+        let parsedProducts: ScrapedProduct[] = [];
+        if (result.html) {
+          parsedProducts = this.parseProducts(result.html, config);
+        }
+        
+        // If no products found with HTML, try markdown parsing
+        if (parsedProducts.length === 0 && result.markdown) {
+          console.log(`No products found with HTML, trying markdown for ${url}`);
+          parsedProducts = this.parseProductsFromMarkdown(result.markdown, config);
+        }
         products.push(...parsedProducts);
         
       } catch (error) {
@@ -104,54 +116,129 @@ export class FirecrawlService {
     const products: ScrapedProduct[] = [];
     
     try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      const $ = cheerio.load(html);
       
-      const productElements = doc.querySelectorAll(config.selectors.products);
+      const productElements = $(config.selectors.products);
+      console.log(`Found ${productElements.length} product elements for ${config.name}`);
       
-      productElements.forEach(element => {
+      productElements.each((_, element) => {
         try {
+          const $element = $(element);
+          
           const product: ScrapedProduct = {
-            name: element.querySelector(config.selectors.name)?.textContent?.trim() || '',
+            name: $element.find(config.selectors.name).first().text().trim() || '',
             price: this.parsePrice(
-              element.querySelector(config.selectors.price)?.textContent || '0'
+              $element.find(config.selectors.price).first().text() || '0'
             ),
           };
 
           if (config.selectors.sku) {
-            product.sku = element.querySelector(config.selectors.sku)?.textContent?.trim();
+            product.sku = $element.find(config.selectors.sku).first().text().trim();
           }
 
           if (config.selectors.unit) {
-            const unitText = element.querySelector(config.selectors.unit)?.textContent || '';
+            const unitText = $element.find(config.selectors.unit).first().text() || '';
             product.unit = this.parseUnit(unitText);
+          } else {
+            product.unit = 'EA'; // Default unit
           }
 
           if (config.selectors.stock) {
-            const stockText = element.querySelector(config.selectors.stock)?.textContent || '';
+            const stockText = $element.find(config.selectors.stock).first().text() || '';
             product.inStock = !stockText.toLowerCase().includes('out of stock');
+          } else {
+            product.inStock = true; // Default to in stock
           }
 
           if (config.selectors.category) {
-            product.category = element.querySelector(config.selectors.category)?.textContent?.trim();
+            product.category = $element.find(config.selectors.category).first().text().trim();
           }
 
           if (config.selectors.description) {
-            product.description = element.querySelector(config.selectors.description)?.textContent?.trim();
+            product.description = $element.find(config.selectors.description).first().text().trim();
           }
 
-          if (product.name && product.price) {
+          // Log for debugging
+          if (!product.name) {
+            console.log('No product name found, trying alternate selector:', $element.text().substring(0, 100));
+          }
+
+          if (product.name && product.price && product.price > 0) {
             products.push(product);
           }
         } catch (error) {
-          console.error('Error parsing product:', error);
+          console.error('Error parsing individual product:', error);
         }
       });
       
     } catch (error) {
-      console.error('Error parsing HTML:', error);
+      console.error('Error parsing HTML with cheerio:', error);
     }
     
+    console.log(`Parsed ${products.length} products from HTML`);
+    return products;
+  }
+
+  private parseProductsFromMarkdown(markdown: string, _config: SupplierConfig): ScrapedProduct[] {
+    const products: ScrapedProduct[] = [];
+    
+    try {
+      // Split markdown into sections and look for product patterns
+      const lines = markdown.split('\n');
+      let currentProduct: Partial<ScrapedProduct> = {};
+      
+      for (const line of lines) {
+        // Look for price patterns
+        const priceMatch = line.match(/\$\s?([\d,]+\.?\d*)/);
+        if (priceMatch) {
+          const price = this.parsePrice(priceMatch[0]);
+          if (price > 0 && currentProduct.name) {
+            currentProduct.price = price;
+          }
+        }
+        
+        // Look for product names (usually in headers or bold)
+        if (line.match(/^#{1,3}\s/) || line.match(/^\*\*.*\*\*$/)) {
+          if (currentProduct.name && currentProduct.price) {
+            products.push({
+              name: currentProduct.name,
+              price: currentProduct.price,
+              unit: currentProduct.unit || 'EA',
+              inStock: currentProduct.inStock ?? true,
+              description: currentProduct.description,
+              category: currentProduct.category,
+              sku: currentProduct.sku,
+            });
+          }
+          currentProduct = {
+            name: line.replace(/^#{1,3}\s/, '').replace(/\*\*/g, '').trim()
+          };
+        }
+        
+        // Look for SKU patterns
+        const skuMatch = line.match(/SKU:?\s*([A-Z0-9\-]+)/i);
+        if (skuMatch) {
+          currentProduct.sku = skuMatch[1];
+        }
+      }
+      
+      // Don't forget the last product
+      if (currentProduct.name && currentProduct.price) {
+        products.push({
+          name: currentProduct.name,
+          price: currentProduct.price,
+          unit: currentProduct.unit || 'EA',
+          inStock: currentProduct.inStock ?? true,
+          description: currentProduct.description,
+          category: currentProduct.category,
+          sku: currentProduct.sku,
+        });
+      }
+    } catch (error) {
+      console.error('Error parsing markdown:', error);
+    }
+    
+    console.log(`Parsed ${products.length} products from markdown`);
     return products;
   }
 

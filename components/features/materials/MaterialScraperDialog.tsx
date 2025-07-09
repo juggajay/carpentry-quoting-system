@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { Globe, Search, AlertCircle } from 'lucide-react';
+import { Globe, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 type SupplierType = 'bunnings' | 'blacktown' | 'canterbury' | 'custom';
@@ -58,9 +58,11 @@ export function MaterialScraperDialog({
   const [category, setCategory] = useState<string>('');
   const [customUrl, setCustomUrl] = useState('');
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<string>('');
 
   const handleScrape = async () => {
     setLoading(true);
+    setProgress('Initializing scraper...');
     try {
       const config = {
         source,
@@ -70,12 +72,14 @@ export function MaterialScraperDialog({
         }),
       };
 
+      setProgress(`Connecting to ${SUPPLIERS[source].name}...`);
       await onScrape(config);
       onOpenChange(false);
     } catch {
       toast.error('Scraping failed');
     } finally {
       setLoading(false);
+      setProgress('');
     }
   };
 
@@ -174,14 +178,27 @@ export function MaterialScraperDialog({
         </div>
 
         <ModalFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          {loading && progress && (
+            <div className="flex items-center gap-2 mr-auto text-sm text-gray-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {progress}
+            </div>
+          )}
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
           <Button 
             onClick={handleScrape} 
             disabled={loading || (source === 'custom' && !customUrl)}
           >
-            {loading ? 'Scraping...' : 'Start Scraping'}
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Scraping...
+              </>
+            ) : (
+              'Start Scraping'
+            )}
           </Button>
         </ModalFooter>
       </ModalContent>

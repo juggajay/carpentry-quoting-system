@@ -55,7 +55,11 @@ export function MaterialImportButton() {
 
   const handleScrape = async (config: { source: string; category?: string; materials?: string[]; customUrl?: string }) => {
     setScraping(true);
+    
     try {
+      // Show progress toast
+      const toastId = toast.loading(`Scraping products from ${config.source}...`);
+      
       const response = await fetch('/api/materials/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,12 +79,12 @@ export function MaterialImportButton() {
       const data = await response.json();
       
       if (response.ok) {
-        toast.success(`Found ${data.summary.total} products from ${config.source}`);
+        toast.success(`Found ${data.summary.total} products from ${config.source}`, { id: toastId });
         setScrapedProducts(data.products);
         setScraperOpen(false);
         setPreviewOpen(true);
       } else {
-        toast.error(data.error || 'Scraping failed');
+        toast.error(data.error || 'Scraping failed', { id: toastId });
       }
     } catch {
       toast.error('Connection error');
