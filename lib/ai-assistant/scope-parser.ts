@@ -116,14 +116,37 @@ export class ScopeParser {
 
   private normalizeText(text: string): string {
     return text
-      .replace(/\s+/g, ' ')
-      .replace(/[^\w\s.,;:()\-\[\]]/g, '')
+      .replace(/\r\n/g, '\n') // Normalize line endings
+      .replace(/\t/g, ' ') // Replace tabs with spaces
+      .replace(/[ ]{2,}/g, ' ') // Replace multiple spaces with single space (but keep newlines)
       .trim();
   }
 
   private splitIntoSections(text: string): string[] {
-    // Split by common delimiters but keep context
-    const sections = text.split(/(?:\n|\.|\;|\band\b|\bthen\b|\balso\b|\bincluding\b)/i)
+    // First check if it's a structured list with bullet points or dashes
+    if (text.includes('\n-') || text.includes('\n•') || text.includes('\n*')) {
+      // Split by newlines but keep the header if it exists
+      const lines = text.split('\n');
+      const sections: string[] = [];
+      let header = '';
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('-') || trimmed.startsWith('•') || trimmed.startsWith('*')) {
+          // This is a list item - remove the bullet point
+          sections.push(trimmed.substring(1).trim());
+        } else if (trimmed.length > 0 && !header) {
+          // This is likely the header (e.g., "Supply and install new kitchen renovation including:")
+          header = trimmed;
+        }
+      }
+      
+      return sections.length > 0 ? sections : [text];
+    }
+    
+    // For non-list formats, split by sentence-ending punctuation and major conjunctions
+    // but NOT by "including" which often introduces a list
+    const sections = text.split(/(?:[.;]\s+|\n\n|\band then\b|\bplus\b)/i)
       .map(s => s.trim())
       .filter(s => s.length > 10); // Filter out very short sections
     
@@ -252,7 +275,24 @@ export class ScopeParser {
     const measurementType = this.determineMeasurementType(text);
     
     // Extract base quantities if explicitly mentioned
-    const quantityMatch = text.match(/\b(\d+(?:\.\d+)?)\s*(m2|m²|sqm|lm|m3|m³|each|ea|no|nr)\b/i);
+    // Handle various quantity formats: "6x", "4 units", "8 linear meters", "12 square meters", etc.
+    const quantityPatterns = [
+      /\b(\d+(?:\.\d+)?)\s*x\s+/i, // "6x overhead cabinets"
+      /\b(\d+(?:\.\d+)?)\s*(linear\s+)?meter[s]?\b/i, // "8 linear meters" or "8 meters"
+      /\b(\d+(?:\.\d+)?)\s*(square\s+)?meter[s]?\b/i, // "12 square meters"
+      /\b(\d+(?:\.\d+)?)\s*(m2|m²|sqm|lm|m3|m³|each|ea|no|nr|units?)\b/i, // Standard units
+      /\b(\d+(?:\.\d+)?)\s+(units?|items?|pieces?|cabinets?|doors?|windows?)\b/i, // Count items
+      /approximately\s+(\d+(?:\.\d+)?)\s*/i // "approximately 8 linear meters"
+    ];
+    
+    let baseQuantity: number | undefined;
+    for (const pattern of quantityPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        baseQuantity = parseFloat(match[1]);
+        break;
+      }
+    }
     
     const wasteFactors = {
       timber: 0.10,
@@ -287,7 +327,7 @@ export class ScopeParser {
     return {
       type: measurementType,
       unit: this.getDefaultUnit(measurementType),
-      base_quantity: quantityMatch ? parseFloat(quantityMatch[1]) : undefined,
+      base_quantity: baseQuantity,
       waste_factor: wasteFactor,
       access_factor: accessFactor,
       complexity_factor: complexityFactor,
@@ -392,6 +432,16 @@ export class ScopeParser {
     if (factors.hasQuantityIndicator) score += 20;
     if (factors.isUnambiguous) score += 15;
     
+    // Bonus for explicit quantities
+    if (text.match(/\b\d+\s*x\s+/i) || text.match(/\b\d+(?:\.\d+)?\s*(?:linear\s+)?meters?\b/i)) {
+      score += 10; // Clear quantity specified
+    }
+    
+    // Bonus for dimensional specifications
+    if (text.match(/\d+x\d+(?:x\d+)?mm/i) || text.match(/\d+mm/i)) {
+      score += 5; // Clear dimensions specified
+    }
+    
     // Penalty for complex or unusual items
     if (text.match(/\b(complex|unusual|special|custom|bespoke|non-standard)\b/i)) {
       score -= 20;
@@ -400,6 +450,11 @@ export class ScopeParser {
     // Bonus for standard construction items
     if (text.match(/\b(standard|typical|common|regular|normal)\b/i)) {
       score += 10;
+    }
+    
+    // Bonus for clear supply/install actions
+    if (text.match(/\b(supply and install|remove|demolish)\b/i)) {
+      score += 5;
     }
     
     score = Math.max(0, Math.min(100, score)); // Clamp between 0-100
