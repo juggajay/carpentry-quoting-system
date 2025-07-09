@@ -7,7 +7,7 @@ interface DebugLog {
   timestamp: string;
   type: 'info' | 'error' | 'warning' | 'success';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 interface DebugConsoleProps {
@@ -23,7 +23,11 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
     if (!isEnabled) return;
 
     // Create global debug logger
-    (window as any).debugLog = (type: DebugLog['type'], message: string, details?: any) => {
+    interface WindowWithDebugLog extends Window {
+      debugLog?: (type: DebugLog['type'], message: string, details?: unknown) => void;
+    }
+    
+    (window as WindowWithDebugLog).debugLog = (type: DebugLog['type'], message: string, details?: unknown) => {
       const log: DebugLog = {
         id: Date.now().toString(),
         timestamp: new Date().toLocaleTimeString(),
@@ -46,29 +50,30 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
     };
 
     console.log = (...args) => {
-      (window as any).debugLog('info', args.join(' '));
+      (window as WindowWithDebugLog).debugLog?.('info', args.join(' '));
       originalConsole.log(...args);
     };
 
     console.error = (...args) => {
-      (window as any).debugLog('error', args.join(' '));
+      (window as WindowWithDebugLog).debugLog?.('error', args.join(' '));
       originalConsole.error(...args);
     };
 
     console.warn = (...args) => {
-      (window as any).debugLog('warning', args.join(' '));
+      (window as WindowWithDebugLog).debugLog?.('warning', args.join(' '));
       originalConsole.warn(...args);
     };
 
     // Log initial message
-    (window as any).debugLog('info', 'Debug mode enabled');
+    (window as WindowWithDebugLog).debugLog?.('info', 'Debug mode enabled');
 
     return () => {
       // Restore original console methods
       console.log = originalConsole.log;
       console.error = originalConsole.error;
       console.warn = originalConsole.warn;
-      delete (window as any).debugLog;
+      const windowWithDebug = window as WindowWithDebugLog;
+      delete windowWithDebug.debugLog;
     };
   }, [isEnabled]);
 
@@ -161,8 +166,14 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
 };
 
 // Helper function for easier debug logging
-export const debugLog = (type: 'info' | 'error' | 'warning' | 'success', message: string, details?: any) => {
-  if (typeof window !== 'undefined' && (window as any).debugLog) {
-    (window as any).debugLog(type, message, details);
+export const debugLog = (type: 'info' | 'error' | 'warning' | 'success', message: string, details?: unknown) => {
+  if (typeof window !== 'undefined') {
+    interface WindowWithDebugLog extends Window {
+      debugLog?: (type: 'info' | 'error' | 'warning' | 'success', message: string, details?: unknown) => void;
+    }
+    const windowWithDebug = window as WindowWithDebugLog;
+    if (windowWithDebug.debugLog) {
+      windowWithDebug.debugLog(type, message, details);
+    }
   }
 };
