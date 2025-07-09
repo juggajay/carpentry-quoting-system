@@ -4,7 +4,7 @@ import { ChunkedImportService } from '@/lib/services/chunked-import';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -12,7 +12,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const jobStatus = await ChunkedImportService.getJobStatus(params.jobId, userId);
+    const { jobId } = await params;
+    const jobStatus = await ChunkedImportService.getJobStatus(jobId, userId);
     
     if (!jobStatus) {
       return NextResponse.json(
@@ -39,7 +40,7 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -47,7 +48,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const cancelled = await ChunkedImportService.cancelJob(params.jobId, userId);
+    const { jobId } = await params;
+    const cancelled = await ChunkedImportService.cancelJob(jobId, userId);
     
     if (!cancelled) {
       return NextResponse.json(

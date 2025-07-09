@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { cuid } from '@/lib/utils';
 import { DataValidator } from './data-validator';
-import type { ImportJobStatus } from '@prisma/client';
 
 interface ImportProduct {
   name: string;
@@ -51,11 +50,11 @@ export class ChunkedImportService {
         status: 'PENDING',
         totalItems: validProducts.length,
         totalBatches: Math.ceil(validProducts.length / this.BATCH_SIZE),
-        data: {
+        data: JSON.parse(JSON.stringify({
           products: validProducts,
           options,
           invalidProducts: invalid,
-        },
+        })),
       },
     });
     
@@ -175,7 +174,7 @@ export class ChunkedImportService {
         skippedItems: skippedCount,
         errorItems: errorCount,
         percentComplete: 100,
-        errors: errors.length > 0 ? errors : null,
+        errors: errors.length > 0 ? errors : undefined,
       },
     });
   }

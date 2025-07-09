@@ -72,12 +72,12 @@ export function ImportJobsList() {
     loadJobs();
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): "default" | "info" | "primary" | "success" | "warning" | "error" => {
     switch (status) {
       case 'PENDING': return 'default';
       case 'PROCESSING': return 'info';
       case 'COMPLETED': return 'success';
-      case 'FAILED': return 'destructive';
+      case 'FAILED': return 'error';
       case 'CANCELLED': return 'warning';
       default: return 'default';
     }
