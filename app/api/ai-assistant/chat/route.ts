@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import type { ChatMessage } from "@/lib/ai-assistant/types";
+import type { ChatMessage, FileAttachment } from "@/lib/ai-assistant/types";
 import { processChat } from "@/lib/ai-assistant/openai-service";
 
 export async function POST(request: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       message: message?.substring(0, 100) + '...',
       sessionId,
       attachmentsCount: attachments?.length || 0,
-      attachments: attachments?.map((a: any) => ({ name: a.name, type: a.type, size: a.size }))
+      attachments: attachments?.map((a: FileAttachment) => ({ name: a.name, type: a.type, size: a.size }))
     });
 
     if (!message || typeof message !== 'string') {

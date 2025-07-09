@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { ChatMessage } from './types';
+import type { ChatMessage, FileAttachment } from './types';
 import { mcpManager } from './mcp-manager';
 
 // Initialize OpenAI client
@@ -61,7 +61,7 @@ Remember: You're not a generic AI - you're specifically integrated with the carp
 
 export async function processChat(
   messages: ChatMessage[],
-  attachments?: any[]
+  attachments?: FileAttachment[]
 ): Promise<string> {
   try {
     // Ensure MCP connections are initialized
@@ -84,7 +84,7 @@ export async function processChat(
     if (attachments && attachments.length > 0) {
       let fileContext = '\n\n=== UPLOADED FILES ===\n';
       
-      attachments.forEach((attachment: any) => {
+      attachments.forEach((attachment) => {
         fileContext += `\nFile: ${attachment.name} (${attachment.type})\n`;
         
         if (attachment.content) {
