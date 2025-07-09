@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { debugLog } from "@/components/debug-console";
+import { simpleLog } from "@/components/simple-debug";
 import type { FileAttachment } from "@/lib/ai-assistant/types";
 import FilePreview from "./FilePreview";
 
@@ -26,28 +26,26 @@ export default function FileDropZone({
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
 
-    debugLog('info', `FileDropZone: Received ${files.length} file(s)`, {
-      files: Array.from(files).map(f => ({ name: f.name, size: f.size, type: f.type }))
-    });
+    simpleLog(`FileDropZone: ${files.length} file(s)`);
 
     const validFiles: File[] = [];
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > MAX_FILE_SIZE) {
-        debugLog('warning', `File too large: ${file.name} (${file.size} bytes)`);
+        simpleLog(`File too large: ${file.name}`);
         alert(`File ${file.name} is too large. Maximum size is 10MB.`);
         continue;
       }
-      debugLog('success', `Valid file: ${file.name}`);
+      simpleLog(`Valid file: ${file.name}`);
       validFiles.push(file);
     }
 
     if (validFiles.length > 0) {
-      debugLog('info', `Passing ${validFiles.length} valid file(s) to onFileUpload`);
+      simpleLog(`Passing ${validFiles.length} file(s) up`);
       onFileUpload(validFiles);
     } else {
-      debugLog('warning', 'No valid files to upload');
+      simpleLog('No valid files');
     }
   }, [onFileUpload]);
 
@@ -55,9 +53,7 @@ export default function FileDropZone({
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    debugLog('info', 'DROP EVENT: Files dropped', {
-      fileCount: e.dataTransfer.files.length
-    });
+    simpleLog(`DROP EVENT: ${e.dataTransfer.files.length} files`);
     handleFiles(e.dataTransfer.files);
   }, [handleFiles]);
 
@@ -65,7 +61,7 @@ export default function FileDropZone({
     e.preventDefault();
     e.stopPropagation();
     if (!isDragActive) {
-      debugLog('info', 'DRAG EVENT: Drag over started');
+      simpleLog('DRAG OVER');
     }
     setIsDragActive(true);
   }, [isDragActive]);
@@ -74,16 +70,16 @@ export default function FileDropZone({
     e.preventDefault();
     e.stopPropagation();
     setIsDragActive(false);
-    debugLog('info', 'DRAG EVENT: Drag leave');
+    simpleLog('DRAG LEAVE');
   }, []);
 
   const handleClick = () => {
-    debugLog('info', 'FileDropZone: Click to select files');
+    simpleLog('CLICK TO SELECT');
     inputRef.current?.click();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    debugLog('info', 'FileDropZone: File input changed');
+    simpleLog('FILE INPUT CHANGED');
     handleFiles(e.target.files);
   };
 

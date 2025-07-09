@@ -9,7 +9,7 @@ import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@clerk/nextjs";
-import { DebugConsole, debugLog } from "@/components/debug-console";
+import { SimpleDebug, simpleLog } from "@/components/simple-debug";
 import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from "@/lib/ai-assistant/types";
 
 export default function AIAssistantPage() {
@@ -25,10 +25,10 @@ export default function AIAssistantPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
 
-  // Log debug status on mount
+  // Simple debug status
   useEffect(() => {
     if (isDebug) {
-      debugLog('info', 'AI Assistant page loaded in debug mode');
+      simpleLog('Page loaded');
     }
   }, [isDebug]);
 
@@ -110,9 +110,7 @@ export default function AIAssistantPage() {
   };
 
   const handleFileUpload = async (files: File[]) => {
-    debugLog('info', `DROPPED: ${files.length} file(s)`, {
-      files: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
-    });
+    simpleLog(`DROPPED: ${files.length} file(s)`);
 
     const newAttachments: FileAttachment[] = files.map(file => ({
       id: crypto.randomUUID(),
@@ -129,16 +127,13 @@ export default function AIAssistantPage() {
       const attachment = newAttachments.find(a => a.name === file.name);
       if (!attachment) continue;
 
-      debugLog('info', `UPLOADING: ${file.name} (0%)`);
+      simpleLog(`UPLOADING: ${file.name}`);
 
       try {
         const formData = new FormData();
         formData.append('file', file);
 
-        debugLog('info', `CALLING: /api/ai-assistant/upload`, {
-          fileName: file.name,
-          fileSize: file.size
-        });
+        simpleLog(`CALLING API for ${file.name}`);
 
         const response = await fetch('/api/ai-assistant/upload', {
           method: 'POST',
@@ -147,10 +142,7 @@ export default function AIAssistantPage() {
 
         const data = await response.json();
 
-        debugLog(response.ok ? 'success' : 'error', 
-          `RESPONSE: ${response.status}`, 
-          { response: data, ok: response.ok }
-        );
+        simpleLog(`RESPONSE: ${response.status} ${response.ok ? 'OK' : 'ERROR'}`);
 
         if (response.ok) {
           setAttachedFiles(prev => 
@@ -160,15 +152,12 @@ export default function AIAssistantPage() {
                 : f
             )
           );
-          debugLog('success', `File uploaded successfully: ${file.name}`);
+          simpleLog(`SUCCESS: ${file.name}`);
         } else {
           throw new Error(data.error || 'Upload failed');
         }
       } catch (error) {
-        debugLog('error', `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`, {
-          fileName: file.name,
-          error
-        });
+        simpleLog(`ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`);
         
         setAttachedFiles(prev => 
           prev.map(f => 
@@ -341,8 +330,8 @@ export default function AIAssistantPage() {
         />
       )}
 
-      {/* Debug Console */}
-      <DebugConsole isEnabled={isDebug} />
+      {/* Simple Debug */}
+      <SimpleDebug isEnabled={isDebug} />
     </div>
   );
 }
