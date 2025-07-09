@@ -7,6 +7,8 @@ export interface ParsedFileContent {
     pages?: number;
     sheets?: string[];
     rows?: number;
+    warning?: string;
+    error?: string;
   };
 }
 
@@ -52,6 +54,21 @@ async function parsePDFFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
     const pdfParse = (await import('pdf-parse')).default;
     const data = await pdfParse(buffer);
     
+    // Check if we got any text
+    if (!data.text || data.text.trim().length === 0) {
+      console.log('PDF parse returned no text - might be a scanned PDF');
+      return {
+        text: '',
+        type: 'pdf',
+        metadata: {
+          pages: data.numpages || 0,
+          warning: 'No text extracted - PDF might be scanned/image-based'
+        }
+      };
+    }
+    
+    console.log(`PDF parsed successfully: ${data.numpages} pages, ${data.text.length} characters`);
+    
     return {
       text: data.text,
       type: 'pdf',
@@ -61,11 +78,18 @@ async function parsePDFFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
     };
   } catch (error) {
     console.error('Error parsing PDF:', error);
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return {
-      text: 'PDF parsing failed. Please try uploading an Excel or CSV file instead.',
+      text: '',
       type: 'pdf',
       metadata: {
-        pages: 0
+        pages: 0,
+        error: error instanceof Error ? error.message : 'Unknown error'
       }
     };
   }

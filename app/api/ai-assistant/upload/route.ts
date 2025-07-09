@@ -84,10 +84,18 @@ export async function POST(request: NextRequest) {
       let parseError = null;
       
       try {
+        console.log('[API] Starting to parse file:', file.name, 'Size:', buffer.length);
         const parsed = await parseFileFromBuffer(buffer, file.name);
-        extractedContent = extractBOQItems(parsed.text);
-        console.log('[API] Extracted content length:', extractedContent.length);
-        console.log('[API] First 200 chars:', extractedContent.substring(0, 200));
+        
+        // Check if parsing actually succeeded
+        if (parsed.text && parsed.text !== 'PDF parsing failed. Please try uploading an Excel or CSV file instead.') {
+          extractedContent = extractBOQItems(parsed.text);
+          console.log('[API] Successfully extracted content, length:', extractedContent.length);
+          console.log('[API] First 500 chars:', extractedContent.substring(0, 500));
+        } else {
+          console.log('[API] Parsing returned no content or error message');
+          parseError = 'Unable to extract text from PDF. The file might be scanned/image-based or corrupted.';
+        }
       } catch (error) {
         console.error('[API] Error parsing file:', error);
         parseError = error instanceof Error ? error.message : 'Parse error';

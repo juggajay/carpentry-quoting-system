@@ -84,15 +84,24 @@ export async function processChat(
       attachments.forEach((attachment) => {
         fileContext += `\n--- File: ${attachment.name} ---\n`;
         
-        if (attachment.content) {
+        if (attachment.content && attachment.content.trim().length > 0) {
           // Include the extracted content
           fileContext += `\nExtracted Text Content:\n${attachment.content}\n`;
           fileContext += '\n--- End of File ---\n';
         } else if (attachment.parseError) {
-          fileContext += `Error parsing file: ${attachment.parseError}\n`;
-          fileContext += 'Please ask the user to upload a different format (PDF, Excel, or CSV).\n';
+          fileContext += `\nError: ${attachment.parseError}\n`;
+          fileContext += '\nThe PDF might be:\n';
+          fileContext += '1. A scanned/image-based PDF (not text-based)\n';
+          fileContext += '2. Password protected\n';
+          fileContext += '3. Corrupted or invalid format\n';
+          fileContext += '\nPlease ask the user to:\n';
+          fileContext += '- Try uploading an Excel (.xlsx) or CSV version instead\n';
+          fileContext += '- Ensure the PDF contains selectable text (not scanned images)\n';
+          fileContext += '- Check if the PDF opens correctly on their computer\n';
         } else {
-          fileContext += `File uploaded but content extraction failed. Please try uploading again.\n`;
+          fileContext += `\nNo text content could be extracted from this file.\n`;
+          fileContext += 'This usually happens with scanned PDFs or image-based documents.\n';
+          fileContext += 'Please request an Excel or CSV version of the BOQ.\n';
         }
       });
       
