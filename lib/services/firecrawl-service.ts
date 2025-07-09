@@ -79,9 +79,10 @@ export class FirecrawlService {
           async () => {
             console.log(`[FirecrawlService] Calling Firecrawl API for ${url}`);
             const res = await this.firecrawl.scrapeUrl(url, {
-              formats: ['html', 'markdown'],
-              waitFor: 3000,
-              onlyMainContent: false,
+              formats: ['markdown', 'html'],
+              waitFor: 5000,
+              onlyMainContent: true,
+              timeout: 25000,
             });
             
             console.log(`[FirecrawlService] Firecrawl response:`, { 
@@ -100,16 +101,17 @@ export class FirecrawlService {
           { supplier: config.name, url }
         );
 
-        // Try HTML parsing first, fallback to markdown
+        // Try markdown parsing first for Canterbury (simpler and faster)
         let parsedProducts: ScrapedProduct[] = [];
-        if ((result as any).html) {
-          parsedProducts = this.parseProducts((result as any).html, config);
+        if ((result as any).markdown) {
+          console.log(`Parsing markdown for ${url}`);
+          parsedProducts = this.parseProductsFromMarkdown((result as any).markdown, config);
         }
         
-        // If no products found with HTML, try markdown parsing
-        if (parsedProducts.length === 0 && (result as any).markdown) {
-          console.log(`No products found with HTML, trying markdown for ${url}`);
-          parsedProducts = this.parseProductsFromMarkdown((result as any).markdown, config);
+        // If no products found with markdown, try HTML parsing
+        if (parsedProducts.length === 0 && (result as any).html) {
+          console.log(`No products found with markdown, trying HTML for ${url}`);
+          parsedProducts = this.parseProducts((result as any).html, config);
         }
         products.push(...parsedProducts);
         
@@ -189,67 +191,92 @@ export class FirecrawlService {
     return products;
   }
 
-  private parseProductsFromMarkdown(markdown: string, _config: SupplierConfig): ScrapedProduct[] {
+  private parseProductsFromMarkdown(markdown: string, config: SupplierConfig): ScrapedProduct[] {
     const products: ScrapedProduct[] = [];
     
     try {
-      // Split markdown into sections and look for product patterns
-      const lines = markdown.split('\n');
-      let currentProduct: Partial<ScrapedProduct> = {};
+      // Split by common product separators
+      const sections = markdown.split(/\n(?=#{1,3}\s|^[-*]\s|\[)/);
       
-      for (const line of lines) {
-        // Look for price patterns
-        const priceMatch = line.match(/\$\s?([\d,]+\.?\d*)/);
-        if (priceMatch) {
-          const price = this.parsePrice(priceMatch[0]);
-          if (price > 0 && currentProduct.name) {
-            currentProduct.price = price;
+      for (const section of sections) {
+        const lines = section.split('\n').filter(line => line.trim());
+        if (lines.length === 0) continue;
+        
+        const product: Partial<ScrapedProduct> = {};
+        
+        for (const line of lines) {
+          // Extract product name from headers, links, or bold text
+          if (!product.name) {
+            if (line.match(/^#{1,3}\s/)) {
+              product.name = line.replace(/^#{1,3}\s/, '').replace(/[\[\]()]/g, '').trim();
+            } else if (line.match(/^\[([^\]]+)\]/)) {
+              const match = line.match(/^\[([^\]]+)\]/);
+              if (match) product.name = match[1].trim();
+            } else if (line.match(/^\*\*([^*]+)\*\*/)) {
+              const match = line.match(/^\*\*([^*]+)\*\*/);
+              if (match) product.name = match[1].trim();
+            } else if (line.match(/^[-*]\s+(.+)/) && !product.name) {
+              const match = line.match(/^[-*]\s+(.+)/);
+              if (match) product.name = match[1].replace(/\$[\d,]+\.?\d*.*$/, '').trim();
+            }
+          }
+          
+          // Look for price patterns
+          const priceMatch = line.match(/\$\s?([\d,]+\.?\d*)/);
+          if (priceMatch) {
+            const price = this.parsePrice(priceMatch[0]);
+            if (price > 0) {
+              product.price = price;
+              
+              // Try to extract unit from price line
+              const unitMatch = line.match(/per\s+(\w+)|\/(\w+)/i);
+              if (unitMatch) {
+                const unitText = unitMatch[1] || unitMatch[2];
+                product.unit = this.parseUnit(unitText);
+              }
+            }
+          }
+          
+          // Look for SKU patterns
+          const skuMatch = line.match(/(?:SKU|Code|Item|Product\s*#?):?\s*([A-Z0-9\-]+)/i);
+          if (skuMatch) {
+            product.sku = skuMatch[1];
+          }
+          
+          // Look for stock status
+          if (line.match(/in\s*stock|available/i)) {
+            product.inStock = true;
+          } else if (line.match(/out\s*of\s*stock|unavailable/i)) {
+            product.inStock = false;
           }
         }
         
-        // Look for product names (usually in headers or bold)
-        if (line.match(/^#{1,3}\s/) || line.match(/^\*\*.*\*\*$/)) {
-          if (currentProduct.name && currentProduct.price) {
-            products.push({
-              name: currentProduct.name,
-              price: currentProduct.price,
-              unit: currentProduct.unit || 'EA',
-              inStock: currentProduct.inStock ?? true,
-              description: currentProduct.description,
-              category: currentProduct.category,
-              sku: currentProduct.sku,
-            });
-          }
-          currentProduct = {
-            name: line.replace(/^#{1,3}\s/, '').replace(/\*\*/g, '').trim()
-          };
+        // Add product if we have name and price
+        if (product.name && product.price) {
+          products.push({
+            name: product.name.substring(0, 255), // Limit length
+            price: product.price,
+            unit: product.unit || 'EA',
+            inStock: product.inStock ?? true,
+            description: product.description,
+            category: config.name,
+            sku: product.sku || this.generateSKU(product.name, config.name),
+          });
         }
-        
-        // Look for SKU patterns
-        const skuMatch = line.match(/SKU:?\s*([A-Z0-9\-]+)/i);
-        if (skuMatch) {
-          currentProduct.sku = skuMatch[1];
-        }
-      }
-      
-      // Don't forget the last product
-      if (currentProduct.name && currentProduct.price) {
-        products.push({
-          name: currentProduct.name,
-          price: currentProduct.price,
-          unit: currentProduct.unit || 'EA',
-          inStock: currentProduct.inStock ?? true,
-          description: currentProduct.description,
-          category: currentProduct.category,
-          sku: currentProduct.sku,
-        });
       }
     } catch (error) {
       console.error('Error parsing markdown:', error);
     }
     
-    console.log(`Parsed ${products.length} products from markdown`);
+    console.log(`[Markdown Parser] Found ${products.length} products from ${config.name}`);
     return products;
+  }
+  
+  private generateSKU(name: string, supplier: string): string {
+    const prefix = supplier.substring(0, 3).toUpperCase();
+    const namePart = name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${namePart}-${random}`;
   }
 
   // Supplier-specific scrapers
