@@ -34,6 +34,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { message, sessionId, attachments } = body;
 
+    console.log('[CHAT API] Received:', {
+      message: message?.substring(0, 100) + '...',
+      sessionId,
+      attachmentsCount: attachments?.length || 0,
+      attachments: attachments?.map((a: any) => ({ name: a.name, type: a.type, size: a.size }))
+    });
+
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
@@ -68,7 +75,9 @@ export async function POST(request: NextRequest) {
     const messages = [...(session.messages as unknown as ChatMessage[]), userMessage];
 
     // Process with OpenAI
+    console.log('[CHAT API] Sending to AI with', messages.length, 'messages');
     const aiResponse = await processChat(messages, attachments);
+    console.log('[CHAT API] AI Response:', aiResponse.substring(0, 200) + '...');
 
     // Create assistant message
     const assistantMessage: ChatMessage = {

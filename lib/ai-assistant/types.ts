@@ -15,6 +15,8 @@ export interface FileAttachment {
   url?: string;
   status: 'uploading' | 'processing' | 'complete' | 'error';
   error?: string;
+  content?: string; // Extracted text content from the file
+  parseError?: string; // Error if file parsing failed
 }
 
 export interface QuoteItem {

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+import { parseFile, extractBOQItems } from "@/lib/ai-assistant/file-parser";
 import type { FileAttachment } from "@/lib/ai-assistant/types";
 
 export async function POST(request: NextRequest) {
@@ -72,17 +75,48 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // TODO: Implement actual file upload to storage
-      // For now, just create file metadata
+      // Create upload directory
+      const uploadDir = path.join(process.cwd(), 'uploads', userId);
+      await mkdir(uploadDir, { recursive: true });
+      
+      // Generate unique filename
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `${timestamp}-${sanitizedName}`;
+      const filepath = path.join(uploadDir, filename);
+      
+      // Save file to disk
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(filepath, buffer);
+      
+      console.log('[API] File saved to:', filepath);
+      
+      // Parse file content
+      let extractedContent = '';
+      let parseError = null;
+      
+      try {
+        const parsed = await parseFile(filepath);
+        extractedContent = extractBOQItems(parsed.text);
+        console.log('[API] Extracted content length:', extractedContent.length);
+        console.log('[API] First 200 chars:', extractedContent.substring(0, 200));
+      } catch (error) {
+        console.error('[API] Error parsing file:', error);
+        parseError = error instanceof Error ? error.message : 'Parse error';
+      }
+      
       const fileAttachment: FileAttachment = {
         id: crypto.randomUUID(),
         name: file.name,
         type: file.type,
         size: file.size,
         status: 'complete',
-        // In production, you'd upload to cloud storage and get a URL
-        url: `data:${file.type};base64,placeholder`,
-      };
+        url: `/uploads/${userId}/${filename}`,
+        // Add extracted content to the attachment
+        content: extractedContent,
+        parseError: parseError || undefined
+      } as FileAttachment;
 
       console.log('[API] File processed successfully:', fileAttachment.id);
       processedFiles.push(fileAttachment);

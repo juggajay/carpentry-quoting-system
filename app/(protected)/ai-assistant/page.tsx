@@ -139,10 +139,19 @@ export default function AIAssistantPage() {
         if (isDebug) setDebugStatus(`RESPONSE: ${response.status}`);
 
         if (response.ok) {
+          // Get the file data from the response
+          const uploadedFile = data.files?.[0] || data;
+          
           setAttachedFiles(prev => 
             prev.map(f => 
               f.id === attachment.id 
-                ? { ...f, status: 'complete' as const, url: data.url }
+                ? { 
+                    ...f, 
+                    status: 'complete' as const, 
+                    url: uploadedFile.url,
+                    content: uploadedFile.content,
+                    parseError: uploadedFile.parseError
+                  }
                 : f
             )
           );

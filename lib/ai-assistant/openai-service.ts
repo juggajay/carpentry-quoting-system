@@ -61,7 +61,7 @@ Remember: You're not a generic AI - you're specifically integrated with the carp
 
 export async function processChat(
   messages: ChatMessage[],
-  files?: { name: string; type: string; size: number }[]
+  attachments?: any[]
 ): Promise<string> {
   try {
     // Ensure MCP connections are initialized
@@ -80,11 +80,31 @@ export async function processChat(
       })),
     ];
 
-    // If there are files, add context about them
-    if (files && files.length > 0) {
-      const fileContext = `\n\nUploaded files: ${files.map(f => f.name).join(', ')}`;
+    // If there are attachments, add their content to the context
+    if (attachments && attachments.length > 0) {
+      let fileContext = '\n\n=== UPLOADED FILES ===\n';
+      
+      attachments.forEach((attachment: any) => {
+        fileContext += `\nFile: ${attachment.name} (${attachment.type})\n`;
+        
+        if (attachment.content) {
+          // Include the extracted content
+          fileContext += `Content:\n${attachment.content.substring(0, 3000)}\n`; // Limit to 3000 chars per file
+          if (attachment.content.length > 3000) {
+            fileContext += `... (truncated, ${attachment.content.length} total characters)\n`;
+          }
+        } else if (attachment.parseError) {
+          fileContext += `Error parsing file: ${attachment.parseError}\n`;
+        } else {
+          fileContext += `File uploaded but content not available.\n`;
+        }
+        fileContext += '\n---\n';
+      });
+      
       const lastMessage = openAIMessages[openAIMessages.length - 1];
       lastMessage.content += fileContext;
+      
+      console.log('[OpenAI Service] Added file context, total length:', fileContext.length);
     }
 
     // Convert MCP tools to OpenAI function format
