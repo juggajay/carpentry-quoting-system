@@ -12,6 +12,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
   
   // Get page title based on current route
   const getPageTitle = () => {
+    if (!pathname) return "Dashboard";
     if (pathname === "/dashboard") return "Dashboard";
     if (pathname.startsWith("/quotes")) return "Quotes";
     if (pathname.startsWith("/import")) return "Import";

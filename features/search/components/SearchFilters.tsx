@@ -22,17 +22,17 @@ export default function SearchFilters({ onFiltersChange }: SearchFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [search, setSearch] = useState(searchParams?.get("search") || "");
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [dateFrom, setDateFrom] = useState(searchParams.get("dateFrom") || "");
-  const [dateTo, setDateTo] = useState(searchParams.get("dateTo") || "");
-  const [status, setStatus] = useState(searchParams.get("status") || "");
-  const [minAmount, setMinAmount] = useState(searchParams.get("minAmount") || "");
-  const [maxAmount, setMaxAmount] = useState(searchParams.get("maxAmount") || "");
+  const [dateFrom, setDateFrom] = useState(searchParams?.get("dateFrom") || "");
+  const [dateTo, setDateTo] = useState(searchParams?.get("dateTo") || "");
+  const [status, setStatus] = useState(searchParams?.get("status") || "");
+  const [minAmount, setMinAmount] = useState(searchParams?.get("minAmount") || "");
+  const [maxAmount, setMaxAmount] = useState(searchParams?.get("maxAmount") || "");
 
   // Update URL params
   const updateSearchParams = (params: Record<string, string>) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
+    const newSearchParams = new URLSearchParams(searchParams?.toString() || "");
     
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
