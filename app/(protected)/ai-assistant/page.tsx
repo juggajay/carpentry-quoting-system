@@ -15,7 +15,7 @@ import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from 
 export default function AIAssistantPage() {
   const { userId } = useAuth();
   const searchParams = useSearchParams();
-  const isDebug = searchParams.get('debug') === 'true';
+  const isDebug = searchParams?.get('debug') === 'true';
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);

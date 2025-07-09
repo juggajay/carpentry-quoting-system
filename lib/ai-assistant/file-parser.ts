@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import pdfParse from 'pdf-parse';
 import * as XLSX from 'xlsx';
 
 export interface ParsedFileContent {
@@ -49,16 +48,30 @@ export async function parseFile(filePath: string): Promise<ParsedFileContent> {
 }
 
 async function parsePDF(filePath: string): Promise<ParsedFileContent> {
-  const dataBuffer = await fs.readFile(filePath);
-  const data = await pdfParse(dataBuffer);
-  
-  return {
-    text: data.text,
-    type: 'pdf',
-    metadata: {
-      pages: data.numpages
-    }
-  };
+  try {
+    // Dynamic import to avoid build issues
+    const pdfParse = (await import('pdf-parse')).default;
+    const dataBuffer = await fs.readFile(filePath);
+    const data = await pdfParse(dataBuffer);
+    
+    return {
+      text: data.text,
+      type: 'pdf',
+      metadata: {
+        pages: data.numpages
+      }
+    };
+  } catch (error) {
+    console.error('Error parsing PDF:', error);
+    // Fallback if pdf-parse fails
+    return {
+      text: 'PDF parsing failed. Please try uploading an Excel or CSV file instead.',
+      type: 'pdf',
+      metadata: {
+        pages: 0
+      }
+    };
+  }
 }
 
 async function parseExcel(filePath: string): Promise<ParsedFileContent> {
@@ -75,9 +88,9 @@ async function parseExcel(filePath: string): Promise<ParsedFileContent> {
     fullText += `\n=== Sheet: ${sheetName} ===\n`;
     
     // Convert each row to text
-    jsonData.forEach((row: any) => {
+    jsonData.forEach((row) => {
       if (Array.isArray(row) && row.some(cell => cell !== null && cell !== undefined && cell !== '')) {
-        fullText += row.join('\t') + '\n';
+        fullText += row.map(cell => String(cell ?? '')).join('\t') + '\n';
         totalRows++;
       }
     });
