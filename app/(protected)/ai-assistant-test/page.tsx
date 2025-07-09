@@ -33,6 +33,11 @@ export default function AIAssistantTestPage() {
     setIsRunning(true);
     setTestResults([]);
 
+    // Warning if no file selected
+    if (!uploadedFile) {
+      addTestResult('file-warning', 'error', 'No file selected! Please select a BOQ file (PDF, Excel, or CSV) before running tests.', null);
+    }
+
     // Test 1: Check API endpoints
     addTestResult('api-health', 'testing', 'Checking API endpoints...');
     try {
@@ -106,21 +111,26 @@ export default function AIAssistantTestPage() {
       addTestResult('chat', 'error', 'Chat request failed', error);
     }
 
-    // Test 5: Check environment variables
-    addTestResult('env', 'testing', 'Checking environment...');
+    // Test 5: Check AI Assistant status
+    addTestResult('env', 'testing', 'Checking AI Assistant configuration...');
     try {
-      const envResponse = await fetch('/api/debug');
-      const envData = await envResponse.json();
+      const statusResponse = await fetch('/api/ai-assistant/status');
+      const statusData = await statusResponse.json();
       
-      const hasOpenAI = envData.env?.OPENAI_API_KEY ? 'Yes' : 'No';
-      const hasDatabase = envData.env?.DATABASE_URL ? 'Yes' : 'No';
-      
-      addTestResult('env', hasOpenAI === 'Yes' ? 'success' : 'error', 
-        `OpenAI API Key: ${hasOpenAI}, Database: ${hasDatabase}`, 
-        envData
-      );
+      if (statusResponse.ok) {
+        const openAIConfigured = statusData.openai?.configured ? 'Yes' : 'No';
+        const dbConfigured = statusData.database?.configured ? 'Yes' : 'No';
+        
+        addTestResult('env', 
+          statusData.openai?.configured ? 'success' : 'error', 
+          `OpenAI: ${openAIConfigured}, Database: ${dbConfigured}`, 
+          statusData
+        );
+      } else {
+        addTestResult('env', 'error', 'Status check failed', statusData);
+      }
     } catch (error) {
-      addTestResult('env', 'error', 'Environment check failed', error);
+      addTestResult('env', 'error', 'Status check failed', error);
     }
 
     // Test 6: Check MCP connections
@@ -167,8 +177,11 @@ export default function AIAssistantTestPage() {
       </p>
 
       <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Test File Upload</h2>
+        <h2 className="text-xl font-semibold mb-4">Step 1: Select a Test File</h2>
         <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Please select a BOQ file to test the upload and parsing functionality.
+          </p>
           <input
             type="file"
             accept=".pdf,.xlsx,.xls,.csv,.docx"
@@ -180,17 +193,25 @@ export default function AIAssistantTestPage() {
               file:bg-electric-magenta file:text-white
               hover:file:bg-electric-magenta/80"
           />
-          {uploadedFile && (
-            <p className="text-sm text-muted-foreground">
-              Selected: {uploadedFile.name} ({(uploadedFile.size / 1024).toFixed(2)} KB)
-            </p>
+          {uploadedFile ? (
+            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <p className="text-sm text-green-500">
+                ✅ File selected: {uploadedFile.name} ({(uploadedFile.size / 1024).toFixed(2)} KB)
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+              <p className="text-sm text-yellow-500">
+                ⚠️ No file selected - file upload test will be skipped
+              </p>
+            </div>
           )}
         </div>
       </Card>
 
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Run Tests</h2>
+          <h2 className="text-xl font-semibold">Step 2: Run Diagnostic Tests</h2>
           <Button 
             onClick={runTests} 
             disabled={isRunning}
