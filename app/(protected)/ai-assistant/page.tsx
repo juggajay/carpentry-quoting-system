@@ -3,20 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
-import ChatInterface from "./components/ChatInterface";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
 import FileDropZone from "./components/FileDropZone";
 import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
-import { Button } from "@/components/ui/Button";
 import { useAuth } from "@clerk/nextjs";
-import { DebugIndicator } from "./components/DebugIndicator";
 import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from "@/lib/ai-assistant/types";
 
 export default function AIAssistantPage() {
   const { userId } = useAuth();
   const searchParams = useSearchParams();
-  const isDebug = searchParams?.get('debug') === 'true';
   
+  // State management
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);
   const [generatedQuote, setGeneratedQuote] = useState<GeneratedQuote | null>(null);
@@ -24,24 +24,36 @@ export default function AIAssistantPage() {
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const [debugStatus, setDebugStatus] = useState('READY');
   const [seniorEstimatorData, setSeniorEstimatorData] = useState<any>(null);
   const [liveUpdates, setLiveUpdates] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const updatesEndRef = useRef<HTMLDivElement>(null);
   
-  // Auto-scroll for live updates
+  // Auto-scroll functions
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
   const scrollUpdatesToBottom = () => {
     updatesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   
   useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  useEffect(() => {
     scrollUpdatesToBottom();
   }, [liveUpdates]);
   
-  // Add live update helper
+  // Add live update helper with leprechaun theme
   const addLiveUpdate = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLiveUpdates(prev => [...prev, `[${timestamp}] ${message}`]);
+    // Add leprechaun-themed prefixes for junior estimator
+    const prefixes = ['🧚', '✨', '💚', '🪙', '🌟'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    setLiveUpdates(prev => [...prev, `${prefix} [${timestamp}] ${message}`]);
   };
 
   // Load existing MCP connections and check for Senior Estimator data
@@ -70,11 +82,11 @@ export default function AIAssistantPage() {
         try {
           const takeoffData = JSON.parse(data);
           setSeniorEstimatorData(takeoffData);
-          addLiveUpdate("📥 Received takeoffs from Senior Estimator");
-          addLiveUpdate(`📊 ${takeoffData.quantities.length} items to price with ${takeoffData.project_summary.confidence}% confidence`);
+          addLiveUpdate("📥 Received wisdom from the Senior Leprechaun!");
+          addLiveUpdate(`📊 ${takeoffData.quantities.length} magical items to price with ${takeoffData.project_summary.confidence}% confidence`);
           
           // Auto-send a message to start the Junior Estimator workflow
-          const autoMessage = `I've received quantity takeoffs from the Senior Estimator. Please help me create a detailed quote using our materials database and labor rates.
+          const autoMessage = `The Senior Leprechaun has blessed me with quantity takeoffs! Let me craft a detailed quote using our enchanted materials database and labor rates.
 
 Project Summary:
 - Scope: ${takeoffData.project_summary.scope}
@@ -87,11 +99,11 @@ ${takeoffData.quantities.map((item: any, index: number) =>
   `${index + 1}. ${item.description} - ${item.quantity} ${item.unit} (${item.confidence}% confidence)`
 ).join('\n')}
 
-Please start by searching our materials database for pricing on these items and suggest appropriate labor rates.`;
+Let me search our treasure trove of materials for the best pricing!`;
 
           // Clear the session storage
           sessionStorage.removeItem('senior_estimator_takeoff');
-          addLiveUpdate("🤖 Starting Junior Estimator workflow...");
+          addLiveUpdate("🧚 Junior Leprechaun awakening...");
           
           // Send the auto message after a short delay
           setTimeout(() => {
@@ -113,17 +125,6 @@ Please start by searching our materials database for pricing on these items and 
   const handleSendMessage = async (content: string) => {
     if (!userId) return;
 
-    // Debug log attached files
-    console.log('[AI-Assistant] Sending message with attachments:', {
-      attachmentCount: attachedFiles.length,
-      attachments: attachedFiles.map(f => ({
-        name: f.name,
-        hasContent: !!f.content,
-        contentLength: f.content?.length || 0,
-        parseError: f.parseError
-      }))
-    });
-
     const newMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
@@ -135,6 +136,7 @@ Please start by searching our materials database for pricing on these items and 
     setMessages(prev => [...prev, newMessage]);
     setAttachedFiles([]); // Clear attachments after sending
     setIsProcessing(true);
+    addLiveUpdate("🧚 Junior Leprechaun thinking...");
 
     try {
       const response = await fetch('/api/ai-assistant/chat', {
@@ -160,18 +162,20 @@ Please start by searching our materials database for pricing on these items and 
       
       // Add the AI response to messages
       setMessages(prev => [...prev, data.message]);
+      addLiveUpdate("💚 Junior wisdom delivered!");
       
       // If the response contains a quote draft, update the generated quote
       if (data.message.quoteDraft) {
-        console.log('[AI-Assistant] Quote draft received:', data.message.quoteDraft);
         setGeneratedQuote(data.message.quoteDraft);
+        addLiveUpdate("🪙 Quote treasure created!");
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      addLiveUpdate(`❌ Oops! ${error instanceof Error ? error.message : 'Magic failed'}`);
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: `Oh dear! The magic fizzled: ${error instanceof Error ? error.message : 'Unknown error'}`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -181,8 +185,6 @@ Please start by searching our materials database for pricing on these items and 
   };
 
   const handleFileUpload = async (files: File[]) => {
-    if (isDebug) setDebugStatus(`DROPPED: ${files.length}`);
-
     const newAttachments: FileAttachment[] = files.map(file => ({
       id: crypto.randomUUID(),
       name: file.name,
@@ -192,6 +194,7 @@ Please start by searching our materials database for pricing on these items and 
     }));
 
     setAttachedFiles(prev => [...prev, ...newAttachments]);
+    addLiveUpdate(`📄 Receiving ${files.length} magical scroll${files.length > 1 ? 's' : ''}...`);
     
     // Track which files are BOQ files
     const boqFiles: FileAttachment[] = [];
@@ -201,13 +204,9 @@ Please start by searching our materials database for pricing on these items and 
       const attachment = newAttachments.find(a => a.name === file.name);
       if (!attachment) continue;
 
-      if (isDebug) setDebugStatus('UPLOADING');
-
       try {
         const formData = new FormData();
         formData.append('file', file);
-
-        if (isDebug) setDebugStatus('CALLING API');
 
         const response = await fetch('/api/ai-assistant/upload', {
           method: 'POST',
@@ -215,8 +214,6 @@ Please start by searching our materials database for pricing on these items and 
         });
 
         const data = await response.json();
-
-        if (isDebug) setDebugStatus(`RESPONSE: ${response.status}`);
 
         if (response.ok) {
           // Get the file data from the response
@@ -235,21 +232,8 @@ Please start by searching our materials database for pricing on these items and 
                 : f
             )
           );
-          if (isDebug) setDebugStatus('SUCCESS');
-          
-          // Log the extracted content for debugging
-          console.log('[AI-Assistant] Upload response:', {
-            hasContent: !!uploadedFile.content,
-            contentLength: uploadedFile.content?.length || 0,
-            parseError: uploadedFile.parseError,
-            fileName: file.name
-          });
           
           if (uploadedFile.content) {
-            console.log(`[AI-Assistant] Extracted content preview (first 500 chars):`);
-            console.log(uploadedFile.content.substring(0, 500));
-            
-            // Track BOQ files with content
             const updatedFile = {
               ...attachment,
               status: 'complete' as const,
@@ -258,17 +242,12 @@ Please start by searching our materials database for pricing on these items and 
               parseError: uploadedFile.parseError
             };
             boqFiles.push(updatedFile);
-          } else if (uploadedFile.parseError) {
-            console.log(`[AI-Assistant] Parse error: ${uploadedFile.parseError}`);
-          } else {
-            console.log(`[AI-Assistant] No content extracted from ${file.name}`);
+            addLiveUpdate(`✨ Scroll decoded: ${file.name}`);
           }
         } else {
           throw new Error(data.error || 'Upload failed');
         }
       } catch (error) {
-        if (isDebug) setDebugStatus(`ERROR: ${error instanceof Error ? error.message : 'ERROR'}`);
-        
         setAttachedFiles(prev => 
           prev.map(f => 
             f.id === attachment.id 
@@ -276,17 +255,14 @@ Please start by searching our materials database for pricing on these items and 
               : f
           )
         );
+        addLiveUpdate(`❌ Failed to read scroll: ${file.name}`);
       }
     }
     
     // Automatically analyze BOQ files if any were successfully uploaded with content
     if (boqFiles.length > 0) {
-      console.log('[AI-Assistant] Auto-analyzing BOQ files:', boqFiles.length);
+      const autoMessage = `Please analyze the uploaded BOQ file${boqFiles.length > 1 ? 's' : ''} and create a magical quote!`;
       
-      // Send automatic analysis message
-      const autoMessage = `Please analyze the uploaded BOQ file${boqFiles.length > 1 ? 's' : ''} and create a quote.`;
-      
-      // Wait a moment for state to update, then send the message
       setTimeout(() => {
         handleSendMessage(autoMessage);
       }, 500);
@@ -304,16 +280,12 @@ Please start by searching our materials database for pricing on these items and 
 
   const handleMCPDisconnect = async (connectionId: string) => {
     try {
-      console.log('Disconnecting MCP:', connectionId);
       const response = await fetch(`/api/mcp/connections/${connectionId}/connect`, {
         method: 'DELETE',
       });
       
       if (response.ok) {
         setMcpConnections(prev => prev.filter(conn => conn.id !== connectionId));
-        console.log('MCP disconnected successfully');
-      } else {
-        console.error('Failed to disconnect MCP:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Error disconnecting MCP:', error);
@@ -321,71 +293,75 @@ Please start by searching our materials database for pricing on these items and 
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4 px-6 pt-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            🤖 Junior Estimator (AI Assistant)
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <span className="text-4xl animate-pulse">🧚</span> 
+            <div>
+              <div className="flex items-center gap-2">
+                Junior Estimator
+                <span className="text-3xl">🧙‍♂️</span>
+              </div>
+              <p className="text-xs text-green-600 font-semibold italic">
+                "A wee bit of magic for your quotes!"
+              </p>
+            </div>
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground text-sm mt-2">
             {seniorEstimatorData 
-              ? "Using Senior Estimator takeoffs to create detailed quotes with database pricing"
-              : "Upload BOQ files and let AI help you generate accurate quotes"
+              ? "Using Senior Leprechaun's wisdom to craft detailed quotes"
+              : "Upload BOQ scrolls for magical quote generation"
             }
           </p>
         </div>
-        <Button
-          onClick={() => setShowMCPSelector(true)}
-          variant="secondary"
-          className="flex items-center gap-2 relative"
-        >
-          <span className="text-lg">🔌</span>
-          Add MCP
-          {mcpConnections.filter(c => c.status === 'connected').length > 0 && (
-            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-              {mcpConnections.filter(c => c.status === 'connected').length}
-            </span>
-          )}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Badge variant="info" className="text-sm bg-green-100 text-green-800 border-green-300">
+            🌟 AI Assistant
+          </Badge>
+          <Button
+            onClick={() => setShowMCPSelector(true)}
+            variant="secondary"
+            size="sm"
+            className="flex items-center gap-2 relative"
+          >
+            <span>🔌</span>
+            MCP Tools
+            {mcpConnections.filter(c => c.status === 'connected').length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                {mcpConnections.filter(c => c.status === 'connected').length}
+              </span>
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Debug indicator */}
-      {isDebug && (
-        <DebugIndicator 
-          status={debugStatus} 
-          color={debugStatus.includes('ERROR') ? 'red' : debugStatus.includes('SUCCESS') ? 'green' : 'yellow'}
-        />
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="p-6">
-            <FileDropZone 
-              onFileUpload={handleFileUpload}
-              attachedFiles={attachedFiles}
-              onRemoveFile={handleRemoveFile}
-            />
-          </Card>
-
-          <Card className="p-6">
-            <ChatInterface
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              isProcessing={isProcessing}
-              attachedFiles={attachedFiles}
-            />
-          </Card>
-        </div>
-
-        <div className="lg:col-span-1 space-y-6">
-          {/* Live Updates */}
+      {/* Main Content Grid - Matching Senior Layout */}
+      <div className="flex-1 grid grid-cols-12 gap-4 px-6 pb-4 min-h-0">
+        {/* Left Column - Files & MCP (Small) */}
+        <div className="col-span-3 space-y-4 overflow-y-auto">
           <Card className="p-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              📡 Live Updates
+            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              📜 BOQ Scrolls
             </h3>
-            <div className="h-40 overflow-y-auto bg-gray-50 rounded-lg p-3 text-xs font-mono">
+            <div className="text-xs">
+              <FileDropZone 
+                onFileUpload={handleFileUpload}
+                attachedFiles={attachedFiles}
+                onRemoveFile={handleRemoveFile}
+              />
+            </div>
+          </Card>
+
+          {/* Live Updates */}
+          <Card className="p-4 flex-1">
+            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              ✨ Magical Updates
+            </h3>
+            <div className="h-48 overflow-y-auto bg-gray-50 rounded p-2 text-xs font-mono">
               {liveUpdates.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No activity yet...</p>
+                <p className="text-gray-500 text-center py-8">Waiting for magic...</p>
               ) : (
                 liveUpdates.map((update, index) => (
                   <div key={index} className="mb-1 text-gray-700">
@@ -396,79 +372,170 @@ Please start by searching our materials database for pricing on these items and 
               <div ref={updatesEndRef} />
             </div>
           </Card>
-          
+
+          {/* MCP Connections */}
+          {mcpConnections.length > 0 && (
+            <Card className="p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                🔌 Magic Tools
+              </h3>
+              <div className="space-y-1">
+                {mcpConnections.map(conn => (
+                  <div key={conn.id} className="flex items-center justify-between p-1.5 rounded bg-gray-50 hover:bg-gray-100 transition-colors text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        conn.status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                      }`} />
+                      <span className="font-medium">{conn.name}</span>
+                    </div>
+                    {conn.status === 'connected' && (
+                      <button
+                        className="text-xs text-red-600 hover:text-red-700"
+                        onClick={() => handleMCPDisconnect(conn.id)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+
+        {/* Middle Column - Chat Interface (Big) */}
+        <div className="col-span-6 flex flex-col min-h-0">
+          <Card className="flex-1 flex flex-col p-4">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              💬 Junior Leprechaun Chat
+            </h3>
+            
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-gray-50 mb-4">
+              {messages.length === 0 && !generatedQuote ? (
+                <div className="text-center text-gray-500 py-16">
+                  <div className="text-6xl mb-3 animate-bounce">🧚‍♂️</div>
+                  <p className="font-medium">Junior Leprechaun Ready!</p>
+                  <p className="text-sm mt-2 text-green-600 italic">"Upload your BOQ scrolls or ask me anything!"</p>
+                  <div className="flex justify-center gap-2 mt-4">
+                    <span className="text-2xl">✨</span>
+                    <span className="text-2xl">🪙</span>
+                    <span className="text-2xl">💚</span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`mb-3 p-3 rounded-lg ${
+                        message.role === 'user'
+                          ? 'bg-green-100 ml-12'
+                          : 'bg-white mr-12 shadow-sm'
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className={message.role === 'user' ? 'text-sm' : 'text-2xl'}>
+                          {message.role === 'user' ? '👤' : '🧚'}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              {isProcessing && (
+                <div className="mb-3 p-3 rounded-lg bg-white mr-12 shadow-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-2xl animate-pulse">🧚</span>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500 italic">Junior Leprechaun is crafting magic...</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            
+            {/* Chat Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
+                placeholder="Ask about materials, pricing, or upload BOQ files..."
+                className="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                disabled={isProcessing}
+              />
+              <Button
+                onClick={() => handleSendMessage(inputValue)}
+                disabled={!inputValue.trim() || isProcessing}
+                size="sm"
+              >
+                Send
+              </Button>
+            </div>
+          </Card>
+        </div>
+        
+        {/* Right Column - Quote Preview */}
+        <div className="col-span-3 space-y-4 overflow-y-auto">
           {generatedQuote ? (
             <QuotePreview 
               quote={generatedQuote} 
               sessionId={sessionId}
               onQuoteCreated={(quoteId, quoteNumber) => {
                 console.log(`Quote ${quoteNumber} created with ID: ${quoteId}`);
+                addLiveUpdate(`🪙 Quote ${quoteNumber} saved to treasure chest!`);
               }}
             />
-          ) : isProcessing && attachedFiles.some(f => f.content) ? (
-            <Card className="p-6">
-              <div className="text-center text-muted-foreground">
-                <div className="text-4xl mb-4 animate-pulse">⚡</div>
-                <p className="font-medium">Analyzing BOQ...</p>
-                <p className="text-sm mt-2">
-                  Creating quote from uploaded files
-                </p>
-              </div>
-            </Card>
           ) : (
-            <Card className="p-6">
-              <div className="text-center text-muted-foreground">
-                <div className="text-4xl mb-4">📋</div>
-                <p>No quote generated yet</p>
-                <p className="text-sm mt-2">
-                  Upload BOQ files and interact with the AI to generate a quote
+            <Card className="p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                📋 Quote Preview
+              </h3>
+              <div className="text-center text-muted-foreground py-8">
+                <div className="text-4xl mb-3">🪙</div>
+                <p className="text-sm">No quote generated yet</p>
+                <p className="text-xs mt-2 text-green-600 italic">
+                  "The gold will appear when ready!"
                 </p>
               </div>
             </Card>
           )}
 
-          {mcpConnections.length > 0 && (
-            <Card className="p-4 mt-6">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <span className="text-lg">🔌</span>
-                Active Connections
+          {/* Senior Estimator Data Summary */}
+          {seniorEstimatorData && (
+            <Card className="p-4">
+              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                🧙‍♂️ From Senior Leprechaun
+                <Badge variant="success" className="text-xs">
+                  {seniorEstimatorData.quantities.length} items
+                </Badge>
               </h3>
-              <div className="space-y-2">
-                {mcpConnections.map(conn => (
-                  <div key={conn.id} className="flex items-center justify-between p-2 rounded-lg bg-dark-elevated/50 hover:bg-dark-elevated transition-colors">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full animate-pulse ${
-                        conn.status === 'connected' ? 'bg-green-500' : ''
-                      }${
-                        conn.status === 'error' ? 'bg-red-500' : ''
-                      }${
-                        conn.status === 'disconnected' ? 'bg-gray-500' : ''
-                      }`} />
-                      <span className="text-sm font-medium">{conn.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        conn.status === 'connected' ? 'bg-green-500/20 text-green-500' : ''
-                      }${
-                        conn.status === 'error' ? 'bg-red-500/20 text-red-500' : ''
-                      }${
-                        conn.status === 'disconnected' ? 'bg-gray-500/20 text-gray-500' : ''
-                      }`}>
-                        {conn.status}
-                      </span>
-                      {conn.status === 'connected' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 px-2 text-xs hover:bg-red-500/20 hover:text-red-500"
-                          onClick={() => handleMCPDisconnect(conn.id)}
-                        >
-                          Disconnect
-                        </Button>
-                      )}
-                    </div>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                <div className="p-2 bg-green-50 rounded text-xs">
+                  <p className="font-medium text-green-800">Project: {seniorEstimatorData.project_summary.project_type}</p>
+                  <p className="text-green-600">Location: {seniorEstimatorData.project_summary.location}</p>
+                  <p className="text-green-600">Confidence: {seniorEstimatorData.project_summary.confidence}%</p>
+                </div>
+                {seniorEstimatorData.quantities.slice(0, 5).map((item: any, index: number) => (
+                  <div key={index} className="p-2 border rounded bg-gray-50 text-xs">
+                    <p className="font-medium">{item.description}</p>
+                    <p className="text-gray-600">{item.quantity} {item.unit}</p>
                   </div>
                 ))}
+                {seniorEstimatorData.quantities.length > 5 && (
+                  <p className="text-xs text-center text-gray-500 italic">
+                    ...and {seniorEstimatorData.quantities.length - 5} more items
+                  </p>
+                )}
               </div>
             </Card>
           )}
@@ -482,7 +549,6 @@ Please start by searching our materials database for pricing on these items and 
           existingConnections={mcpConnections}
         />
       )}
-
     </div>
   );
 }
