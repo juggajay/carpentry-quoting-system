@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { parseFile, extractBOQItems } from "@/lib/ai-assistant/file-parser";
+import { parseFileFromBuffer, extractBOQItems } from "@/lib/ai-assistant/file-parser-memory";
 import type { FileAttachment } from "@/lib/ai-assistant/types";
 
 export async function POST(request: NextRequest) {
@@ -75,29 +73,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create upload directory
-      const uploadDir = path.join(process.cwd(), 'uploads', userId);
-      await mkdir(uploadDir, { recursive: true });
-      
-      // Generate unique filename
-      const timestamp = Date.now();
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filename = `${timestamp}-${sanitizedName}`;
-      const filepath = path.join(uploadDir, filename);
-      
-      // Save file to disk
+      // Get file buffer
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      await writeFile(filepath, buffer);
       
-      console.log('[API] File saved to:', filepath);
+      console.log('[API] Processing file in memory:', file.name);
       
-      // Parse file content
+      // Parse file content from buffer
       let extractedContent = '';
       let parseError = null;
       
       try {
-        const parsed = await parseFile(filepath);
+        const parsed = await parseFileFromBuffer(buffer, file.name, file.type);
         extractedContent = extractBOQItems(parsed.text);
         console.log('[API] Extracted content length:', extractedContent.length);
         console.log('[API] First 200 chars:', extractedContent.substring(0, 200));
@@ -106,14 +93,17 @@ export async function POST(request: NextRequest) {
         parseError = error instanceof Error ? error.message : 'Parse error';
       }
       
+      // Convert buffer to base64 for storage
+      const base64Content = buffer.toString('base64');
+      const dataUrl = `data:${file.type};base64,${base64Content}`;
+      
       const fileAttachment: FileAttachment = {
         id: crypto.randomUUID(),
         name: file.name,
         type: file.type,
         size: file.size,
         status: 'complete',
-        url: `/uploads/${userId}/${filename}`,
-        // Add extracted content to the attachment
+        url: dataUrl, // Store as data URL
         content: extractedContent,
         parseError: parseError || undefined
       } as FileAttachment;
@@ -156,7 +146,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('[API] Upload error:', error);
-    console.error('[API] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('[API] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      type: error?.constructor?.name || 'Unknown'
+    });
+    
+    // More specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('ENOENT')) {
+        return NextResponse.json(
+          { error: 'File system error: Unable to save file. Please try again.' },
+          { status: 500 }
+        );
+      }
+      if (error.message.includes('pdf-parse')) {
+        return NextResponse.json(
+          { error: 'PDF parsing error. Please try uploading an Excel or CSV file instead.' },
+          { status: 500 }
+        );
+      }
+    }
+    
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
