@@ -13,7 +13,7 @@ interface ScrapedProduct {
 }
 
 export interface ScraperConfig {
-  supplier: 'bunnings' | 'tradelink' | 'reece' | 'custom';
+  supplier: 'bunnings' | 'blacktown' | 'canterbury' | 'custom';
   category?: string;
   customUrl?: string;
   options: {
@@ -171,10 +171,10 @@ export class FirecrawlService {
     return this.scrapeSupplier(config, urls);
   }
 
-  async scrapeTradelink(urls: string[]): Promise<ScrapedProduct[]> {
-    const supplierConfig = getSupplierConfig('tradelink');
+  async scrapeBlacktown(urls: string[]): Promise<ScrapedProduct[]> {
+    const supplierConfig = getSupplierConfig('blacktown');
     if (!supplierConfig) {
-      throw new Error('Tradelink configuration not found');
+      throw new Error('Blacktown Building Supplies configuration not found');
     }
     
     const config: SupplierConfig = {
@@ -186,10 +186,10 @@ export class FirecrawlService {
     return this.scrapeSupplier(config, urls);
   }
 
-  async scrapeReece(urls: string[]): Promise<ScrapedProduct[]> {
-    const supplierConfig = getSupplierConfig('reece');
+  async scrapeCanterbury(urls: string[]): Promise<ScrapedProduct[]> {
+    const supplierConfig = getSupplierConfig('canterbury');
     if (!supplierConfig) {
-      throw new Error('Reece configuration not found');
+      throw new Error('Canterbury Timbers configuration not found');
     }
     
     const config: SupplierConfig = {
@@ -209,11 +209,11 @@ export class FirecrawlService {
       case 'bunnings':
         products = await this.scrapeBunnings(urls);
         break;
-      case 'tradelink':
-        products = await this.scrapeTradelink(urls);
+      case 'blacktown':
+        products = await this.scrapeBlacktown(urls);
         break;
-      case 'reece':
-        products = await this.scrapeReece(urls);
+      case 'canterbury':
+        products = await this.scrapeCanterbury(urls);
         break;
       case 'custom':
         if (!config.customUrl) {
@@ -256,7 +256,7 @@ export class FirecrawlService {
 
   // Batch scraping with error handling
   async batchScrape(
-    supplier: 'bunnings' | 'tradelink' | 'reece',
+    supplier: 'bunnings' | 'blacktown' | 'canterbury',
     urls: string[],
     batchSize = 5
   ): Promise<ScrapedProduct[]> {
@@ -271,11 +271,11 @@ export class FirecrawlService {
         case 'bunnings':
           products = await this.scrapeBunnings(batch);
           break;
-        case 'tradelink':
-          products = await this.scrapeTradelink(batch);
+        case 'blacktown':
+          products = await this.scrapeBlacktown(batch);
           break;
-        case 'reece':
-          products = await this.scrapeReece(batch);
+        case 'canterbury':
+          products = await this.scrapeCanterbury(batch);
           break;
       }
       

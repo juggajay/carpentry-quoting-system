@@ -7,13 +7,13 @@ import { prisma } from '@/lib/prisma';
 export const firecrawlTools: Record<string, MCPTool> = {
   scrape_supplier: {
     name: 'scrape_supplier',
-    description: "Scrape products from supplier website (Bunnings, Tradelink, Reece)",
+    description: "Scrape products from supplier website (Bunnings, Blacktown Building Supplies, Canterbury Timbers)",
     parameters: {
       type: 'object',
       properties: {
         supplier: {
           type: 'string',
-          enum: ['bunnings', 'tradelink', 'reece'],
+          enum: ['bunnings', 'blacktown', 'canterbury'],
           description: 'The supplier to scrape from',
         },
         category: {
@@ -267,14 +267,32 @@ function getSupplierUrls(supplier: string, category?: string): string[] {
         'https://www.bunnings.com.au/our-range/building-hardware/screws-fasteners-hardware',
       ],
     },
-    tradelink: {
-      plumbing: [
-        'https://www.tradelink.com.au/products/plumbing-supplies',
+    blacktown: {
+      timber: [
+        'https://blacktownbuildingsupplies.com.au/product-category/timber/',
+      ],
+      hardware: [
+        'https://blacktownbuildingsupplies.com.au/product-category/hardware/',
+      ],
+      'building materials': [
+        'https://blacktownbuildingsupplies.com.au/product-category/building-materials/',
+      ],
+      tools: [
+        'https://blacktownbuildingsupplies.com.au/product-category/tools/',
       ],
     },
-    reece: {
-      plumbing: [
-        'https://www.reece.com.au/plumbing/c/c1',
+    canterbury: {
+      timber: [
+        'https://www.canterburytimbers.com.au/timber-products/',
+      ],
+      decking: [
+        'https://www.canterburytimbers.com.au/decking/',
+      ],
+      flooring: [
+        'https://www.canterburytimbers.com.au/flooring/',
+      ],
+      cladding: [
+        'https://www.canterburytimbers.com.au/cladding/',
       ],
     },
   };

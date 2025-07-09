@@ -147,56 +147,121 @@ export const supplierConfigs: Record<string, SupplierConfig> = {
     },
   },
   
-  reece: {
-    name: 'Reece',
-    baseUrl: 'https://www.reece.com.au',
+  blacktown: {
+    name: 'Blacktown Building Supplies',
+    baseUrl: 'https://blacktownbuildingsupplies.com.au',
     categories: {
-      plumbing: {
-        name: 'Plumbing',
-        path: '/plumbing/c/c1',
+      timber: {
+        name: 'Timber',
+        path: '/product-category/timber/',
         subcategories: {
-          pipework: '/plumbing/pipework/c/c1_1',
-          valves: '/plumbing/valves-actuators/c/c1_2',
-          tools: '/plumbing/plumbing-tools/c/c1_3',
+          structural: '/product-category/timber/structural-timber/',
+          treated: '/product-category/timber/treated-pine/',
+          hardwood: '/product-category/timber/hardwood/',
+          mouldings: '/product-category/timber/mouldings/',
         },
       },
-      bathroom: {
-        name: 'Bathroom',
-        path: '/bathroom/c/c2',
+      hardware: {
+        name: 'Hardware',
+        path: '/product-category/hardware/',
         subcategories: {
-          toilets: '/bathroom/toilets/c/c2_1',
-          tapware: '/bathroom/tapware/c/c2_2',
-          vanities: '/bathroom/vanities/c/c2_3',
+          fasteners: '/product-category/hardware/fasteners/',
+          tools: '/product-category/hardware/tools/',
+          safety: '/product-category/hardware/safety/',
         },
       },
-      hvac: {
-        name: 'HVAC-R',
-        path: '/hvac-r/c/c3',
+      building_materials: {
+        name: 'Building Materials',
+        path: '/product-category/building-materials/',
         subcategories: {
-          heating: '/hvac-r/heating/c/c3_1',
-          cooling: '/hvac-r/cooling/c/c3_2',
-          ventilation: '/hvac-r/ventilation/c/c3_3',
+          insulation: '/product-category/building-materials/insulation/',
+          plasterboard: '/product-category/building-materials/plasterboard/',
+          cement: '/product-category/building-materials/cement-products/',
+        },
+      },
+      tools: {
+        name: 'Tools',
+        path: '/product-category/tools/',
+        subcategories: {
+          power_tools: '/product-category/tools/power-tools/',
+          hand_tools: '/product-category/tools/hand-tools/',
+          accessories: '/product-category/tools/accessories/',
         },
       },
     },
     selectors: {
-      products: '[data-testid="product-card"]',
-      name: '[data-testid="product-card-title"]',
-      price: '[data-testid="product-card-price"]',
-      sku: '[data-testid="product-card-sku"]',
-      unit: '[data-testid="product-card-unit"]',
-      stock: '[data-testid="product-card-availability"]',
-      image: '[data-testid="product-card-image"] img',
+      products: '.product, .product-item',
+      name: '.product-title, .woocommerce-loop-product__title',
+      price: '.price, .amount',
+      sku: '.sku, .product-sku',
+      unit: '.product-unit, .unit',
+      stock: '.stock, .in-stock',
+      image: '.product-image img, .attachment-woocommerce_thumbnail',
+      description: '.product-description, .woocommerce-product-details__short-description',
     },
     priceFormat: {
       currency: '$',
       decimal: '.',
       thousands: ',',
     },
-    pagination: {
-      nextButton: '[data-testid="pagination-next"]',
-      pageParam: 'page',
-      maxPages: 20,
+  },
+  
+  canterbury: {
+    name: 'Canterbury Timbers',
+    baseUrl: 'https://www.canterburytimbers.com.au',
+    categories: {
+      timber: {
+        name: 'Timber',
+        path: '/timber-products/',
+        subcategories: {
+          structural: '/timber-products/structural-timber/',
+          treated: '/timber-products/treated-timber/',
+          hardwood: '/timber-products/hardwood-timber/',
+          engineered: '/timber-products/engineered-timber/',
+        },
+      },
+      decking: {
+        name: 'Decking',
+        path: '/decking/',
+        subcategories: {
+          composite: '/decking/composite-decking/',
+          hardwood: '/decking/hardwood-decking/',
+          treated_pine: '/decking/treated-pine-decking/',
+        },
+      },
+      flooring: {
+        name: 'Flooring',
+        path: '/flooring/',
+        subcategories: {
+          solid: '/flooring/solid-timber-flooring/',
+          engineered: '/flooring/engineered-flooring/',
+          laminate: '/flooring/laminate-flooring/',
+        },
+      },
+      cladding: {
+        name: 'Cladding',
+        path: '/cladding/',
+        subcategories: {
+          weatherboard: '/cladding/weatherboard/',
+          shiplap: '/cladding/shiplap/',
+          board_batten: '/cladding/board-and-batten/',
+        },
+      },
+    },
+    selectors: {
+      products: '.product, .product-item',
+      name: '.product-title, h2.product-name',
+      price: '.price, .product-price',
+      sku: '.sku, .product-code',
+      unit: '.unit, .product-unit',
+      stock: '.stock-status, .availability',
+      image: '.product-image img, .product-thumb img',
+      description: '.product-description, .short-description',
+    },
+    priceFormat: {
+      currency: '$',
+      decimal: '.',
+      thousands: ',',
     },
   },
 };

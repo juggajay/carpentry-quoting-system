@@ -22,24 +22,24 @@ import { Label } from '@/components/ui/label';
 import { Globe, Search, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-type SupplierType = 'bunnings' | 'tradelink' | 'reece' | 'custom';
+type SupplierType = 'bunnings' | 'blacktown' | 'canterbury' | 'custom';
 
 const SUPPLIERS = {
   bunnings: {
     name: 'Bunnings',
     categories: ['Timber', 'Plumbing', 'Hardware', 'Concrete'],
   },
-  tradelink: {
-    name: 'Tradelink',
-    categories: ['Plumbing', 'Bathroom', 'Hot Water'],
+  blacktown: {
+    name: 'Blacktown Building Supplies',
+    categories: ['Timber', 'Hardware', 'Building Materials', 'Tools'],
   },
-  reece: {
-    name: 'Reece',
-    categories: ['Plumbing', 'Bathroom', 'HVAC-R'],
+  canterbury: {
+    name: 'Canterbury Timbers',
+    categories: ['Timber', 'Decking', 'Flooring', 'Cladding'],
   },
   custom: {
     name: 'Custom URL',
-    categories: [],
+    categories: ['Timber', 'Plumbing', 'Hardware', 'Building Materials', 'Tools', 'Other'],
   },
 };
 
@@ -110,8 +110,8 @@ export function MaterialScraperDialog({
             </Select>
           </div>
 
-          {/* Category Selection for supported suppliers */}
-          {source !== 'custom' && SUPPLIERS[source].categories.length > 0 && (
+          {/* Category Selection for all suppliers including custom */}
+          {SUPPLIERS[source].categories.length > 0 && (
             <div className="space-y-2">
               <Label>Category (Optional)</Label>
               <Select value={category} onValueChange={setCategory}>
@@ -143,10 +143,11 @@ export function MaterialScraperDialog({
               </div>
 
               <div className="flex items-start space-x-2 p-4 bg-amber-900/20 border border-amber-700 rounded-md">
-                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5" />
-                <p className="text-sm text-amber-300">
-                  Custom URL scraping is coming soon. For now, please use one of the supported suppliers.
-                </p>
+                <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-300">
+                  <p>Custom URL scraping is experimental.</p>
+                  <p className="mt-1">Make sure the URL points to a product listing page.</p>
+                </div>
               </div>
             </>
           )}
@@ -154,20 +155,21 @@ export function MaterialScraperDialog({
 
           {/* Preview of what will be scraped */}
           <div className="flex items-start space-x-2 p-4 bg-blue-900/20 border border-blue-700 rounded-md">
-            <Search className="h-4 w-4 text-blue-400 mt-0.5" />
-            <p className="text-sm text-blue-300">
+            <Search className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-300">
               {source !== 'custom' ? (
-                <>
+                <p>
                   Will scrape from <strong>{SUPPLIERS[source].name}</strong>
                   {category && ` - ${category} category`}
                   {!category && ' - all categories'}
-                </>
+                </p>
               ) : (
-                <>
-                  Custom URL scraping: <strong>{customUrl || 'Not specified'}</strong>
-                </>
+                <p>
+                  Custom URL: <strong className="break-all">{customUrl || 'Not specified'}</strong>
+                  {category && ` - ${category} category`}
+                </p>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
@@ -177,7 +179,7 @@ export function MaterialScraperDialog({
           </Button>
           <Button 
             onClick={handleScrape} 
-            disabled={loading || (source === 'custom')}
+            disabled={loading || (source === 'custom' && !customUrl)}
           >
             {loading ? 'Scraping...' : 'Start Scraping'}
           </Button>
