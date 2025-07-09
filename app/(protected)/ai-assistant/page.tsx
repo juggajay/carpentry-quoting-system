@@ -314,7 +314,13 @@ export default function AIAssistantPage() {
 
         <div className="lg:col-span-1">
           {generatedQuote ? (
-            <QuotePreview quote={generatedQuote} />
+            <QuotePreview 
+              quote={generatedQuote} 
+              sessionId={sessionId}
+              onQuoteCreated={(quoteId, quoteNumber) => {
+                console.log(`Quote ${quoteNumber} created with ID: ${quoteId}`);
+              }}
+            />
           ) : isProcessing && attachedFiles.some(f => f.content) ? (
             <Card className="p-6">
               <div className="text-center text-muted-foreground">

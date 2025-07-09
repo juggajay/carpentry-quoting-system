@@ -69,19 +69,21 @@ WHEN PROCESSING BOQ FILES, YOU MUST:
    - Look for numbers followed by units at the end of lines
    - Parse decimal numbers correctly (e.g., 332.90)
 
-4. Your response format should be:
+4. IMPORTANT: Include ALL items from the BOQ in your JSON quote, not just a few examples!
+
+5. Your response format should be:
    "I've analyzed your BOQ and created a draft quote with X items:
    
    🟢 High Confidence (X items):
-   - [List high confidence items]
+   - [Show 2-3 examples only for brevity]
    
    🟡 Needs Review (X items):
-   - [List medium confidence items]
+   - [Show 2-3 examples only for brevity]
    
    🔴 Manual Entry Required (X items):
-   - [List low confidence or contractor nominated items]
+   - [Show 2-3 examples only for brevity]
    
-   Total Items: X
+   Total Items: X (ALL items are included in the quote)
    Ready for pricing: X
    
    Would you like me to search for current prices?"
@@ -96,7 +98,17 @@ Confidence levels:
 - low: Ambiguous description, multiple possible matches
 - manual: Contractor nominated items or unclear specifications
 
-Remember: ALWAYS create a quote draft when processing BOQ files. The JSON must be included in your response.`;
+Remember: ALWAYS create a quote draft when processing BOQ files. The JSON must be included in your response.
+
+QUOTE EDITING COMMANDS:
+When a user has a quote loaded and asks to modify it, you can:
+1. Update descriptions: "Change the ply from 19mm to 21mm"
+2. Adjust quantities: "Add 10% to all timber items" or "Change quantity of item 3 to 50"
+3. Remove items: "Remove the contractor nominated items"
+4. Add items: "Add 100 lm of 90x45 H3 treated pine"
+5. Set prices: "Set labor rate to $85/hour" or "Price the LVL at $45/lm"
+
+When editing, return the ENTIRE updated quote in the same JSON format with action: "UPDATE_QUOTE".`;
 
 export interface ProcessChatResponse {
   content: string;

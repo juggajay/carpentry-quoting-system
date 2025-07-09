@@ -1,15 +1,55 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 import type { GeneratedQuote } from "@/lib/ai-assistant/types";
 import ConfidenceIndicator from "./ConfidenceIndicator";
 
 interface QuotePreviewProps {
   quote: GeneratedQuote;
+  sessionId?: string;
+  onQuoteCreated?: (quoteId: string, quoteNumber: string) => void;
 }
 
-export default function QuotePreview({ quote }: QuotePreviewProps) {
+export default function QuotePreview({ quote, sessionId, onQuoteCreated }: QuotePreviewProps) {
   const { summary } = quote;
+  const router = useRouter();
+  const [isCreating, setIsCreating] = useState(false);
+  const [createdQuoteId, setCreatedQuoteId] = useState<string | null>(null);
+  const [createdQuoteNumber, setCreatedQuoteNumber] = useState<string | null>(null);
+  
+  const handleCreateQuote = async () => {
+    setIsCreating(true);
+    try {
+      const response = await fetch('/api/ai-assistant/create-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quoteDraft: quote, sessionId })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setCreatedQuoteId(data.quote.id);
+        setCreatedQuoteNumber(data.quote.quoteNumber);
+        onQuoteCreated?.(data.quote.id, data.quote.quoteNumber);
+      } else {
+        console.error('Failed to create quote:', data.error);
+      }
+    } catch (error) {
+      console.error('Error creating quote:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+  
+  const handleEditQuote = () => {
+    if (createdQuoteId) {
+      router.push(`/quotes/${createdQuoteId}`);
+    }
+  };
 
   return (
     <Card>
@@ -68,32 +108,28 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
         </div>
 
         <div className="pt-4 border-t border-border">
-          <h4 className="font-medium mb-2">Quote Items</h4>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {quote.items.slice(0, 5).map((item) => (
-              <div key={item.id} className="text-sm space-y-1">
-                <div className="flex items-start justify-between">
+          <h4 className="font-medium mb-2">All Quote Items ({quote.items.length})</h4>
+          <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+            {quote.items.map((item, index) => (
+              <div key={item.id} className="text-sm space-y-1 p-2 rounded hover:bg-muted/50">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-muted-foreground w-8">{index + 1}.</span>
                   <span className="flex-1">{item.description}</span>
                   <ConfidenceIndicator 
                     confidence={item.confidence} 
                     compact 
                   />
                 </div>
-                <div className="flex justify-between text-muted-foreground">
+                <div className="flex justify-between text-muted-foreground pl-8">
                   <span>{item.quantity} {item.unit}</span>
                   {item.totalPrice > 0 ? (
                     <span>${item.totalPrice.toFixed(2)}</span>
                   ) : (
-                    <span className="text-xs">Not priced</span>
+                    <span className="text-xs italic">Not priced</span>
                   )}
                 </div>
               </div>
             ))}
-            {quote.items.length > 5 && (
-              <p className="text-sm text-muted-foreground text-center pt-2">
-                And {quote.items.length - 5} more items...
-              </p>
-            )}
           </div>
         </div>
 
@@ -116,9 +152,40 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
         
         {quote.status === 'draft' && (
           <div className="pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-muted-foreground text-center mb-4">
               Draft quote - prices not yet calculated
             </p>
+            
+            <div className="space-y-2">
+              {!createdQuoteId ? (
+                <Button 
+                  onClick={handleCreateQuote}
+                  disabled={isCreating}
+                  className="w-full"
+                >
+                  {isCreating ? 'Creating Quote...' : 'Create Quote in System'}
+                </Button>
+              ) : (
+                <>
+                  <div className="text-center text-sm text-green-600 font-medium">
+                    ✓ Quote {createdQuoteNumber} created
+                  </div>
+                  <Button 
+                    onClick={handleEditQuote}
+                    className="w-full"
+                  >
+                    Edit in Quote Builder
+                  </Button>
+                  <Button 
+                    onClick={() => router.push(`/quotes/${createdQuoteId}`)}
+                    className="w-full"
+                    variant="secondary"
+                  >
+                    View Quote
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
