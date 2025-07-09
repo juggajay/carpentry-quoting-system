@@ -22,17 +22,38 @@ export async function POST(req: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     body = await req.json();
-    const { supplier, category, urls, options, customUrl } = body as {
-      supplier: string;
-      category?: string;
-      urls?: string[];
-      customUrl?: string;
-      options: {
-        updateExisting: boolean;
-        importNew: boolean;
-        includeGST: boolean;
-      };
+    console.log('Scrape API received body:', body);
+    
+    // Support both old format (direct params) and new format (config object)
+    let supplier: string;
+    let category: string | undefined;
+    let urls: string[] | undefined;
+    let customUrl: string | undefined;
+    let options: {
+      updateExisting: boolean;
+      importNew: boolean;
+      includeGST: boolean;
     };
+    
+    if (body.config) {
+      // New format from MCP tool
+      const config = body.config as ScraperConfig;
+      supplier = config.supplier;
+      category = config.category;
+      customUrl = config.customUrl;
+      options = config.options;
+    } else {
+      // Old format from UI
+      supplier = body.supplier;
+      category = body.category;
+      urls = body.urls;
+      customUrl = body.customUrl;
+      options = body.options || {
+        updateExisting: true,
+        importNew: true,
+        includeGST: true,
+      };
+    }
 
     // Validate supplier
     if (!supplier || !DataValidator.isValidSupplier(supplier)) {
