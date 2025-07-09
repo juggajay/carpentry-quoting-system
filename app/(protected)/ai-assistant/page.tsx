@@ -51,7 +51,7 @@ export default function AIAssistantPage() {
   const addLiveUpdate = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     // Add leprechaun-themed prefixes for junior estimator
-    const prefixes = ['🧚', '✨', '💚', '🪙', '🌟'];
+    const prefixes = ['🍀', '✨', '💚', '🪙', '🌟', '🌈'];
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     setLiveUpdates(prev => [...prev, `${prefix} [${timestamp}] ${message}`]);
   };
@@ -298,11 +298,14 @@ Let me search our treasure trove of materials for the best pricing!`;
       <div className="flex items-center justify-between mb-4 px-6 pt-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <span className="text-4xl animate-pulse">🧚</span> 
+            <div className="flex items-center animate-pulse">
+              <span className="text-4xl">🧑‍🦰</span>
+              <span className="text-3xl -ml-3">🍀</span>
+            </div> 
             <div>
               <div className="flex items-center gap-2">
                 Junior Estimator
-                <span className="text-3xl">🧙‍♂️</span>
+                <Badge variant="success" className="text-xs">Jr</Badge>
               </div>
               <p className="text-xs text-green-600 font-semibold italic">
                 {"A wee bit of magic for your quotes!"}
@@ -414,7 +417,10 @@ Let me search our treasure trove of materials for the best pricing!`;
             <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-gray-50 mb-4">
               {messages.length === 0 && !generatedQuote ? (
                 <div className="text-center text-gray-500 py-16">
-                  <div className="text-6xl mb-3 animate-bounce">🧚‍♂️</div>
+                  <div className="flex items-center justify-center mb-3 animate-bounce">
+                    <span className="text-6xl">🧑‍🦰</span>
+                    <span className="text-5xl -ml-4">🍀</span>
+                  </div>
                   <p className="font-medium">Junior Leprechaun Ready!</p>
                   <p className="text-sm mt-2 text-green-600 italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
                   <div className="flex justify-center gap-2 mt-4">
@@ -436,7 +442,7 @@ Let me search our treasure trove of materials for the best pricing!`;
                     >
                       <div className="flex items-start gap-2">
                         <span className={message.role === 'user' ? 'text-sm' : 'text-2xl'}>
-                          {message.role === 'user' ? '👤' : '🧚'}
+                          {message.role === 'user' ? '👤' : '🧑‍🦰🍀'}
                         </span>
                         <div className="flex-1">
                           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -452,7 +458,10 @@ Let me search our treasure trove of materials for the best pricing!`;
               {isProcessing && (
                 <div className="mb-3 p-3 rounded-lg bg-white mr-12 shadow-sm">
                   <div className="flex items-start gap-2">
-                    <span className="text-2xl animate-pulse">🧚</span>
+                    <div className="flex items-center animate-pulse">
+                      <span className="text-2xl">🧑‍🦰</span>
+                      <span className="text-xl -ml-2">🍀</span>
+                    </div>
                     <div className="flex-1">
                       <p className="text-sm text-gray-500 italic">Junior Leprechaun is crafting magic...</p>
                     </div>
@@ -514,7 +523,7 @@ Let me search our treasure trove of materials for the best pricing!`;
           {seniorEstimatorData && (
             <Card className="p-4">
               <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                🧙‍♂️ From Senior Leprechaun
+                🧑‍🦰🎩 From Senior Leprechaun
                 <Badge variant="success" className="text-xs">
                   {seniorEstimatorData.quantities.length} items
                 </Badge>

@@ -5,8 +5,9 @@ import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import FileDropZone from "../ai-assistant/components/FileDropZone";
 import { Input } from "@/components/ui/Input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import FileDropZone from "../ai-assistant/components/FileDropZone";
 import type { FileAttachment, ChatMessage } from "@/lib/ai-assistant/types";
 
 interface SeniorEstimatorResult {
@@ -51,6 +52,11 @@ export default function SeniorEstimatorPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const updatesEndRef = useRef<HTMLDivElement>(null);
   
+  // Collapsible states
+  const [filesOpen, setFilesOpen] = useState(true);
+  const [updatesOpen, setUpdatesOpen] = useState(true);
+  const [resultsOpen, setResultsOpen] = useState(true);
+  
   // Auto-scroll functions
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -68,10 +74,9 @@ export default function SeniorEstimatorPage() {
     scrollUpdatesToBottom();
   }, [liveUpdates]);
   
-  // Add live update helper
+  // Add live update helper with leprechaun theme
   const addLiveUpdate = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    // Add leprechaun-themed prefixes randomly
     const prefixes = ['🍀', '💰', '🌈', '✨', '🪙'];
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
     setLiveUpdates(prev => [...prev, `${prefix} [${timestamp}] ${message}`]);
@@ -163,7 +168,7 @@ export default function SeniorEstimatorPage() {
       });
 
       const data = await response.json();
-      addLiveUpdate("⚡ Processing with AI Senior Estimator...");
+      addLiveUpdate("⚡ Processing with Senior Leprechaun magic...");
 
       if (response.ok && data.success) {
         addLiveUpdate("✅ Analysis complete! Reviewing confidence scores...");
@@ -195,20 +200,9 @@ export default function SeniorEstimatorPage() {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     setIsProcessing(true);
-    addLiveUpdate("🤖 AI Senior Estimator thinking...");
+    addLiveUpdate("🧑‍🦰🍀 Senior Leprechaun thinking...");
 
     try {
-      // Include current context in the message
-      // const contextualMessage = `Context: I'm working on a ${projectType} project in ${location}. 
-
-// Scope: ${scopeText || 'No scope entered yet'}
-
-// Attached Files: ${attachedFiles.length} files
-
-// Current Analysis: ${result ? `${result.quote_items.length} items analyzed with ${result.confidence_summary.overall_confidence.score}% confidence` : 'No analysis yet'}
-
-// Question: ${inputValue}`;
-
       const response = await fetch('/api/ai-assistant/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -229,7 +223,7 @@ export default function SeniorEstimatorPage() {
       });
 
       const data = await response.json();
-      addLiveUpdate("💭 AI response received");
+      addLiveUpdate("💭 Wisdom delivered");
 
       if (response.ok) {
         const assistantMessage: ChatMessage = {
@@ -261,7 +255,6 @@ export default function SeniorEstimatorPage() {
     if (!result) return;
 
     try {
-      // Format the data for the Junior Estimator
       const takeoffData = {
         project_summary: {
           scope: scopeText,
@@ -284,10 +277,7 @@ export default function SeniorEstimatorPage() {
         estimated_duration: result.estimated_duration
       };
 
-      // Store in session storage for the Junior Estimator to pick up
       sessionStorage.setItem('senior_estimator_takeoff', JSON.stringify(takeoffData));
-      
-      // Navigate to AI Assistant (Junior Estimator)
       window.location.href = '/ai-assistant?from=senior-estimator';
       
     } catch (error) {
@@ -297,331 +287,353 @@ export default function SeniorEstimatorPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-6 pt-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <span className="text-6xl animate-bounce">🍀</span> 
-            <div>
-              <div className="flex items-center gap-2">
-                Senior Estimator
-                <span className="text-5xl">🧙‍♂️</span>
+      <div className="sticky top-0 z-10 bg-background border-b">
+        <div className="px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center">
+                <span className="text-3xl">🧑‍🦰</span>
+                <span className="text-2xl -ml-2">🍀</span>
               </div>
-              <p className="text-xs text-green-600 font-semibold italic">
-                {"Top o' the mornin' to your quotes!"}
-              </p>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">
+                  Senior Estimator
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  Analyze scope → Generate takeoffs
+                </p>
+              </div>
             </div>
-          </h1>
-          <p className="text-muted-foreground text-sm mt-2">
-            Analyze construction scope & drawings → Generate quantity takeoffs
-          </p>
+            <div className="flex items-center gap-2">
+              <select
+                value={projectType}
+                onChange={(e) => setProjectType(e.target.value as 'residential' | 'commercial' | 'industrial')}
+                className="text-sm px-2 py-1 border rounded bg-background"
+              >
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="industrial">Industrial</option>
+              </select>
+              <Input
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="Location"
+                className="w-32 text-sm"
+              />
+              <Badge variant="info" className="text-xs">
+                🌈 NSW Standards 🎩
+              </Badge>
+            </div>
+          </div>
         </div>
-        <Badge variant="info" className="text-sm bg-green-100 text-green-800 border-green-300">
-          🌈 NSW Construction Standards
-        </Badge>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-12 gap-4 px-6 pb-4 min-h-0">
-        {/* Left Column - Files & Settings (Small) */}
-        <div className="col-span-3 space-y-4 overflow-y-auto">
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              ⚙️ Project Settings
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium mb-1 text-foreground">Project Type</label>
-                <select
-                  value={projectType}
-                  onChange={(e) => setProjectType(e.target.value as 'residential' | 'commercial' | 'industrial')}
-                  className="w-full p-2 text-sm border border-border rounded bg-background text-foreground focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="residential" className="bg-background text-foreground">Residential</option>
-                  <option value="commercial" className="bg-background text-foreground">Commercial</option>
-                  <option value="industrial" className="bg-background text-foreground">Industrial</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium mb-1">Location</label>
-                <Input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="NSW, Australia"
-                  className="text-sm"
-                />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              📐 Project Files
-            </h3>
-            <div className="text-xs">
-              <FileDropZone 
-                onFileUpload={handleFileUpload}
-                attachedFiles={attachedFiles}
-                onRemoveFile={handleRemoveFile}
-              />
-            </div>
-          </Card>
-
-          {/* Live Updates moved to small column */}
-          <Card className="p-4 flex-1">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              📡 Live Updates
-            </h3>
-            <div className="h-48 overflow-y-auto bg-gray-50 rounded p-2 text-xs font-mono">
-              {liveUpdates.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No activity yet...</p>
-              ) : (
-                liveUpdates.map((update, index) => (
-                  <div key={index} className="mb-1 text-gray-700">
-                    {update}
+      {/* Main Content */}
+      <div className="flex h-[calc(100vh-4rem)]">
+        {/* Left Panel - Files & Live Updates */}
+        <div className="w-80 border-r bg-muted/10 overflow-y-auto">
+          <div className="p-4 space-y-4">
+            {/* Files Section */}
+            <Collapsible open={filesOpen} onOpenChange={setFilesOpen}>
+              <Card className="overflow-hidden">
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center justify-between p-3 hover:bg-muted/50">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      📐 Project Files
+                      {attachedFiles.length > 0 && (
+                        <Badge variant="default" className="text-xs">
+                          {attachedFiles.length}
+                        </Badge>
+                      )}
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      {filesOpen ? '▼' : '▶'}
+                    </span>
                   </div>
-                ))
-              )}
-              <div ref={updatesEndRef} />
-            </div>
-          </Card>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-3 pt-0">
+                    <FileDropZone 
+                      onFileUpload={handleFileUpload}
+                      attachedFiles={attachedFiles}
+                      onRemoveFile={handleRemoveFile}
+                    />
+                  </div>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+
+            {/* Live Updates */}
+            <Collapsible open={updatesOpen} onOpenChange={setUpdatesOpen}>
+              <Card className="overflow-hidden">
+                <CollapsibleTrigger className="w-full">
+                  <div className="flex items-center justify-between p-3 hover:bg-muted/50">
+                    <h3 className="text-sm font-semibold flex items-center gap-2">
+                      ✨ Live Updates
+                    </h3>
+                    <span className="text-xs text-muted-foreground">
+                      {updatesOpen ? '▼' : '▶'}
+                    </span>
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-3 pt-0">
+                    <div className="h-64 overflow-y-auto bg-muted/50 rounded p-2 text-xs font-mono">
+                      {liveUpdates.length === 0 ? (
+                        <p className="text-muted-foreground text-center py-4">
+                          Waiting for magic...
+                        </p>
+                      ) : (
+                        liveUpdates.map((update, index) => (
+                          <div key={index} className="mb-1">
+                            {update}
+                          </div>
+                        ))
+                      )}
+                      <div ref={updatesEndRef} />
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
+          </div>
         </div>
 
-        {/* Middle Column - Chat Interface (Big) */}
-        <div className="col-span-6 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                💬 AI Conversation
-              </h3>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={scopeText}
-                  onChange={(e) => setScopeText(e.target.value)}
-                  placeholder="Describe the construction scope..."
-                  className="w-96 px-3 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={isAnalyzing || !scopeText.trim()}
-                  size="sm"
-                >
-                  {isAnalyzing ? (
-                    <span className="animate-spin">⚙️</span>
-                  ) : (
-                    '🔍 Analyze'
-                  )}
-                </Button>
-              </div>
+        {/* Center - Main Chat */}
+        <div className="flex-1 flex flex-col">
+          {/* Scope Input Bar */}
+          <div className="border-b p-4">
+            <div className="flex gap-2">
+              <Input
+                value={scopeText}
+                onChange={(e) => setScopeText(e.target.value)}
+                placeholder="Enter construction scope of work..."
+                className="flex-1"
+              />
+              <Button
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || !scopeText.trim()}
+                className="px-6"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <span className="animate-spin mr-2">⚙️</span>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-2">🔍</span>
+                    Analyze
+                  </>
+                )}
+              </Button>
             </div>
-            
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-gray-50 mb-4">
-              {error && (
-                <div className="mb-4 p-3 border-red-200 bg-red-50 rounded-lg">
-                  <div className="flex items-center gap-2 text-red-700">
-                    <span>❌</span>
-                    <span className="font-medium text-sm">Error: {error}</span>
+            {error && (
+              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {messages.length === 0 && !result ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="flex items-center justify-center mb-4">
+                    <span className="text-5xl">🧑‍🦰</span>
+                    <span className="text-4xl -ml-3">🍀</span>
+                    <span className="text-3xl ml-2">💰</span>
                   </div>
+                  <p className="text-lg font-medium text-muted-foreground">
+                    Senior Leprechaun Ready
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {"Enter your scope above to begin the magic"}
+                  </p>
                 </div>
-              )}
-              
-              {messages.length === 0 && !result ? (
-                <div className="text-center text-gray-500 py-16">
-                  <div className="text-8xl mb-3 animate-pulse">🧙‍♂️</div>
-                  <p className="font-medium text-lg">The Great Leprechaun Estimator Awaits!</p>
-                  <p className="text-sm mt-2 text-green-600 italic">{"Share your construction dreams, and I'll count the gold coins needed!"}</p>
-                  <div className="flex justify-center gap-2 mt-4">
-                    <span className="text-3xl">🍀</span>
-                    <span className="text-3xl">💰</span>
-                    <span className="text-3xl">🌈</span>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {messages.map((message) => (
+              </div>
+            ) : (
+              <div className="space-y-4 max-w-3xl mx-auto">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex gap-3 ${
+                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
+                  >
+                    {message.role === 'assistant' && (
+                      <div className="flex items-center">
+                        <span className="text-xl">🧑‍🦰</span>
+                        <span className="text-lg -ml-2">🍀</span>
+                      </div>
+                    )}
                     <div
-                      key={message.id}
-                      className={`mb-3 p-3 rounded-lg ${
+                      className={`max-w-[70%] rounded-lg p-3 ${
                         message.role === 'user'
-                          ? 'bg-blue-100 ml-12'
-                          : 'bg-white mr-12 shadow-sm'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
                       }`}
                     >
-                      <div className="flex items-start gap-2">
-                        <span className={message.role === 'user' ? 'text-sm' : 'text-3xl'}>
-                          {message.role === 'user' ? '👤' : '🧙‍♂️'}
-                        </span>
-                        <div className="flex-1">
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </p>
-                        </div>
-                      </div>
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </p>
                     </div>
-                  ))}
-                  
-                  {result && (
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start gap-2">
-                        <span className="text-3xl">🧙‍♂️</span>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium mb-3">Analysis Complete!</p>
-                          
-                          {/* Summary Stats */}
-                          <div className="grid grid-cols-4 gap-2 mb-4 text-xs">
-                            <div className="text-center p-2 bg-gray-50 rounded">
-                              <div className="font-semibold">{result.quote_items.length}</div>
-                              <div className="text-gray-600">Items</div>
-                            </div>
-                            <div className="text-center p-2 bg-green-50 rounded">
-                              <div className="font-semibold text-green-700">{result.confidence_summary.high_confidence_items}</div>
-                              <div className="text-gray-600">High Conf</div>
-                            </div>
-                            <div className="text-center p-2 bg-yellow-50 rounded">
-                              <div className="font-semibold text-yellow-700">{result.confidence_summary.medium_confidence_items}</div>
-                              <div className="text-gray-600">Med Conf</div>
-                            </div>
-                            <div className="text-center p-2 bg-red-50 rounded">
-                              <div className="font-semibold text-red-700">{result.confidence_summary.low_confidence_items}</div>
-                              <div className="text-gray-600">Low Conf</div>
-                            </div>
-                          </div>
-                          
-                          {/* Overall Confidence */}
-                          <div className="p-3 bg-blue-50 rounded-lg mb-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm">Overall Confidence:</span>
-                              <Badge variant={result.confidence_summary.overall_confidence.score >= 85 ? 'success' : 'warning'}>
-                                {result.confidence_summary.overall_confidence.score}%
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          {/* Send Button */}
-                          {result.should_proceed && (
-                            <Button
-                              onClick={handleSendToJuniorEstimator}
-                              className="w-full"
-                              size="sm"
-                            >
-                              🍀 Send to Junior Leprechaun 🧙‍♂️
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                    {message.role === 'user' && (
+                      <span className="text-sm">👤</span>
+                    )}
+                  </div>
+                ))}
+                {isProcessing && (
+                  <div className="flex gap-3 justify-start">
+                    <div className="flex items-center animate-pulse">
+                      <span className="text-xl">🧑‍🦰</span>
+                      <span className="text-lg -ml-2">🍀</span>
                     </div>
-                  )}
-                </>
-              )}
-              {isProcessing && (
-                <div className="mb-3 p-3 rounded-lg bg-white mr-12 shadow-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-3xl animate-pulse">🧙‍♂️</span>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-500 italic">Senior Estimator is thinking...</p>
+                    <div className="bg-muted rounded-lg p-3">
+                      <p className="text-sm text-muted-foreground italic">
+                        Consulting the leprechaun wisdom...
+                      </p>
                     </div>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            
-            {/* Chat Input */}
-            <div className="flex gap-2">
-              <input
-                type="text"
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <div className="border-t p-4">
+            <div className="flex gap-2 max-w-3xl mx-auto">
+              <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask about materials, quantities, standards..."
-                className="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                placeholder="Ask about materials, quantities, or standards..."
+                className="flex-1"
                 disabled={isProcessing}
               />
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isProcessing}
-                size="sm"
               >
                 Send
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
-        
-        {/* Right Column - Issues/Questions Panel */}
-        <div className="col-span-3 space-y-4 overflow-y-auto">
-          {result && (
-            <>
-              {/* Takeoffs Summary */}
+
+        {/* Right Panel - Results */}
+        {result && (
+          <div className="w-96 border-l bg-muted/10 overflow-y-auto">
+            <div className="p-4 space-y-4">
+              {/* Summary Card */}
               <Card className="p-4">
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                  📋 Quantity Takeoffs
-                  <Badge variant="default" className="text-xs">
-                    {result.quote_items.length} items
-                  </Badge>
-                </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {result.quote_items.map((item, index) => (
-                    <div 
-                      key={index} 
-                      className="p-2 border rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors text-xs"
-                      onClick={() => {
-                        // Add to chat when clicked
-                        const question = `Tell me more about: ${item.description}`;
-                        setInputValue(question);
-                      }}
+                <h3 className="text-sm font-semibold mb-3">Analysis Summary</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">Overall Confidence</span>
+                    <Badge 
+                      variant={result.confidence_summary.overall_confidence.score >= 85 ? 'success' : 'warning'}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <p className="font-medium">{item.description}</p>
-                          <p className="text-gray-600 mt-0.5">
-                            {item.quantity} {item.unit}
-                          </p>
-                        </div>
-                        <Badge 
-                          variant={item.confidence >= 85 ? 'success' : item.confidence >= 70 ? 'warning' : 'error'} 
-                          className="text-xs ml-2"
-                        >
-                          {item.confidence}%
-                        </Badge>
-                      </div>
+                      {result.confidence_summary.overall_confidence.score}%
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center p-2 bg-green-50 rounded">
+                      <div className="font-semibold">{result.confidence_summary.high_confidence_items}</div>
+                      <div className="text-muted-foreground">High</div>
                     </div>
-                  ))}
+                    <div className="text-center p-2 bg-yellow-50 rounded">
+                      <div className="font-semibold">{result.confidence_summary.medium_confidence_items}</div>
+                      <div className="text-muted-foreground">Medium</div>
+                    </div>
+                    <div className="text-center p-2 bg-red-50 rounded">
+                      <div className="font-semibold">{result.confidence_summary.low_confidence_items}</div>
+                      <div className="text-muted-foreground">Low</div>
+                    </div>
+                  </div>
+                  {result.should_proceed && (
+                    <Button
+                      onClick={handleSendToJuniorEstimator}
+                      className="w-full"
+                      size="sm"
+                    >
+                      🍀 Send to Junior Leprechaun 🪙
+                    </Button>
+                  )}
                 </div>
               </Card>
-              
-              {/* Questions/Issues */}
+
+              {/* Takeoffs */}
+              <Collapsible open={resultsOpen} onOpenChange={setResultsOpen}>
+                <Card className="overflow-hidden">
+                  <CollapsibleTrigger className="w-full">
+                    <div className="flex items-center justify-between p-3 hover:bg-muted/50">
+                      <h3 className="text-sm font-semibold flex items-center gap-2">
+                        📋 Takeoffs
+                        <Badge variant="default" className="text-xs">
+                          {result.quote_items.length}
+                        </Badge>
+                      </h3>
+                      <span className="text-xs text-muted-foreground">
+                        {resultsOpen ? '▼' : '▶'}
+                      </span>
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="p-3 pt-0 space-y-2 max-h-96 overflow-y-auto">
+                      {result.quote_items.map((item, index) => (
+                        <div 
+                          key={index} 
+                          className="p-2 border rounded hover:bg-muted/50 cursor-pointer"
+                          onClick={() => setInputValue(`Tell me more about: ${item.description}`)}
+                        >
+                          <p className="text-sm font-medium">{item.description}</p>
+                          <div className="flex justify-between items-center mt-1">
+                            <span className="text-xs text-muted-foreground">
+                              {item.quantity} {item.unit}
+                            </span>
+                            <Badge 
+                              variant={item.confidence >= 85 ? 'success' : item.confidence >= 70 ? 'warning' : 'error'} 
+                              className="text-xs"
+                            >
+                              {item.confidence}%
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+
+              {/* Questions */}
               {result.questions && result.questions.length > 0 && (
                 <Card className="p-4">
                   <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    ❓ Issues to Resolve
+                    ❓ Questions
                     <Badge variant="warning" className="text-xs">
-                      {result.questions.length} questions
+                      {result.questions.length}
                     </Badge>
                   </h3>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
                     {result.questions.map((question, index) => (
                       <div 
                         key={index} 
-                        className="p-3 border-l-4 border-yellow-400 bg-yellow-50 rounded hover:bg-yellow-100 cursor-pointer transition-colors"
-                        onClick={() => {
-                          // Add question to chat when clicked
-                          setInputValue(question.question);
-                        }}
+                        className="p-2 border-l-2 border-yellow-400 bg-yellow-50 rounded hover:bg-yellow-100 cursor-pointer"
+                        onClick={() => setInputValue(question.question)}
                       >
-                        <p className="text-sm font-medium text-yellow-900">{question.question}</p>
-                        <p className="text-xs text-yellow-700 mt-1">{question.context}</p>
+                        <p className="text-sm">{question.question}</p>
                         {question.options && question.options.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
+                          <div className="mt-1 flex flex-wrap gap-1">
                             {question.options.map((option: string, optIndex: number) => (
                               <button
                                 key={optIndex}
-                                className="px-2 py-0.5 text-xs bg-yellow-200 hover:bg-yellow-300 rounded transition-colors"
+                                className="px-2 py-0.5 text-xs bg-yellow-200 hover:bg-yellow-300 rounded"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setInputValue(`${question.question} Answer: ${option}`);
@@ -637,9 +649,9 @@ export default function SeniorEstimatorPage() {
                   </div>
                 </Card>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
