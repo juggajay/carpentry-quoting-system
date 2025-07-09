@@ -50,3 +50,6 @@ prisma/dev.db-journal
 # Debug
 debug/
 logs/
+
+# Uploads
+uploads/

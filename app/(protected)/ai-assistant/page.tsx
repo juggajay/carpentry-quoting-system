@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import ChatInterface from "./components/ChatInterface";
 import FileDropZone from "./components/FileDropZone";
@@ -8,10 +9,14 @@ import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@clerk/nextjs";
+import { DebugConsole, debugLog } from "@/components/debug-console";
 import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from "@/lib/ai-assistant/types";
 
 export default function AIAssistantPage() {
   const { userId } = useAuth();
+  const searchParams = useSearchParams();
+  const isDebug = searchParams.get('debug') === 'true';
+  
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);
   const [generatedQuote] = useState<GeneratedQuote | null>(null);
@@ -19,6 +24,13 @@ export default function AIAssistantPage() {
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+
+  // Log debug status on mount
+  useEffect(() => {
+    if (isDebug) {
+      debugLog('info', 'AI Assistant page loaded in debug mode');
+    }
+  }, [isDebug]);
 
   // Load existing MCP connections on component mount
   useEffect(() => {
@@ -97,7 +109,11 @@ export default function AIAssistantPage() {
     }
   };
 
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = async (files: File[]) => {
+    debugLog('info', `DROPPED: ${files.length} file(s)`, {
+      files: files.map(f => ({ name: f.name, size: f.size, type: f.type }))
+    });
+
     const newAttachments: FileAttachment[] = files.map(file => ({
       id: crypto.randomUUID(),
       name: file.name,
@@ -108,17 +124,61 @@ export default function AIAssistantPage() {
 
     setAttachedFiles(prev => [...prev, ...newAttachments]);
 
-    // TODO: Implement actual file upload
-    // For now, simulate upload completion
-    setTimeout(() => {
-      setAttachedFiles(prev => 
-        prev.map(file => 
-          newAttachments.find(nf => nf.id === file.id) 
-            ? { ...file, status: 'complete' as const }
-            : file
-        )
-      );
-    }, 2000);
+    // Upload files
+    for (const file of files) {
+      const attachment = newAttachments.find(a => a.name === file.name);
+      if (!attachment) continue;
+
+      debugLog('info', `UPLOADING: ${file.name} (0%)`);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        debugLog('info', `CALLING: /api/ai-assistant/upload`, {
+          fileName: file.name,
+          fileSize: file.size
+        });
+
+        const response = await fetch('/api/ai-assistant/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        debugLog(response.ok ? 'success' : 'error', 
+          `RESPONSE: ${response.status}`, 
+          { response: data, ok: response.ok }
+        );
+
+        if (response.ok) {
+          setAttachedFiles(prev => 
+            prev.map(f => 
+              f.id === attachment.id 
+                ? { ...f, status: 'complete' as const, url: data.url }
+                : f
+            )
+          );
+          debugLog('success', `File uploaded successfully: ${file.name}`);
+        } else {
+          throw new Error(data.error || 'Upload failed');
+        }
+      } catch (error) {
+        debugLog('error', `ERROR: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+          fileName: file.name,
+          error
+        });
+        
+        setAttachedFiles(prev => 
+          prev.map(f => 
+            f.id === attachment.id 
+              ? { ...f, status: 'error' as const }
+              : f
+          )
+        );
+      }
+    }
   };
 
   const handleRemoveFile = (fileId: string) => {
@@ -171,6 +231,13 @@ export default function AIAssistantPage() {
           )}
         </Button>
       </div>
+
+      {/* Debug indicator */}
+      {isDebug && (
+        <div className="fixed top-4 right-4 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-mono z-40">
+          DEBUG MODE ON
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -262,6 +329,9 @@ export default function AIAssistantPage() {
           existingConnections={mcpConnections}
         />
       )}
+
+      {/* Debug Console */}
+      <DebugConsole isEnabled={isDebug} />
     </div>
   );
 }
