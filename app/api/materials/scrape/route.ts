@@ -192,13 +192,23 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Scraping error:', error);
+    console.error('Scraping error details:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      body: body,
+    });
+    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { 
         error: 'Failed to scrape products',
         details: errorMessage,
-        supplier: body?.supplier 
+        supplier: body?.supplier,
+        debug: process.env.NODE_ENV === 'development' ? {
+          stack: error instanceof Error ? error.stack : undefined,
+          body: body,
+        } : undefined
       },
       { status: 500 }
     );

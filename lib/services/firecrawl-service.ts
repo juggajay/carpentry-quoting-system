@@ -466,7 +466,8 @@ export function getFirecrawlService(): FirecrawlService {
   if (!firecrawlInstance) {
     const apiKey = process.env.FIRECRAWL_API_KEY;
     if (!apiKey) {
-      throw new Error('FIRECRAWL_API_KEY environment variable is required');
+      console.error('[FirecrawlService] FIRECRAWL_API_KEY environment variable is missing');
+      throw new Error('FIRECRAWL_API_KEY environment variable is required. Please add it to your .env.local file.');
     }
     console.log('[FirecrawlService] Initializing with API key:', apiKey.substring(0, 10) + '...');
     firecrawlInstance = new FirecrawlService(apiKey);
