@@ -100,8 +100,8 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between flex-shrink-0 pb-2">
         <div className="flex gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">
             <div className="h-2 w-2 bg-green-600 rounded-full" />
@@ -120,6 +120,7 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
         <Button
           onClick={handleImport}
           disabled={isImporting || selectedIds.size === 0}
+          className="bg-primary-light hover:bg-primary"
         >
           {isImporting ? (
             <>
@@ -132,9 +133,10 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
         </Button>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b">
+      <div className="border border-gray-800 rounded-lg overflow-hidden flex-1 min-h-0">
+        <div className="overflow-auto max-h-[60vh]">
+          <table className="w-full">
+          <thead className="bg-dark-surface border-b border-gray-800">
             <tr>
               <th className="w-12 px-4 py-3">
                 <Checkbox
@@ -143,18 +145,18 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
                   aria-label="Select all"
                 />
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Name</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">SKU</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Category</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Unit</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-gray-700">Price</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Stock</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">Status</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">Name</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">SKU</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">Category</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">Unit</th>
+              <th className="px-4 py-3 text-right text-sm font-medium text-gray-100">Price</th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-100">Stock</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-800">
             {products.map((product, index) => (
-              <tr key={index} className={product.status === 'error' ? 'opacity-60' : 'hover:bg-gray-50'}>
+              <tr key={index} className={product.status === 'error' ? 'opacity-60' : 'hover:bg-dark-surface/50'}>
                 <td className="px-4 py-3">
                   <Checkbox
                     checked={selectedIds.has(index.toString())}
@@ -205,6 +207,7 @@ export function ImportPreview({ products, onImport, isImporting }: ImportPreview
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

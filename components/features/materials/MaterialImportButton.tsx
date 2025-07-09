@@ -165,25 +165,27 @@ export function MaterialImportButton() {
       />
 
       <Modal open={previewOpen} onOpenChange={setPreviewOpen}>
-        <ModalContent className="max-w-6xl">
+        <ModalContent className="max-w-6xl max-h-[90vh] flex flex-col">
           <ModalHeader>
             <ModalTitle>Import Materials Preview</ModalTitle>
             <ModalDescription>
               Review and select materials to import
             </ModalDescription>
           </ModalHeader>
-          {importProgress ? (
-            <ImportProgress 
-              progress={importProgress} 
-              isVisible={true}
-            />
-          ) : (
-            <ImportPreview
-              products={scrapedProducts}
-              onImport={handleImport}
-              isImporting={importing}
-            />
-          )}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {importProgress ? (
+              <ImportProgress 
+                progress={importProgress} 
+                isVisible={true}
+              />
+            ) : (
+              <ImportPreview
+                products={scrapedProducts}
+                onImport={handleImport}
+                isImporting={importing}
+              />
+            )}
+          </div>
         </ModalContent>
       </Modal>
     </>
