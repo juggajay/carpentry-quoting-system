@@ -232,11 +232,22 @@ export default function AIAssistantPage() {
         </Button>
       </div>
 
-      {/* Debug indicator */}
+      {/* Debug indicator and simple status */}
       {isDebug && (
-        <div className="fixed top-4 right-4 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-mono z-40">
-          DEBUG MODE ON
-        </div>
+        <>
+          <div className="fixed top-4 right-4 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-full text-xs font-mono z-40">
+            DEBUG MODE ON
+          </div>
+          <div className="fixed top-4 left-4 bg-black/80 text-white p-2 rounded text-xs font-mono z-40 max-w-xs">
+            <div>Files attached: {attachedFiles.length}</div>
+            <div>Processing: {isProcessing ? 'YES' : 'NO'}</div>
+            {attachedFiles.map(f => (
+              <div key={f.id} className="truncate">
+                {f.name} - {f.status}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

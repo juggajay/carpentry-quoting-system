@@ -7,80 +7,35 @@ interface DebugLog {
   timestamp: string;
   type: 'info' | 'error' | 'warning' | 'success';
   message: string;
-  details?: unknown;
 }
 
 interface DebugConsoleProps {
   isEnabled: boolean;
 }
 
+// Global logs array to store debug messages
+let globalLogs: DebugLog[] = [];
+let logListeners: ((logs: DebugLog[]) => void)[] = [];
+
 export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
   const [logs, setLogs] = useState<DebugLog[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
-  const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isEnabled) return;
 
-    // Create global debug logger
-    interface WindowWithDebugLog extends Window {
-      debugLog?: (type: DebugLog['type'], message: string, details?: unknown) => void;
-    }
+    // Subscribe to log updates
+    const listener = (newLogs: DebugLog[]) => {
+      setLogs([...newLogs]);
+    };
     
-    (window as WindowWithDebugLog).debugLog = (type: DebugLog['type'], message: string, details?: unknown) => {
-      const log: DebugLog = {
-        id: Date.now().toString(),
-        timestamp: new Date().toLocaleTimeString(),
-        type,
-        message,
-        details
-      };
-      setLogs(prev => [...prev, log]);
-      
-      // Also log to regular console
-      const consoleMethod = type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log';
-      console[consoleMethod](`[DEBUG ${type.toUpperCase()}]`, message, details || '');
-    };
-
-    // Override console methods
-    const originalConsole = {
-      log: console.log,
-      error: console.error,
-      warn: console.warn
-    };
-
-    console.log = (...args) => {
-      (window as WindowWithDebugLog).debugLog?.('info', args.join(' '));
-      originalConsole.log(...args);
-    };
-
-    console.error = (...args) => {
-      (window as WindowWithDebugLog).debugLog?.('error', args.join(' '));
-      originalConsole.error(...args);
-    };
-
-    console.warn = (...args) => {
-      (window as WindowWithDebugLog).debugLog?.('warning', args.join(' '));
-      originalConsole.warn(...args);
-    };
-
-    // Log initial message
-    (window as WindowWithDebugLog).debugLog?.('info', 'Debug mode enabled');
-
+    logListeners.push(listener);
+    setLogs([...globalLogs]); // Load existing logs
+    
     return () => {
-      // Restore original console methods
-      console.log = originalConsole.log;
-      console.error = originalConsole.error;
-      console.warn = originalConsole.warn;
-      const windowWithDebug = window as WindowWithDebugLog;
-      delete windowWithDebug.debugLog;
+      logListeners = logListeners.filter(l => l !== listener);
     };
   }, [isEnabled]);
-
-  useEffect(() => {
-    // Auto-scroll to bottom
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
 
   if (!isEnabled) return null;
 
@@ -90,15 +45,6 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
       case 'warning': return 'text-yellow-400';
       case 'success': return 'text-green-400';
       default: return 'text-blue-400';
-    }
-  };
-
-  const getLogIcon = (type: DebugLog['type']) => {
-    switch (type) {
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'success': return '✅';
-      default: return 'ℹ️';
     }
   };
 
@@ -114,7 +60,8 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setLogs([]);
+              globalLogs = [];
+              logListeners.forEach(listener => listener([]));
             }}
             className="text-gray-400 hover:text-white text-xs"
           >
@@ -134,46 +81,35 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
               {logs.map((log) => (
                 <div key={log.id} className="flex items-start gap-2">
                   <span className="text-gray-600">{log.timestamp}</span>
-                  <span>{getLogIcon(log.type)}</span>
                   <div className={`flex-1 ${getLogColor(log.type)} break-all`}>
-                    <div>{log.message}</div>
-                    {log.details !== undefined && log.details !== null && (
-                      <pre className="text-gray-500 mt-1 text-xs">
-                        {JSON.stringify(log.details, null, 2)}
-                      </pre>
-                    )}
+                    {log.message}
                   </div>
                 </div>
               ))}
-              <div ref={logsEndRef} />
             </div>
           )}
-        </div>
-      )}
-
-      {/* Stats */}
-      {!isMinimized && logs.length > 0 && (
-        <div className="border-t border-gray-700 p-2 flex justify-between text-xs text-gray-500">
-          <span>Total: {logs.length}</span>
-          <span>
-            Errors: {logs.filter(l => l.type === 'error').length} | 
-            Warnings: {logs.filter(l => l.type === 'warning').length}
-          </span>
         </div>
       )}
     </div>
   );
 };
 
-// Helper function for easier debug logging
+// Safe debug logging function - no console override
 export const debugLog = (type: 'info' | 'error' | 'warning' | 'success', message: string, details?: unknown) => {
-  if (typeof window !== 'undefined') {
-    interface WindowWithDebugLog extends Window {
-      debugLog?: (type: 'info' | 'error' | 'warning' | 'success', message: string, details?: unknown) => void;
-    }
-    const windowWithDebug = window as WindowWithDebugLog;
-    if (windowWithDebug.debugLog) {
-      windowWithDebug.debugLog(type, message, details);
-    }
-  }
+  const log: DebugLog = {
+    id: Date.now().toString() + Math.random(),
+    timestamp: new Date().toLocaleTimeString(),
+    type,
+    message: details ? `${message} ${JSON.stringify(details)}` : message
+  };
+  
+  // Keep only last 100 logs to prevent memory issues
+  globalLogs = [...globalLogs.slice(-99), log];
+  
+  // Notify all listeners
+  logListeners.forEach(listener => listener(globalLogs));
+  
+  // Also log to real console for development
+  const consoleMethod = type === 'error' ? 'error' : type === 'warning' ? 'warn' : 'log';
+  console[consoleMethod](`[DEBUG ${type.toUpperCase()}]`, message, details || '');
 };
