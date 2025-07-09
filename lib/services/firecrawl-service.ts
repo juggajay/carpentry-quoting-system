@@ -79,7 +79,7 @@ export class FirecrawlService {
         try {
           console.log(`[AlternativeScraper] Starting scrape for URL: ${url}`);
           const startTime = Date.now();
-          const altProducts = await AlternativeScraper.scrapeDirectly(url);
+          const altProducts = await AlternativeScraper.scrapeDirectly(url, 20); // Fetch up to 20 pages
           const elapsedTime = Date.now() - startTime;
           console.log(`[AlternativeScraper] Scrape completed in ${elapsedTime}ms`);
           
@@ -158,7 +158,7 @@ export class FirecrawlService {
         if (parsedProducts.length === 0 && (config.name === 'Canterbury Timbers' || url.includes('canterburytimbers'))) {
           console.log(`[FirecrawlService] No products found, trying alternative scraper for ${url}`);
           try {
-            const altProducts = await AlternativeScraper.scrapeDirectly(url);
+            const altProducts = await AlternativeScraper.scrapeDirectly(url, 20); // Fetch up to 20 pages
             parsedProducts = altProducts.map(p => ({
               name: p.name,
               price: p.price,
@@ -183,7 +183,7 @@ export class FirecrawlService {
         if (config.name === 'Canterbury Timbers' || config.name.includes('Canterbury')) {
           console.log(`[FirecrawlService] Trying alternative scraper for ${url}`);
           try {
-            const altProducts = await AlternativeScraper.scrapeDirectly(url);
+            const altProducts = await AlternativeScraper.scrapeDirectly(url, 20); // Fetch up to 20 pages
             const mappedProducts = altProducts.map(p => ({
               name: p.name,
               price: p.price,

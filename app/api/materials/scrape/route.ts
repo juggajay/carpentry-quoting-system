@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         for (const url of scrapeUrls) {
           try {
             console.log(`[Scrape API] Scraping Canterbury URL: ${url}`);
-            const products = await AlternativeScraper.scrapeDirectly(url);
+            const products = await AlternativeScraper.scrapeDirectly(url, 20); // Fetch up to 20 pages
             console.log(`[Scrape API] Found ${products.length} products from ${url}`);
             allProducts.push(...products.map(p => ({
               name: p.name,
