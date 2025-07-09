@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import type { ChatMessage, FileAttachment } from './types';
+import type { ChatMessage, FileAttachment, GeneratedQuote, QuoteItem, ConfidenceLevel } from './types';
 import { mcpManager } from './mcp-manager';
 
 // Initialize OpenAI client
@@ -15,7 +15,7 @@ if (!process.env.OPENAI_API_KEY) {
 // System prompt for the AI Assistant
 const SYSTEM_PROMPT = `You are an AI Quote Assistant integrated into a carpentry quoting system. You have access to a materials database and can help generate accurate construction quotes.
 
-IMPORTANT: When a user uploads a file, the file content will be provided to you as extracted text in the message. You should IMMEDIATELY analyze this content without asking the user to convert or reformat the file.
+IMPORTANT: When a user uploads a file, the file content will be provided to you as extracted text in the message. You should IMMEDIATELY analyze this content and CREATE A DRAFT QUOTE without asking the user to convert or reformat the file.
 
 Your capabilities include:
 1. **BOQ File Processing**: When you receive extracted text from uploaded files:
@@ -23,42 +23,77 @@ Your capabilities include:
    - Extract: item descriptions, quantities, units of measurement, specifications
    - DO NOT ask users to convert files - the content is already extracted for you
    - Look for patterns like: item codes, descriptions, quantities, units (m², lm, each, etc.)
-   - Present the parsed data in a clear table format
+   - CREATE A QUOTE DRAFT with all parsed items
 
 2. **Materials Database Access**: You can search for materials like timber, hardware, fixings, etc. Match BOQ items to database materials when possible.
 
-3. **Quote Generation**: Create detailed quotes with:
+3. **Quote Generation**: ALWAYS create a structured quote with:
    - Itemized material lists from the BOQ
    - Quantity calculations
-   - Price calculations with GST (when prices available)
-   - Confidence indicators for each item (🟢 high, 🟡 medium, 🔴 low, ❓ needs clarification)
+   - Confidence indicators for each item (high/medium/low/manual)
+   - Summary statistics
 
 4. **MCP Tools**: Use available tools to search materials database and get pricing.
 
-When processing uploaded BOQ files:
-1. First, acknowledge receipt: "I've received your [file type] file. Let me analyze the contents..."
-2. Parse the extracted text into a structured format
-3. Present findings in a clear table with columns: Item, Description, Quantity, Unit
-4. Suggest material matches from the database if available
-5. Ask for clarification only on ambiguous items
+WHEN PROCESSING BOQ FILES, YOU MUST:
+1. Create a JSON quote object with this structure:
+   {
+     "action": "CREATE_QUOTE",
+     "quote": {
+       "projectName": "[Extract from file or use 'BOQ Import']",
+       "items": [
+         {
+           "id": "unique-id",
+           "description": "item description",
+           "quantity": number,
+           "unit": "unit",
+           "confidence": "high|medium|low|manual",
+           "notes": "optional notes"
+         }
+       ]
+     }
+   }
 
-Example BOQ parsing response:
-"I've analyzed your BOQ file and found the following items:
+2. Include this JSON at the END of your response in a code block marked as: \\\`\\\`\\\`json:quote
 
-| Item | Description | Quantity | Unit | Notes |
-|------|-------------|----------|------|-------|
-| 1 | 140x45 H3 Treated Pine | 250 | lm | Framing timber |
-| 2 | Concrete footings | 12 | m³ | 25MPa concrete |
-| 3 | Galvanized bolts M12 | 100 | each | For connections |
+3. Your response format should be:
+   "I've analyzed your BOQ and created a draft quote with X items:
+   
+   🟢 High Confidence (X items):
+   - [List high confidence items]
+   
+   🟡 Needs Review (X items):
+   - [List medium confidence items]
+   
+   🔴 Manual Entry Required (X items):
+   - [List low confidence or contractor nominated items]
+   
+   Total Items: X
+   Ready for pricing: X
+   
+   Would you like me to search for current prices?"
+   
+   \\\`\\\`\\\`json:quote
+   [JSON quote object here]
+   \\\`\\\`\\\`
 
-Would you like me to search our materials database for pricing on these items?"
+Confidence levels:
+- high: Clear material description with standard units
+- medium: Material identifiable but needs specification confirmation
+- low: Ambiguous description, multiple possible matches
+- manual: Contractor nominated items or unclear specifications
 
-Remember: The file content is ALREADY extracted and provided to you. Never ask users to convert files or copy-paste content.`;
+Remember: ALWAYS create a quote draft when processing BOQ files. The JSON must be included in your response.`;
+
+export interface ProcessChatResponse {
+  content: string;
+  quoteDraft?: GeneratedQuote;
+}
 
 export async function processChat(
   messages: ChatMessage[],
   attachments?: FileAttachment[]
-): Promise<string> {
+): Promise<ProcessChatResponse> {
   try {
     // Ensure MCP connections are initialized
     await mcpManager.initializeConnections();
@@ -200,25 +235,90 @@ export async function processChat(
         max_tokens: 1000,
       });
 
-      return finalCompletion.choices[0].message.content || 'I apologize, but I was unable to generate a response.';
+      const finalResponse = finalCompletion.choices[0].message.content || 'I apologize, but I was unable to generate a response.';
+      return extractQuoteFromResponse(finalResponse);
     }
 
-    return response.message.content || 'I apologize, but I was unable to generate a response.';
+    const aiResponse = response.message.content || 'I apologize, but I was unable to generate a response.';
+    return extractQuoteFromResponse(aiResponse);
   } catch (error) {
     console.error('OpenAI API error:', error);
     
     // Handle specific errors
     if (error instanceof Error) {
       if (error.message.includes('API key')) {
-        return 'API key configuration error. Please check your OpenAI API key.';
+        return { content: 'API key configuration error. Please check your OpenAI API key.' };
       }
       if (error.message.includes('rate limit')) {
-        return 'Rate limit exceeded. Please try again in a moment.';
+        return { content: 'Rate limit exceeded. Please try again in a moment.' };
       }
     }
     
-    return 'I encountered an error while processing your request. Please try again.';
+    return { content: 'I encountered an error while processing your request. Please try again.' };
   }
+}
+
+function extractQuoteFromResponse(content: string): ProcessChatResponse {
+  // Look for JSON quote block in the response
+  const quoteMatch = content.match(/```json:quote\s*([\s\S]*?)```/);
+  
+  if (quoteMatch) {
+    try {
+      const quoteData = JSON.parse(quoteMatch[1]);
+      
+      if (quoteData.action === 'CREATE_QUOTE' && quoteData.quote) {
+        const quote = quoteData.quote;
+        
+        // Calculate summary statistics
+        const rawItems = quote.items as Array<{ confidence: string; [key: string]: unknown }>;
+        const summary = {
+          totalItems: rawItems.length,
+          highConfidence: rawItems.filter(i => i.confidence === 'high').length,
+          mediumConfidence: rawItems.filter(i => i.confidence === 'medium').length,
+          lowConfidence: rawItems.filter(i => i.confidence === 'low').length,
+          needsReview: rawItems.filter(i => i.confidence === 'manual').length,
+          readyForPricing: rawItems.filter(i => i.confidence === 'high' || i.confidence === 'medium').length
+        };
+        
+        // Create GeneratedQuote object
+        const generatedQuote: GeneratedQuote = {
+          id: crypto.randomUUID(),
+          projectName: quote.projectName || 'BOQ Import',
+          items: rawItems.map((item) => ({
+            id: item.id as string,
+            description: item.description as string,
+            quantity: item.quantity as number,
+            unit: item.unit as string,
+            unitPrice: 0,
+            totalPrice: 0,
+            confidence: {
+              score: item.confidence === 'high' ? 95 : item.confidence === 'medium' ? 75 : item.confidence === 'low' ? 40 : 0,
+              indicator: item.confidence === 'high' ? '🟢' : item.confidence === 'medium' ? '🟡' : item.confidence === 'low' ? '🔴' : '❓'
+            } as ConfidenceLevel,
+            notes: item.notes as string | undefined
+          } as QuoteItem)),
+          summary,
+          subtotal: 0,
+          tax: 0,
+          total: 0,
+          status: 'draft',
+          createdAt: new Date()
+        };
+        
+        // Remove the JSON block from the content
+        const cleanContent = content.replace(/```json:quote[\s\S]*?```/, '').trim();
+        
+        return {
+          content: cleanContent,
+          quoteDraft: generatedQuote
+        };
+      }
+    } catch (error) {
+      console.error('Error parsing quote JSON:', error);
+    }
+  }
+  
+  return { content };
 }
 
 export async function analyzeDocument(

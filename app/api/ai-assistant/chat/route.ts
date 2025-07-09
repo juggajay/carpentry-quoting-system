@@ -98,22 +98,35 @@ export async function POST(request: NextRequest) {
     }
     
     const aiResponse = await processChat(messages, attachments);
-    console.log('[CHAT API] AI Response:', aiResponse.substring(0, 200) + '...');
+    console.log('[CHAT API] AI Response:', {
+      contentLength: aiResponse.content.length,
+      hasQuote: !!aiResponse.quoteDraft,
+      quoteItems: aiResponse.quoteDraft?.items.length || 0
+    });
 
     // Create assistant message
     const assistantMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'assistant',
-      content: aiResponse,
+      content: aiResponse.content,
       timestamp: new Date(),
+      quoteDraft: aiResponse.quoteDraft
     };
 
     messages.push(assistantMessage);
 
-    // Update session with new messages
+    // Update session with new messages and quote draft if present
+    const updateData: Record<string, unknown> = {
+      messages: JSON.parse(JSON.stringify(messages))
+    };
+    
+    if (aiResponse.quoteDraft) {
+      updateData.generatedQuote = JSON.parse(JSON.stringify(aiResponse.quoteDraft));
+    }
+    
     await prisma.aISession.update({
       where: { id: session.id },
-      data: { messages: JSON.parse(JSON.stringify(messages)) },
+      data: updateData,
     });
 
     return NextResponse.json({

@@ -19,7 +19,7 @@ export default function AIAssistantPage() {
   
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);
-  const [generatedQuote] = useState<GeneratedQuote | null>(null);
+  const [generatedQuote, setGeneratedQuote] = useState<GeneratedQuote | null>(null);
   const [mcpConnections, setMcpConnections] = useState<MCPConnection[]>([]);
   const [showMCPSelector, setShowMCPSelector] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -100,6 +100,12 @@ export default function AIAssistantPage() {
       
       // Add the AI response to messages
       setMessages(prev => [...prev, data.message]);
+      
+      // If the response contains a quote draft, update the generated quote
+      if (data.message.quoteDraft) {
+        console.log('[AI-Assistant] Quote draft received:', data.message.quoteDraft);
+        setGeneratedQuote(data.message.quoteDraft);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage: ChatMessage = {

@@ -1,10 +1,11 @@
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
   attachments?: FileAttachment[];
   confidence?: ConfidenceLevel;
+  quoteDraft?: GeneratedQuote;
 }
 
 export interface FileAttachment {
@@ -56,6 +57,8 @@ export interface AISession {
 }
 
 export interface GeneratedQuote {
+  id: string;
+  projectName: string;
   items: QuoteItem[];
   summary: {
     totalItems: number;
@@ -63,10 +66,13 @@ export interface GeneratedQuote {
     mediumConfidence: number;
     lowConfidence: number;
     needsReview: number;
+    readyForPricing: number;
   };
   subtotal: number;
   tax: number;
   total: number;
+  status: 'draft' | 'priced' | 'complete';
+  createdAt: Date;
 }
 
 export interface MCPConnection {

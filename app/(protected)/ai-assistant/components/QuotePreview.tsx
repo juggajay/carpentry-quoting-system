@@ -14,7 +14,12 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Generated Quote</CardTitle>
+        <CardTitle>
+          {quote.projectName || 'Generated Quote'}
+          <span className="text-sm font-normal text-muted-foreground ml-2">
+            {quote.status === 'draft' && '(Draft)'}
+          </span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -23,8 +28,8 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
             <p className="text-2xl font-bold">{summary.totalItems}</p>
           </div>
           <div className="space-y-2">
-            <p className="text-muted-foreground">Total Value</p>
-            <p className="text-2xl font-bold">${quote.total.toFixed(2)}</p>
+            <p className="text-muted-foreground">Ready for Pricing</p>
+            <p className="text-2xl font-bold">{summary.readyForPricing}</p>
           </div>
         </div>
 
@@ -76,7 +81,11 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{item.quantity} {item.unit}</span>
-                  <span>${item.totalPrice.toFixed(2)}</span>
+                  {item.totalPrice > 0 ? (
+                    <span>${item.totalPrice.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-xs">Not priced</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -88,20 +97,30 @@ export default function QuotePreview({ quote }: QuotePreviewProps) {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-border space-y-1">
-          <div className="flex justify-between text-sm">
-            <span>Subtotal</span>
-            <span>${quote.subtotal.toFixed(2)}</span>
+        {quote.status !== 'draft' && (
+          <div className="pt-4 border-t border-border space-y-1">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal</span>
+              <span>${quote.subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Tax (10%)</span>
+              <span>${quote.tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between font-bold">
+              <span>Total</span>
+              <span>${quote.total.toFixed(2)}</span>
+            </div>
           </div>
-          <div className="flex justify-between text-sm">
-            <span>Tax (10%)</span>
-            <span>${quote.tax.toFixed(2)}</span>
+        )}
+        
+        {quote.status === 'draft' && (
+          <div className="pt-4 border-t border-border">
+            <p className="text-sm text-muted-foreground text-center">
+              Draft quote - prices not yet calculated
+            </p>
           </div>
-          <div className="flex justify-between font-bold">
-            <span>Total</span>
-            <span>${quote.total.toFixed(2)}</span>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
