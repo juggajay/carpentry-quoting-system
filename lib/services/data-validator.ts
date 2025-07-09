@@ -164,7 +164,7 @@ export class DataValidator {
    * Validate supplier name against whitelist
    */
   static isValidSupplier(supplier: string): boolean {
-    const validSuppliers = ['bunnings', 'tradelink', 'reece', 'custom'];
+    const validSuppliers = ['bunnings', 'blacktown', 'canterbury', 'custom'];
     return validSuppliers.includes(supplier.toLowerCase());
   }
 }

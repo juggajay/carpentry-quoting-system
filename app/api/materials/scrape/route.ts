@@ -20,10 +20,11 @@ export async function POST(req: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     const body = await req.json();
-    const { supplier, category, urls, options } = body as {
+    const { supplier, category, urls, options, customUrl } = body as {
       supplier: string;
       category?: string;
       urls?: string[];
+      customUrl?: string;
       options: {
         updateExisting: boolean;
         importNew: boolean;
@@ -74,6 +75,7 @@ export async function POST(req: NextRequest) {
       const config: ScraperConfig = {
         supplier: supplier as any,
         category,
+        customUrl,
         options,
       };
 

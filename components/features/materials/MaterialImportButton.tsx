@@ -63,6 +63,7 @@ export function MaterialImportButton() {
           supplier: config.source.toLowerCase(),
           category: config.category,
           urls: config.customUrl ? [config.customUrl] : undefined,
+          customUrl: config.customUrl,
           options: {
             updateExisting: true,
             importNew: true,
