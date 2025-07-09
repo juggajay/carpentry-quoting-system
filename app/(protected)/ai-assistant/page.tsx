@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Input } from "@/components/ui/Input";
 import FileDropZone from "./components/FileDropZone";
 import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
@@ -15,6 +14,7 @@ import type { ChatMessage, FileAttachment, GeneratedQuote, MCPConnection } from 
 export default function AIAssistantPage() {
   const { userId } = useAuth();
   const searchParams = useSearchParams();
+  const fromSeniorEstimator = searchParams?.get('from') === 'senior-estimator';
   
   // State management
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -122,7 +122,7 @@ Let me search our treasure trove of materials for the best pricing!`;
     }
   }, [userId]);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = useCallback(async (content: string) => {
     if (!userId) return;
 
     const newMessage: ChatMessage = {
@@ -182,7 +182,7 @@ Let me search our treasure trove of materials for the best pricing!`;
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [userId, sessionId, attachedFiles, addLiveUpdate]);
 
   const handleFileUpload = async (files: File[]) => {
     const newAttachments: FileAttachment[] = files.map(file => ({
@@ -247,7 +247,7 @@ Let me search our treasure trove of materials for the best pricing!`;
         } else {
           throw new Error(data.error || 'Upload failed');
         }
-      } catch (error) {
+      } catch (_error) {
         setAttachedFiles(prev => 
           prev.map(f => 
             f.id === attachment.id 
@@ -305,12 +305,12 @@ Let me search our treasure trove of materials for the best pricing!`;
                 <span className="text-3xl">🧙‍♂️</span>
               </div>
               <p className="text-xs text-green-600 font-semibold italic">
-                "A wee bit of magic for your quotes!"
+                {"A wee bit of magic for your quotes!"}
               </p>
             </div>
           </h1>
           <p className="text-muted-foreground text-sm mt-2">
-            {seniorEstimatorData 
+            {seniorEstimatorData || fromSeniorEstimator
               ? "Using Senior Leprechaun's wisdom to craft detailed quotes"
               : "Upload BOQ scrolls for magical quote generation"
             }
@@ -416,7 +416,7 @@ Let me search our treasure trove of materials for the best pricing!`;
                 <div className="text-center text-gray-500 py-16">
                   <div className="text-6xl mb-3 animate-bounce">🧚‍♂️</div>
                   <p className="font-medium">Junior Leprechaun Ready!</p>
-                  <p className="text-sm mt-2 text-green-600 italic">"Upload your BOQ scrolls or ask me anything!"</p>
+                  <p className="text-sm mt-2 text-green-600 italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
                   <div className="flex justify-center gap-2 mt-4">
                     <span className="text-2xl">✨</span>
                     <span className="text-2xl">🪙</span>
@@ -504,7 +504,7 @@ Let me search our treasure trove of materials for the best pricing!`;
                 <div className="text-4xl mb-3">🪙</div>
                 <p className="text-sm">No quote generated yet</p>
                 <p className="text-xs mt-2 text-green-600 italic">
-                  "The gold will appear when ready!"
+                  {"The gold will appear when ready!"}
                 </p>
               </div>
             </Card>

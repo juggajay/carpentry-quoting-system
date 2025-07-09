@@ -123,7 +123,7 @@ export default function SeniorEstimatorPage() {
         } else {
           throw new Error(data.error || 'Upload failed');
         }
-      } catch (error) {
+      } catch (_error) {
         setAttachedFiles(prev => 
           prev.map(f => 
             f.id === attachment.id 
@@ -199,15 +199,15 @@ export default function SeniorEstimatorPage() {
 
     try {
       // Include current context in the message
-      const contextualMessage = `Context: I'm working on a ${projectType} project in ${location}. 
+      // const contextualMessage = `Context: I'm working on a ${projectType} project in ${location}. 
 
-Scope: ${scopeText || 'No scope entered yet'}
+// Scope: ${scopeText || 'No scope entered yet'}
 
-Attached Files: ${attachedFiles.length} files
+// Attached Files: ${attachedFiles.length} files
 
-Current Analysis: ${result ? `${result.quote_items.length} items analyzed with ${result.confidence_summary.overall_confidence.score}% confidence` : 'No analysis yet'}
+// Current Analysis: ${result ? `${result.quote_items.length} items analyzed with ${result.confidence_summary.overall_confidence.score}% confidence` : 'No analysis yet'}
 
-Question: ${inputValue}`;
+// Question: ${inputValue}`;
 
       const response = await fetch('/api/ai-assistant/chat', {
         method: 'POST',
@@ -309,7 +309,7 @@ Question: ${inputValue}`;
                 <span className="text-5xl">🧙‍♂️</span>
               </div>
               <p className="text-xs text-green-600 font-semibold italic">
-                "Top o' the mornin' to your quotes!"
+                {"Top o' the mornin' to your quotes!"}
               </p>
             </div>
           </h1>
@@ -433,7 +433,7 @@ Question: ${inputValue}`;
                 <div className="text-center text-gray-500 py-16">
                   <div className="text-8xl mb-3 animate-pulse">🧙‍♂️</div>
                   <p className="font-medium text-lg">The Great Leprechaun Estimator Awaits!</p>
-                  <p className="text-sm mt-2 text-green-600 italic">"Share your construction dreams, and I'll count the gold coins needed!"</p>
+                  <p className="text-sm mt-2 text-green-600 italic">{"Share your construction dreams, and I'll count the gold coins needed!"}</p>
                   <div className="flex justify-center gap-2 mt-4">
                     <span className="text-3xl">🍀</span>
                     <span className="text-3xl">💰</span>
@@ -618,7 +618,7 @@ Question: ${inputValue}`;
                         <p className="text-xs text-yellow-700 mt-1">{question.context}</p>
                         {question.options && question.options.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
-                            {question.options.map((option, optIndex) => (
+                            {question.options.map((option: string, optIndex: number) => (
                               <button
                                 key={optIndex}
                                 className="px-2 py-0.5 text-xs bg-yellow-200 hover:bg-yellow-300 rounded transition-colors"
