@@ -137,7 +137,7 @@ export const DebugConsole = ({ isEnabled }: DebugConsoleProps) => {
                   <span>{getLogIcon(log.type)}</span>
                   <div className={`flex-1 ${getLogColor(log.type)} break-all`}>
                     <div>{log.message}</div>
-                    {log.details && (
+                    {log.details !== undefined && log.details !== null && (
                       <pre className="text-gray-500 mt-1 text-xs">
                         {JSON.stringify(log.details, null, 2)}
                       </pre>
