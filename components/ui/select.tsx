@@ -47,7 +47,7 @@ const SelectTrigger = React.forwardRef<
       type="button"
       onClick={() => context.setOpen(!context.open)}
       className={cn(
-        "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-9 w-full items-center justify-between rounded-md border border-gray-700 bg-dark-surface px-3 py-2 text-sm text-white shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-electric-magenta focus:border-electric-magenta disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
         className
       )}
       {...props}
@@ -99,8 +99,8 @@ const SelectContent = React.forwardRef<HTMLDivElement, SelectContentProps>(
         <div
           ref={ref}
           className={cn(
-            "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80",
-            "absolute top-full mt-1 w-full",
+            "relative z-50 min-w-[8rem] overflow-hidden rounded-md border border-gray-700 bg-dark-elevated text-white shadow-lg animate-in fade-in-80",
+            "absolute top-full mt-1 w-full max-h-[200px] overflow-y-auto",
             className
           )}
           {...props}
@@ -140,8 +140,8 @@ const SelectItem = React.forwardRef<HTMLButtonElement, SelectItemProps>(
         type="button"
         onClick={handleClick}
         className={cn(
-          "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground disabled:pointer-events-none disabled:opacity-50",
-          context.value === value && "bg-accent text-accent-foreground",
+          "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none transition-colors hover:bg-gray-800 hover:text-white focus:bg-gray-800 focus:text-white disabled:pointer-events-none disabled:opacity-50",
+          context.value === value && "bg-electric-magenta/20 text-electric-magenta",
           className
         )}
         {...props}
