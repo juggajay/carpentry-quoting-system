@@ -10,7 +10,10 @@ export function SimpleDebug({ isEnabled }: { isEnabled: boolean }) {
     if (!isEnabled) return;
     
     // Add debug function to window
-    (window as any).simpleDebug = (msg: string) => {
+    interface WindowWithDebug extends Window {
+      simpleDebug?: (msg: string) => void;
+    }
+    (window as WindowWithDebug).simpleDebug = (msg: string) => {
       const timestamp = new Date().toLocaleTimeString();
       const fullMsg = `${timestamp}: ${msg}`;
       console.log('[DEBUG]', fullMsg);
@@ -18,10 +21,10 @@ export function SimpleDebug({ isEnabled }: { isEnabled: boolean }) {
     };
     
     // Initial message
-    (window as any).simpleDebug('Debug enabled');
+    (window as WindowWithDebug).simpleDebug?.('Debug enabled');
     
     return () => {
-      delete (window as any).simpleDebug;
+      delete (window as WindowWithDebug).simpleDebug;
     };
   }, [isEnabled]);
   
@@ -39,7 +42,10 @@ export function SimpleDebug({ isEnabled }: { isEnabled: boolean }) {
 
 // Helper to call debug safely
 export function simpleLog(message: string) {
-  if (typeof window !== 'undefined' && (window as any).simpleDebug) {
-    (window as any).simpleDebug(message);
+  if (typeof window !== 'undefined') {
+    interface WindowWithDebug extends Window {
+      simpleDebug?: (msg: string) => void;
+    }
+    (window as WindowWithDebug).simpleDebug?.(message);
   }
 }
