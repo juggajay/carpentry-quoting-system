@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { seniorEstimatorProcessor } from '@/lib/ai-assistant/senior-estimator-processor';
-import { fileParser } from '@/lib/ai-assistant/file-parser';
+import { fileParser, ParsedFileContent } from '@/lib/ai-assistant/file-parser';
 import { db } from '@/lib/db';
+
+// Configure route to handle larger file uploads (up to 10MB)
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds timeout
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +25,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Check content length
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB limit
+      return NextResponse.json(
+        { error: 'File size too large. Maximum allowed size is 10MB.' },
+        { status: 413 }
+      );
+    }
+
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
     const sessionId = formData.get('sessionId') as string;
@@ -30,6 +43,16 @@ export async function POST(request: NextRequest) {
 
     if (files.length === 0 && !scopeText) {
       return NextResponse.json({ error: 'No files or scope text provided' }, { status: 400 });
+    }
+
+    // Check individual file sizes
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB per file
+        return NextResponse.json(
+          { error: `File "${file.name}" is too large. Maximum allowed size is 10MB per file.` },
+          { status: 413 }
+        );
+      }
     }
 
     // Create or get estimator session
@@ -50,49 +73,54 @@ export async function POST(request: NextRequest) {
           context: {
             projectType,
             location,
-            messages: [],
             files: []
           }
         }
       });
     }
 
-    // Process uploaded files
-    const parsedFiles = [];
+    // Process files
+    const parsedFiles: ParsedFileContent[] = [];
+    const failedFiles: { name: string; error: string }[] = [];
+    
     for (const file of files) {
       try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const parsed = await fileParser.parseFile(buffer, file.name, file.type);
+        console.log(`Processing file: ${file.name} (${file.size} bytes)`);
         
+        // Convert file to buffer
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        // Parse the file
+        const parsed = await fileParser.parseFile(buffer, file.name, file.type);
         if (parsed) {
           parsedFiles.push(parsed);
-          
-          // Update session context with file info
-          const context = estimatorSession.context as any;
-          context.files = [...(context.files || []), {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            uploadedAt: new Date()
-          }];
-          
-          await db.estimatorSession.update({
-            where: { id: estimatorSession.id },
-            data: { context }
-          });
+          console.log(`Successfully parsed ${file.name}: ${parsed.text.length} characters extracted`);
+        } else {
+          throw new Error('Failed to parse file');
         }
       } catch (error) {
         console.error(`Error parsing file ${file.name}:`, error);
+        failedFiles.push({
+          name: file.name,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
       }
     }
 
-    // Combine scope text with extracted text from files
+    // If all files failed to parse
+    if (parsedFiles.length === 0 && files.length > 0) {
+      return NextResponse.json({
+        error: 'Failed to parse any files',
+        failedFiles
+      }, { status: 400 });
+    }
+
+    // Combine scope text with parsed content
     let combinedScope = scopeText;
     if (parsedFiles.length > 0) {
-      const extractedTexts = parsedFiles.map(f => f.text).filter(t => t);
-      if (extractedTexts.length > 0) {
-        combinedScope = scopeText ? `${scopeText}\n\n${extractedTexts.join('\n\n')}` : extractedTexts.join('\n\n');
-      }
+      const fileContents = parsedFiles.map(f => f.text).join('\n\n');
+      combinedScope = scopeText ? `${scopeText}\n\n${fileContents}` : fileContents;
     }
 
     // Process the estimation request
@@ -134,12 +162,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update session context
+    // Update session context with file info
     const updatedContext = {
       ...estimatorSession.context as any,
-      lastAnalysisId: analysis.id,
-      filesProcessed: parsedFiles.length,
-      scopeItemsFound: estimationResult.scope_analysis.extractedItems.length
+      files: [
+        ...(estimatorSession.context as any).files || [],
+        ...files.map((file, index) => ({
+          name: file.name,
+          type: parsedFiles[index]?.type || 'unknown',
+          uploadedAt: new Date()
+        }))
+      ],
+      lastAnalysisId: analysis.id
     };
 
     await db.estimatorSession.update({
@@ -155,62 +189,24 @@ export async function POST(request: NextRequest) {
       analysisId: analysis.id,
       result: estimationResult,
       filesProcessed: parsedFiles.length,
+      failedFiles: failedFiles.length > 0 ? failedFiles : undefined,
       nextSteps: estimationResult.next_steps,
       estimatedDuration: estimationResult.estimated_duration
     });
 
   } catch (error) {
     console.error('Senior Estimator Analyze Error:', error);
+    
+    // Check if it's a body size error
+    if (error instanceof Error && error.message.includes('Body exceeded')) {
+      return NextResponse.json(
+        { error: 'Request body too large. Please upload smaller files or fewer files at once.' },
+        { status: 413 }
+      );
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
-  }
-}
-
-// GET endpoint to check analysis status
-export async function GET(request: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const user = await db.user.findUnique({
-      where: { clerkId: userId }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    const searchParams = request.nextUrl.searchParams;
-    const analysisId = searchParams.get('analysisId');
-
-    if (!analysisId) {
-      return NextResponse.json({ error: 'Analysis ID is required' }, { status: 400 });
-    }
-
-    const analysis = await db.estimatorAnalysis.findUnique({
-      where: { id: analysisId },
-      include: {
-        session: true,
-        questions: {
-          orderBy: { priority: 'desc' }
-        }
-      }
-    });
-
-    if (!analysis || analysis.session.userId !== user.id) {
-      return NextResponse.json({ error: 'Analysis not found' }, { status: 404 });
-    }
-
-    return NextResponse.json({ analysis });
-
-  } catch (error) {
-    console.error('Senior Estimator Analysis GET Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
       { status: 500 }
     );
   }

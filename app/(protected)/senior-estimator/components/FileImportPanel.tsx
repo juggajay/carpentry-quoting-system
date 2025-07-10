@@ -146,16 +146,25 @@ export function FileImportPanel() {
     } catch (error) {
       console.error('Error analyzing files:', error)
       
+      let errorMessage = 'Analysis failed'
+      if (error instanceof Error) {
+        if (error.message.includes('413')) {
+          errorMessage = 'File too large. Maximum size is 10MB per file.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
       // Mark files as error
       setFiles(prev => prev.map(f => ({ 
         ...f, 
         status: 'error',
-        error: error instanceof Error ? error.message : 'Analysis failed'
+        error: errorMessage
       })))
       
       addActivity({
         type: 'error',
-        message: 'Failed to analyze files'
+        message: errorMessage
       })
     } finally {
       setIsAnalyzing(false)
