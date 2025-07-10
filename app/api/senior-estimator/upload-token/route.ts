@@ -26,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const jsonResponse = await handleUpload({
         body,
         request,
-        onBeforeGenerateToken: async (pathname) => {
+        onBeforeGenerateToken: async () => {
           // Optionally, you can refuse the upload here
           return {
             allowedContentTypes: ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'],

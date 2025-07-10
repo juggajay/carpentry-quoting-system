@@ -287,7 +287,7 @@ export function FileImportPanel() {
         <BlobFileUpload 
           onFileUploaded={(url, fileName, fileSize) => {
             // Add as a cloud file
-            const cloudFile: ImportedFile = {
+            const newCloudFile: ImportedFile = {
               id: Math.random().toString(36).substr(2, 9),
               name: fileName,
               size: fileSize,
@@ -298,9 +298,9 @@ export function FileImportPanel() {
             }
             
             // Store the URL
-            (cloudFile.file as any).url = url;
+            (newCloudFile.file as any).url = url;
             
-            setFiles(prev => [...prev, cloudFile]);
+            setFiles(prev => [...prev, newCloudFile]);
           }}
         />
 
