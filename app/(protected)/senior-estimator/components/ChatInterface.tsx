@@ -116,6 +116,7 @@ export function ChatInterface() {
         sessionId: data.sessionId,
         analysisId: data.analysisId,
         demoMode: data.demoMode,
+        intent: data.result?.intent,
         itemsFound: data.result?.scope_analysis?.extractedItems?.length || 0
       })
       
@@ -133,6 +134,25 @@ export function ChatInterface() {
         })
       } else {
         console.log('Running with FULL DATABASE persistence')
+      }
+
+      // Check if this is a non-construction query
+      if (data.result?.intent && data.result.intent !== 'construction_scope') {
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.result.message,
+          sender: 'assistant',
+          timestamp: new Date()
+        }
+        
+        setMessages(prev => [...prev, aiResponse])
+        
+        addActivity({
+          type: 'response',
+          message: `Intent: ${data.result.intent} (${Math.round(data.result.confidence * 100)}% confidence)`
+        })
+        
+        return
       }
 
       // Process the estimation result

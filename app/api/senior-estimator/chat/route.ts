@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { seniorEstimatorProcessor } from '@/lib/ai-assistant/senior-estimator-processor';
 import { db } from '@/lib/db';
+import { intentDetector } from '@/lib/ai-assistant/intent-detector';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +52,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Process the estimation request
+    // Detect intent first
+    const intentResult = intentDetector.detectIntent(message);
+    
+    // Handle non-construction queries
+    if (intentResult.intent !== 'construction_scope') {
+      let responseMessage = '';
+      
+      switch (intentResult.intent) {
+        case 'file_query':
+          responseMessage = "I can help you analyze architectural drawings and construction documents. Please upload your files using the File Import panel on the left, and I'll extract scope items, measurements, and quantities from them.";
+          break;
+        case 'greeting':
+          responseMessage = "Hello! I'm your Senior Estimator assistant. I can help you analyze construction scopes, extract quantities from drawings, and generate accurate estimates. How can I help you today?";
+          break;
+        case 'help':
+          responseMessage = "I'm here to help with construction estimation! You can:\n\n1. **Type or paste your scope of work** - I'll analyze it and extract measurable items\n2. **Upload drawings** (PDF, images) - I'll identify elements and quantities\n3. **Ask questions** about your project - I'll help clarify scope items\n\nPlease make sure you've configured your project type and location first.";
+          break;
+        case 'question':
+          responseMessage = "I understand you have a question. I'm specialized in construction estimation and can help with:\n- Analyzing scope of work\n- Extracting quantities from drawings\n- Identifying materials and labor requirements\n- NSW construction standards and practices\n\nWhat would you like to know about your construction project?";
+          break;
+        default:
+          responseMessage = "I'm not sure how to help with that. I'm specialized in construction estimation. Please provide a scope of work or upload construction drawings for me to analyze.";
+      }
+      
+      return NextResponse.json({
+        sessionId: estimatorSession.id,
+        result: {
+          intent: intentResult.intent,
+          message: responseMessage,
+          confidence: intentResult.confidence,
+          reason: intentResult.reason
+        }
+      });
+    }
+
+    // Process the estimation request for construction scopes
     const estimationResult = await seniorEstimatorProcessor.processEstimationRequest({
       scope_text: message,
       drawing_files: projectFiles || [],
