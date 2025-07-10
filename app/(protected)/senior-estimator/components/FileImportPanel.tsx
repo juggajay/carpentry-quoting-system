@@ -182,12 +182,16 @@ export function FileImportPanel() {
   }
   
   const processAnalysisResult = (data: any) => {
+    console.log('Processing analysis result, sessionId:', data.sessionId)
+    
     // Update session ID
     if (!sessionId && data.sessionId) {
+      console.log('Setting sessionId:', data.sessionId)
       setSessionId(data.sessionId)
     }
     
     // Mark that we have analyzed files
+    console.log('Setting hasAnalyzedFiles to true')
     setHasAnalyzedFiles(true)
     
     // Process the estimation result

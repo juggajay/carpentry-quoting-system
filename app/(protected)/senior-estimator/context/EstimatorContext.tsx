@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 
 interface Activity {
   id: string
@@ -88,10 +88,6 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
 
   const addEstimateItem = (item: EstimateItem) => {
     setEstimateItems(prev => [...prev, item])
-    addActivity({
-      type: 'analysis',
-      message: `Added estimate: ${item.description}`
-    })
   }
 
   const updateEstimateItem = (id: string, updates: Partial<EstimateItem>) => {
@@ -120,10 +116,6 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
       priority
     }
     setTodoItems(prev => [...prev, newTodo])
-    addActivity({
-      type: 'analysis',
-      message: `Added task: ${task}`
-    })
   }
 
   const toggleTodoItem = (id: string) => {
@@ -140,10 +132,76 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
 
   const updateProjectConfig = (config: ProjectConfig) => {
     setProjectConfig(config)
-    addActivity({
-      type: 'analysis',
-      message: `Updated project configuration: ${config.projectType} in ${config.location}`
-    })
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('seniorEstimatorConfig', JSON.stringify(config))
+    }
+  }
+
+  // Load saved data on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Load saved config
+      const savedConfig = localStorage.getItem('seniorEstimatorConfig')
+      if (savedConfig) {
+        try {
+          const config = JSON.parse(savedConfig)
+          setProjectConfig(config)
+        } catch (e) {
+          console.error('Failed to load saved config:', e)
+        }
+      }
+      
+      // Load saved session ID
+      const savedSessionId = localStorage.getItem('seniorEstimatorSessionId')
+      if (savedSessionId) {
+        setSessionIdState(savedSessionId)
+        // Load session data from API
+        loadSessionData(savedSessionId)
+      }
+    }
+  }, [])
+
+  // Save session ID when it changes
+  useEffect(() => {
+    if (sessionId && typeof window !== 'undefined') {
+      localStorage.setItem('seniorEstimatorSessionId', sessionId)
+    }
+  }, [sessionId])
+
+  const loadSessionData = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/senior-estimator/chat?sessionId=${sessionId}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.session) {
+          // Restore session state
+          const session = data.session
+          if (session.analyses && session.analyses.length > 0) {
+            setHasAnalyzedFiles(true)
+            // Restore estimate items from latest analysis
+            const latestAnalysis = session.analyses[0]
+            if (latestAnalysis.quoteItems) {
+              const items = latestAnalysis.quoteItems as any[]
+              const restoredItems: EstimateItem[] = items.map((item: any) => ({
+                id: item.id,
+                category: item.category || 'General',
+                description: item.description,
+                quantity: item.quantity,
+                unit: item.unit,
+                rate: item.unitPrice || 0,
+                total: item.totalPrice || 0,
+                confidence: (item.confidence.score >= 85 ? 'high' : 
+                          item.confidence.score >= 70 ? 'medium' : 'low') as 'high' | 'medium' | 'low'
+              }))
+              setEstimateItems(restoredItems)
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load session data:', error)
+    }
   }
 
   return (

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Building2, Calculator } from 'lucide-react'
+import { Building2, Calculator, RotateCcw } from 'lucide-react'
 
 interface EstimatorHeaderProps {
   projectName: string
@@ -28,9 +28,25 @@ export function EstimatorHeader({
         </div>
         
         {/* Senior Estimator Label */}
-        <div className="flex items-center gap-2 text-gray-400">
-          <Calculator className="h-4 w-4" />
-          <span className="font-medium text-sm">Senior Estimator</span>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('seniorEstimatorSessionId')
+                localStorage.removeItem('seniorEstimatorConfig')
+                window.location.reload()
+              }
+            }}
+            className="flex items-center gap-1 text-xs text-gray-500 hover:text-white transition-colors px-2 py-1 border border-gray-700 rounded"
+            title="Clear session and start fresh"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Clear Session
+          </button>
+          <div className="flex items-center gap-2 text-gray-400">
+            <Calculator className="h-4 w-4" />
+            <span className="font-medium text-sm">Senior Estimator</span>
+          </div>
         </div>
       </div>
     </header>

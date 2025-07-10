@@ -71,6 +71,9 @@ export function ChatInterface() {
     try {
       // Call the Senior Estimator API
       console.log('Calling main Senior Estimator API...')
+      console.log('Debug - sessionId:', sessionId)
+      console.log('Debug - hasAnalyzedFiles:', hasAnalyzedFiles)
+      
       let response = await fetch('/api/senior-estimator/chat', {
         method: 'POST',
         headers: {
