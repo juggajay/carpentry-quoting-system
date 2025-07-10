@@ -293,17 +293,17 @@ Let me search our treasure trove of materials for the best pricing!`;
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col">
+    <div className="h-[calc(100vh-0px)] flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-6 pt-4">
+      <div className="flex items-center justify-between mb-2 px-4 pt-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
             <div className="flex items-center animate-pulse">
-              <span className="text-4xl">🧑‍🦰</span>
-              <span className="text-3xl -ml-3">🍀</span>
+              <span className="text-2xl">🧑‍🦰</span>
+              <span className="text-xl -ml-2">🍀</span>
             </div> 
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 Junior Estimator
                 <Badge variant="success" className="text-xs">Jr</Badge>
               </div>
@@ -312,7 +312,7 @@ Let me search our treasure trove of materials for the best pricing!`;
               </p>
             </div>
           </h1>
-          <p className="text-muted-foreground text-sm mt-2">
+          <p className="text-muted-foreground text-xs mt-1">
             {seniorEstimatorData || fromSeniorEstimator
               ? "Using Senior Leprechaun's wisdom to craft detailed quotes"
               : "Upload BOQ scrolls for magical quote generation"
@@ -341,11 +341,11 @@ Let me search our treasure trove of materials for the best pricing!`;
       </div>
 
       {/* Main Content Grid - Matching Senior Layout */}
-      <div className="flex-1 grid grid-cols-12 gap-4 px-6 pb-4 min-h-0">
+      <div className="flex-1 grid grid-cols-12 gap-2 px-4 pb-2 min-h-0">
         {/* Left Column - Files & MCP (Small) */}
-        <div className="col-span-3 space-y-4 overflow-y-auto">
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+        <div className="col-span-3 space-y-2 overflow-y-auto">
+          <Card className="p-3">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
               📜 BOQ Scrolls
             </h3>
             <div className="text-xs">
@@ -358,11 +358,11 @@ Let me search our treasure trove of materials for the best pricing!`;
           </Card>
 
           {/* Live Updates */}
-          <Card className="p-4 flex-1">
-            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <Card className="p-3 flex-1">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
               ✨ Magical Updates
             </h3>
-            <div className="h-48 overflow-y-auto bg-gray-50 rounded p-2 text-xs font-mono">
+            <div className="h-32 overflow-y-auto bg-gray-50 rounded p-2 text-xs font-mono">
               {liveUpdates.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">Waiting for magic...</p>
               ) : (
@@ -378,8 +378,8 @@ Let me search our treasure trove of materials for the best pricing!`;
 
           {/* MCP Connections */}
           {mcpConnections.length > 0 && (
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Card className="p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 🔌 Magic Tools
               </h3>
               <div className="space-y-1">
@@ -408,25 +408,25 @@ Let me search our treasure trove of materials for the best pricing!`;
 
         {/* Middle Column - Chat Interface (Big) */}
         <div className="col-span-6 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col p-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Card className="flex-1 flex flex-col p-3">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
               💬 Junior Leprechaun Chat
             </h3>
             
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto border rounded-lg p-4 bg-gray-50 mb-4">
+            <div className="flex-1 overflow-y-auto border rounded-lg p-3 bg-gray-50 mb-2">
               {messages.length === 0 && !generatedQuote ? (
-                <div className="text-center text-gray-500 py-16">
-                  <div className="flex items-center justify-center mb-3 animate-bounce">
-                    <span className="text-6xl">🧑‍🦰</span>
-                    <span className="text-5xl -ml-4">🍀</span>
+                <div className="text-center text-gray-500 py-8">
+                  <div className="flex items-center justify-center mb-2 animate-bounce">
+                    <span className="text-3xl">🧑‍🦰</span>
+                    <span className="text-2xl -ml-2">🍀</span>
                   </div>
-                  <p className="font-medium">Junior Leprechaun Ready!</p>
-                  <p className="text-sm mt-2 text-green-600 italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
-                  <div className="flex justify-center gap-2 mt-4">
-                    <span className="text-2xl">✨</span>
-                    <span className="text-2xl">🪙</span>
-                    <span className="text-2xl">💚</span>
+                  <p className="font-medium text-sm">Junior Leprechaun Ready!</p>
+                  <p className="text-xs mt-1 text-green-600 italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
+                  <div className="flex justify-center gap-1 mt-2">
+                    <span className="text-lg">✨</span>
+                    <span className="text-lg">🪙</span>
+                    <span className="text-lg">💚</span>
                   </div>
                 </div>
               ) : (
@@ -494,7 +494,7 @@ Let me search our treasure trove of materials for the best pricing!`;
         </div>
         
         {/* Right Column - Quote Preview */}
-        <div className="col-span-3 space-y-4 overflow-y-auto">
+        <div className="col-span-3 space-y-2 overflow-y-auto">
           {generatedQuote ? (
             <QuotePreview 
               quote={generatedQuote} 
@@ -505,14 +505,14 @@ Let me search our treasure trove of materials for the best pricing!`;
               }}
             />
           ) : (
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Card className="p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 📋 Quote Preview
               </h3>
-              <div className="text-center text-muted-foreground py-8">
-                <div className="text-4xl mb-3">🪙</div>
-                <p className="text-sm">No quote generated yet</p>
-                <p className="text-xs mt-2 text-green-600 italic">
+              <div className="text-center text-muted-foreground py-4">
+                <div className="text-2xl mb-2">🪙</div>
+                <p className="text-xs">No quote generated yet</p>
+                <p className="text-xs mt-1 text-green-600 italic">
                   {"The gold will appear when ready!"}
                 </p>
               </div>
@@ -521,8 +521,8 @@ Let me search our treasure trove of materials for the best pricing!`;
 
           {/* Senior Estimator Data Summary */}
           {seniorEstimatorData && (
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Card className="p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 🧑‍🦰🎩 From Senior Leprechaun
                 <Badge variant="success" className="text-xs">
                   {seniorEstimatorData.quantities.length} items

@@ -13,7 +13,7 @@ export default function SeniorEstimatorPage() {
 
   return (
     <EstimatorProvider>
-      <div className="flex flex-col h-screen bg-dark-surface">
+      <div className="flex flex-col h-[calc(100vh-0px)] bg-dark-surface">
         {/* Header */}
         <EstimatorHeader 
           projectName={projectName}
@@ -25,12 +25,12 @@ export default function SeniorEstimatorPage() {
           {/* Left Column - 30% */}
           <div className="w-[30%] flex flex-col border-r border-gray-800">
             {/* File Import Panel - Top */}
-            <div className="flex-1 overflow-hidden">
+            <div className="h-[55%] overflow-hidden">
               <FileImportPanel />
             </div>
             
             {/* Activity Monitor - Bottom */}
-            <div className="h-[40%] border-t border-gray-800">
+            <div className="h-[45%] border-t border-gray-800">
               <ActivityMonitor />
             </div>
           </div>
