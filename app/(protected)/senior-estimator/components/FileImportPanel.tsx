@@ -23,7 +23,26 @@ export function FileImportPanel() {
   const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.map(file => ({
+    const maxSize = 4.5 * 1024 * 1024; // 4.5MB limit for Vercel
+    const validFiles: typeof acceptedFiles = [];
+    const oversizedFiles: string[] = [];
+    
+    acceptedFiles.forEach(file => {
+      if (file.size > maxSize) {
+        oversizedFiles.push(`${file.name} (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
+      } else {
+        validFiles.push(file);
+      }
+    });
+    
+    if (oversizedFiles.length > 0) {
+      addActivity({
+        type: 'error',
+        message: `Files too large (max 4.5MB): ${oversizedFiles.join(', ')}`
+      });
+    }
+    
+    const newFiles = validFiles.map(file => ({
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
       size: file.size,
@@ -35,7 +54,7 @@ export function FileImportPanel() {
 
     setFiles(prev => [...prev, ...newFiles])
     
-    // Add activity for each file
+    // Add activity for each valid file
     newFiles.forEach(file => {
       addActivity({
         type: 'file',
@@ -149,7 +168,7 @@ export function FileImportPanel() {
       let errorMessage = 'Analysis failed'
       if (error instanceof Error) {
         if (error.message.includes('413')) {
-          errorMessage = 'File too large. Maximum size is 10MB per file.'
+          errorMessage = 'File too large. Maximum size is 4.5MB per file due to platform limitations. Please compress your PDF or split it into smaller files.'
         } else {
           errorMessage = error.message
         }
@@ -218,7 +237,7 @@ export function FileImportPanel() {
             }
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Supports PDF, Images, Excel, CSV
+            Supports PDF, Images, Excel, CSV • Max 4.5MB per file
           </p>
         </div>
 

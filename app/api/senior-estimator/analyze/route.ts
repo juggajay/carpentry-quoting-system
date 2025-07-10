@@ -4,7 +4,7 @@ import { seniorEstimatorProcessor } from '@/lib/ai-assistant/senior-estimator-pr
 import { fileParser, ParsedFileContent } from '@/lib/ai-assistant/file-parser';
 import { db } from '@/lib/db';
 
-// Configure route to handle larger file uploads (up to 10MB)
+// Configure route to handle larger file uploads
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds timeout
 
@@ -25,11 +25,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check content length
+    // For Vercel deployment, we need to handle large files differently
+    // The platform has a 4.5MB limit on free/hobby tier
     const contentLength = request.headers.get('content-length');
-    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB limit
+    if (contentLength && parseInt(contentLength) > 4.5 * 1024 * 1024) { // 4.5MB limit for Vercel
       return NextResponse.json(
-        { error: 'File size too large. Maximum allowed size is 10MB.' },
+        { error: 'File size too large. Due to platform limitations, maximum file size is 4.5MB. Please compress your PDF or split it into smaller files.' },
         { status: 413 }
       );
     }
@@ -45,11 +46,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No files or scope text provided' }, { status: 400 });
     }
 
-    // Check individual file sizes
+    // Check individual file sizes for Vercel limit
     for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB per file
+      if (file.size > 4.5 * 1024 * 1024) { // 4.5MB per file for Vercel
         return NextResponse.json(
-          { error: `File "${file.name}" is too large. Maximum allowed size is 10MB per file.` },
+          { error: `File "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Due to platform limitations, maximum file size is 4.5MB. Please compress your PDF or split it into smaller files.` },
           { status: 413 }
         );
       }
