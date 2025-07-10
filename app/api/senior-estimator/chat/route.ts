@@ -78,21 +78,38 @@ export async function POST(request: NextRequest) {
           const itemCount = scopeAnalysis?.extractedItems?.length || 0;
           const quoteCount = quoteItems?.length || 0;
           
-          let response = `I've analyzed your uploaded files and found:\n\n`;
-          response += `📋 **${itemCount} scope items** extracted\n`;
-          response += `💰 **${quoteCount} quote items** generated\n\n`;
+          let response = `I've analyzed your uploaded files.\n\n`;
           
-          if (itemCount > 0) {
-            response += `**Key items found:**\n`;
-            scopeAnalysis.extractedItems.slice(0, 5).forEach((item: any) => {
-              response += `• ${item.description}\n`;
-            });
-            if (itemCount > 5) {
-              response += `• ... and ${itemCount - 5} more items\n`;
+          // Check if the items are just drawing headers
+          const hasOnlyDrawingHeaders = scopeAnalysis?.extractedItems?.every((item: any) => 
+            item.description.includes('DRAWING') || 
+            item.description.includes('Drawing type') || 
+            item.description.includes('Scale')
+          );
+          
+          if (hasOnlyDrawingHeaders || itemCount < 3) {
+            response = `I can see you've uploaded architectural drawings. Since these are visual documents with minimal text, I couldn't extract detailed scope items automatically.\n\n`;
+            response += `**To get an accurate estimate, please describe:**\n`;
+            response += `• What type of construction work you need\n`;
+            response += `• Key elements visible in the drawings (e.g., "frame walls", "concrete slab", "roof structure")\n`;
+            response += `• Any specific requirements or materials\n\n`;
+            response += `For example: "I need framing for a single-story extension as shown in the drawings, including wall frames, roof trusses, and external cladding"`;
+          } else {
+            response += `📋 **${itemCount} scope items** extracted\n`;
+            response += `💰 **${quoteCount} quote items** generated\n\n`;
+            
+            if (itemCount > 0) {
+              response += `**Key items found:**\n`;
+              scopeAnalysis.extractedItems.slice(0, 5).forEach((item: any) => {
+                response += `• ${item.description}\n`;
+              });
+              if (itemCount > 5) {
+                response += `• ... and ${itemCount - 5} more items\n`;
+              }
             }
+            
+            response += `\n✅ The analysis is complete. You can see all details in the Estimates panel on the right.`;
           }
-          
-          response += `\n✅ The analysis is complete. You can see all details in the Estimates panel on the right.`;
           
           return NextResponse.json({
             sessionId,

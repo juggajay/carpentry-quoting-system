@@ -81,8 +81,16 @@ class FileParser {
         // Combine results
         const combinedText = this.generateDrawingDescription(drawingAnalysis, enhancedResult);
         
+        // If the PDF has very little text, add a note about it being a visual drawing
+        const finalText = data.text.length < 500 
+          ? `NOTE: This appears to be a visual architectural drawing with minimal text content. 
+Please describe the scope of work you need based on this drawing, or upload a BOQ/specification document.
+
+${combinedText}`
+          : combinedText;
+        
         return {
-          text: combinedText,
+          text: finalText,
           type: 'pdf',
           metadata: {
             pages: data.numpages,
@@ -186,7 +194,16 @@ class FileParser {
       description += `\n`;
     }
     
-    description += `\nRAW DRAWING TEXT:\n${basicAnalysis.original_text || ''}`;
+    // If we have raw text, try to extract scope items from it
+    if (basicAnalysis.original_text) {
+      description += `\nRAW TEXT CONTENT:\n`;
+      // Only include first 2000 characters to avoid overwhelming the AI
+      const truncatedText = basicAnalysis.original_text.substring(0, 2000);
+      description += truncatedText;
+      if (basicAnalysis.original_text.length > 2000) {
+        description += `\n... (${basicAnalysis.original_text.length - 2000} more characters)`;
+      }
+    }
     
     return description;
   }

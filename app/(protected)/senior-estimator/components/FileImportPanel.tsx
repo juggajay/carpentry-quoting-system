@@ -321,20 +321,26 @@ export function FileImportPanel() {
 
         {/* Analyze Button */}
         {files.length > 0 && (
-          <button
-            onClick={analyzeFiles}
-            disabled={isAnalyzing || files.length === 0}
-            className="mt-4 w-full bg-electric-magenta text-white rounded-lg px-4 py-2 font-medium hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing Files...
-              </>
-            ) : (
-              'Analyze Files'
-            )}
-          </button>
+          <>
+            <button
+              onClick={analyzeFiles}
+              disabled={isAnalyzing || files.length === 0}
+              className="mt-4 w-full bg-electric-magenta text-white rounded-lg px-4 py-2 font-medium hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing Files...
+                </>
+              ) : (
+                'Analyze Files'
+              )}
+            </button>
+            
+            <p className="text-xs text-gray-400 mt-2 text-center">
+              Tip: After uploading drawings, describe the scope in the chat
+            </p>
+          </>
         )}
 
         {/* File List */}
