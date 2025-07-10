@@ -81,6 +81,19 @@
   background-color: rgba(41, 98, 255, 0.1);
 }
 
+/* Button sizes */
+.btn-small {
+  height: 2rem;
+  padding: 0 1rem;
+  font-size: 0.75rem;
+}
+
+.btn-large {
+  height: 3rem;
+  padding: 0 2rem;
+  font-size: 1rem;
+}
+
 /* Card Components */
 .card {
   background-color: var(--color-dark-elevated);

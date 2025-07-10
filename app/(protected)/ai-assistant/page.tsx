@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import FileDropZone from "./components/FileDropZone";
 import QuotePreview from "./components/QuotePreview";
@@ -293,12 +291,12 @@ Let me search our treasure trove of materials for the best pricing!`;
   };
 
   return (
-    <div className="h-[calc(100vh-0px)] flex flex-col">
+    <div className="h-[calc(100vh-0px)] flex flex-col bg-dark-surface">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2 px-4 pt-2">
+      <div className="flex items-center justify-between mb-2 px-4 py-3 bg-dark-elevated border-b border-gray-800">
         <div>
-          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <div className="flex items-center animate-pulse">
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="flex items-center">
               <span className="text-2xl">🧑‍🦰</span>
               <span className="text-xl -ml-2">🍀</span>
             </div> 
@@ -307,12 +305,12 @@ Let me search our treasure trove of materials for the best pricing!`;
                 Junior Estimator
                 <Badge variant="success" className="text-xs">Jr</Badge>
               </div>
-              <p className="text-xs text-green-600 font-semibold italic">
+              <p className="text-xs text-lime-green font-semibold italic">
                 {"A wee bit of magic for your quotes!"}
               </p>
             </div>
           </h1>
-          <p className="text-muted-foreground text-xs mt-1">
+          <p className="text-gray-400 text-xs mt-1">
             {seniorEstimatorData || fromSeniorEstimator
               ? "Using Senior Leprechaun's wisdom to craft detailed quotes"
               : "Upload BOQ scrolls for magical quote generation"
@@ -320,23 +318,21 @@ Let me search our treasure trove of materials for the best pricing!`;
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="info" className="text-sm bg-green-100 text-green-800 border-green-300">
+          <Badge variant="info" className="text-sm bg-lime-green/20 text-lime-green border-lime-green/40">
             🌟 AI Assistant
           </Badge>
-          <Button
+          <button
             onClick={() => setShowMCPSelector(true)}
-            variant="secondary"
-            size="sm"
-            className="flex items-center gap-2 relative"
+            className="btn btn-secondary btn-small flex items-center gap-2 relative"
           >
             <span>🔌</span>
             MCP Tools
             {mcpConnections.filter(c => c.status === 'connected').length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 bg-lime-green text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
                 {mcpConnections.filter(c => c.status === 'connected').length}
               </span>
             )}
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -344,8 +340,8 @@ Let me search our treasure trove of materials for the best pricing!`;
       <div className="flex-1 grid grid-cols-12 gap-2 px-4 pb-2 min-h-0">
         {/* Left Column - Files & MCP (Small) */}
         <div className="col-span-3 space-y-2 overflow-y-auto">
-          <Card className="p-3">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+          <div className="card bg-dark-elevated p-3">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
               📜 BOQ Scrolls
             </h3>
             <div className="text-xs">
@@ -355,45 +351,45 @@ Let me search our treasure trove of materials for the best pricing!`;
                 onRemoveFile={handleRemoveFile}
               />
             </div>
-          </Card>
+          </div>
 
           {/* Live Updates */}
-          <Card className="p-3 flex-1">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+          <div className="card bg-dark-elevated p-3 flex-1">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
               ✨ Magical Updates
             </h3>
-            <div className="h-32 overflow-y-auto bg-gray-50 rounded p-2 text-xs font-mono">
+            <div className="h-32 overflow-y-auto bg-dark-surface border border-gray-700 rounded p-2 text-xs font-mono">
               {liveUpdates.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">Waiting for magic...</p>
               ) : (
                 liveUpdates.map((update, index) => (
-                  <div key={index} className="mb-1 text-gray-700">
+                  <div key={index} className="mb-1 text-lime-green">
                     {update}
                   </div>
                 ))
               )}
               <div ref={updatesEndRef} />
             </div>
-          </Card>
+          </div>
 
           {/* MCP Connections */}
           {mcpConnections.length > 0 && (
-            <Card className="p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <div className="card bg-dark-elevated p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
                 🔌 Magic Tools
               </h3>
               <div className="space-y-1">
                 {mcpConnections.map(conn => (
-                  <div key={conn.id} className="flex items-center justify-between p-1.5 rounded bg-gray-50 hover:bg-gray-100 transition-colors text-xs">
+                  <div key={conn.id} className="flex items-center justify-between p-1.5 rounded bg-dark-surface hover:bg-dark-navy border border-gray-700 transition-colors text-xs">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-1.5 h-1.5 rounded-full ${
-                        conn.status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                        conn.status === 'connected' ? 'bg-lime-green animate-pulse' : 'bg-gray-400'
                       }`} />
-                      <span className="font-medium">{conn.name}</span>
+                      <span className="font-medium text-white">{conn.name}</span>
                     </div>
                     {conn.status === 'connected' && (
                       <button
-                        className="text-xs text-red-600 hover:text-red-700"
+                        className="text-xs text-critical-red hover:text-red-400"
                         onClick={() => handleMCPDisconnect(conn.id)}
                       >
                         ×
@@ -402,27 +398,27 @@ Let me search our treasure trove of materials for the best pricing!`;
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           )}
         </div>
 
         {/* Middle Column - Chat Interface (Big) */}
         <div className="col-span-6 flex flex-col min-h-0">
-          <Card className="flex-1 flex flex-col p-3">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+          <div className="card bg-dark-elevated flex-1 flex flex-col p-3">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
               💬 Junior Leprechaun Chat
             </h3>
             
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto border rounded-lg p-3 bg-gray-50 mb-2">
+            <div className="flex-1 overflow-y-auto border border-gray-700 rounded-lg p-3 bg-dark-surface mb-2">
               {messages.length === 0 && !generatedQuote ? (
-                <div className="text-center text-gray-500 py-8">
+                <div className="text-center text-gray-400 py-8">
                   <div className="flex items-center justify-center mb-2 animate-bounce">
                     <span className="text-3xl">🧑‍🦰</span>
                     <span className="text-2xl -ml-2">🍀</span>
                   </div>
-                  <p className="font-medium text-sm">Junior Leprechaun Ready!</p>
-                  <p className="text-xs mt-1 text-green-600 italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
+                  <p className="font-medium text-sm text-white">Junior Leprechaun Ready!</p>
+                  <p className="text-xs mt-1 text-lime-green italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
                   <div className="flex justify-center gap-1 mt-2">
                     <span className="text-lg">✨</span>
                     <span className="text-lg">🪙</span>
@@ -436,8 +432,8 @@ Let me search our treasure trove of materials for the best pricing!`;
                       key={message.id}
                       className={`mb-3 p-3 rounded-lg ${
                         message.role === 'user'
-                          ? 'bg-green-100 ml-12'
-                          : 'bg-white mr-12 shadow-sm'
+                          ? 'bg-electric-magenta/20 ml-12 border border-electric-magenta/40'
+                          : 'bg-dark-elevated mr-12 border border-gray-700'
                       }`}
                     >
                       <div className="flex items-start gap-2">
@@ -445,8 +441,8 @@ Let me search our treasure trove of materials for the best pricing!`;
                           {message.role === 'user' ? '👤' : '🧑‍🦰🍀'}
                         </span>
                         <div className="flex-1">
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-sm whitespace-pre-wrap text-white">{message.content}</p>
+                          <p className="text-xs text-gray-400 mt-1">
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
                         </div>
@@ -456,14 +452,14 @@ Let me search our treasure trove of materials for the best pricing!`;
                 </>
               )}
               {isProcessing && (
-                <div className="mb-3 p-3 rounded-lg bg-white mr-12 shadow-sm">
+                <div className="mb-3 p-3 rounded-lg bg-dark-elevated mr-12 border border-gray-700">
                   <div className="flex items-start gap-2">
                     <div className="flex items-center animate-pulse">
                       <span className="text-2xl">🧑‍🦰</span>
                       <span className="text-xl -ml-2">🍀</span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-500 italic">Junior Leprechaun is crafting magic...</p>
+                      <p className="text-sm text-lime-green italic">Junior Leprechaun is crafting magic...</p>
                     </div>
                   </div>
                 </div>
@@ -479,18 +475,18 @@ Let me search our treasure trove of materials for the best pricing!`;
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
                 placeholder="Ask about materials, pricing, or upload BOQ files..."
-                className="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500"
+                className="flex-1 p-2 border border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-electric-magenta bg-dark-surface text-white placeholder-gray-500"
                 disabled={isProcessing}
               />
-              <Button
+              <button
                 onClick={() => handleSendMessage(inputValue)}
                 disabled={!inputValue.trim() || isProcessing}
-                size="sm"
+                className="btn btn-primary btn-small"
               >
                 Send
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         </div>
         
         {/* Right Column - Quote Preview */}
@@ -505,39 +501,39 @@ Let me search our treasure trove of materials for the best pricing!`;
               }}
             />
           ) : (
-            <Card className="p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <div className="card bg-dark-elevated p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
                 📋 Quote Preview
               </h3>
-              <div className="text-center text-muted-foreground py-4">
+              <div className="text-center text-gray-400 py-4">
                 <div className="text-2xl mb-2">🪙</div>
                 <p className="text-xs">No quote generated yet</p>
-                <p className="text-xs mt-1 text-green-600 italic">
+                <p className="text-xs mt-1 text-lime-green italic">
                   {"The gold will appear when ready!"}
                 </p>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Senior Estimator Data Summary */}
           {seniorEstimatorData && (
-            <Card className="p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <div className="card bg-dark-elevated p-3">
+              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
                 🧑‍🦰🎩 From Senior Leprechaun
                 <Badge variant="success" className="text-xs">
                   {seniorEstimatorData.quantities.length} items
                 </Badge>
               </h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                <div className="p-2 bg-green-50 rounded text-xs">
-                  <p className="font-medium text-green-800">Project: {seniorEstimatorData.project_summary.project_type}</p>
-                  <p className="text-green-600">Location: {seniorEstimatorData.project_summary.location}</p>
-                  <p className="text-green-600">Confidence: {seniorEstimatorData.project_summary.confidence}%</p>
+                <div className="p-2 bg-lime-green/10 border border-lime-green/20 rounded text-xs">
+                  <p className="font-medium text-lime-green">Project: {seniorEstimatorData.project_summary.project_type}</p>
+                  <p className="text-gray-400">Location: {seniorEstimatorData.project_summary.location}</p>
+                  <p className="text-gray-400">Confidence: {seniorEstimatorData.project_summary.confidence}%</p>
                 </div>
                 {seniorEstimatorData.quantities.slice(0, 5).map((item: any, index: number) => (
-                  <div key={index} className="p-2 border rounded bg-gray-50 text-xs">
-                    <p className="font-medium">{item.description}</p>
-                    <p className="text-gray-600">{item.quantity} {item.unit}</p>
+                  <div key={index} className="p-2 border border-gray-700 rounded bg-dark-surface text-xs">
+                    <p className="font-medium text-white">{item.description}</p>
+                    <p className="text-gray-400">{item.quantity} {item.unit}</p>
                   </div>
                 ))}
                 {seniorEstimatorData.quantities.length > 5 && (
@@ -546,7 +542,7 @@ Let me search our treasure trove of materials for the best pricing!`;
                   </p>
                 )}
               </div>
-            </Card>
+            </div>
           )}
         </div>
       </div>
