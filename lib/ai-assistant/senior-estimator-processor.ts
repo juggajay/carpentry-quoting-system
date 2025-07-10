@@ -79,7 +79,17 @@ export class SeniorEstimatorProcessor {
     try {
       // Step 1: Parse and analyze the scope
       console.log('🔍 Step 1: Analyzing scope...');
-      const scopeAnalysis = await scopeParser.parseScope(request.scope_text);
+      
+      // If we have drawings, enhance the scope with drawing information
+      let enhancedScope = request.scope_text;
+      if (request.drawing_files && request.drawing_files.length > 0) {
+        const { enhancePromptWithDrawingContext } = await import('./drawing-prompt-enhancer');
+        // Do a preliminary analysis to get drawing info
+        const preliminaryDrawings = await this.analyzeDrawings(request.drawing_files);
+        enhancedScope = enhancePromptWithDrawingContext(request.scope_text, preliminaryDrawings);
+      }
+      
+      const scopeAnalysis = await scopeParser.parseScope(enhancedScope);
       
       auditTrail.actions.push({
         id: crypto.randomUUID(),
@@ -293,6 +303,16 @@ export class SeniorEstimatorProcessor {
           notes: [`Drawing type: ${file.metadata.drawing_type}`, `Scale: ${file.metadata.scale}`]
         };
         
+        // Extract dimensions from enhanced analysis
+        if (file.metadata.measurements) {
+          analysis.dimensions_extracted = file.metadata.measurements.map((m: any) => ({
+            value: m.value,
+            unit: m.unit,
+            description: m.description,
+            confidence: 0.7
+          }));
+        }
+        
         // Convert detected elements to building elements
         if (file.metadata.elements_detected) {
           analysis.elements_found = file.metadata.elements_detected.map(elementType => ({
@@ -303,6 +323,24 @@ export class SeniorEstimatorProcessor {
             unit: 'each',
             confidence: getConfidenceLevel(60, ['Detected from drawing text'])
           }));
+        }
+        
+        // Add enhanced elements if available
+        if (file.metadata.enhanced_analysis?.extractedElements) {
+          const enhancedElements = file.metadata.enhanced_analysis.extractedElements.map((elem: any) => ({
+            id: crypto.randomUUID(),
+            type: elem.type,
+            location: elem.description,
+            quantity: elem.quantity,
+            unit: 'each',
+            confidence: getConfidenceLevel(elem.confidence * 100, ['Enhanced drawing analysis'])
+          }));
+          analysis.elements_found.push(...enhancedElements);
+        }
+        
+        // Add room information to notes
+        if (file.metadata.rooms && file.metadata.rooms.length > 0) {
+          analysis.notes.push(`Rooms found: ${file.metadata.rooms.map((r: any) => r.name).join(', ')}`);
         }
         
         analyses.push(analysis);

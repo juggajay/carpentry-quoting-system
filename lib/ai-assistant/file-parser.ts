@@ -13,6 +13,9 @@ export interface ParsedFileContent {
     drawing_type?: 'floor_plan' | 'elevation' | 'section' | 'detail' | 'site_plan' | 'unknown';
     dimensions_found?: number;
     elements_detected?: string[];
+    rooms?: any[];
+    measurements?: any[];
+    enhanced_analysis?: any;
   };
 }
 
@@ -67,6 +70,36 @@ class FileParser {
       // Enhanced drawing analysis
       const drawingAnalysis = analyzeDrawingContent(data.text);
       
+      // Check if this looks like an architectural drawing
+      const isDrawing = this.isLikelyArchitecturalDrawing(data.text);
+      
+      if (isDrawing) {
+        // Try enhanced analysis
+        const { enhancedTextAnalysis } = await import('./drawing-analyzer');
+        const enhancedResult = enhancedTextAnalysis(data.text);
+        
+        // Combine results
+        const combinedText = this.generateDrawingDescription(drawingAnalysis, enhancedResult);
+        
+        return {
+          text: combinedText,
+          type: 'pdf',
+          metadata: {
+            pages: data.numpages,
+            scale: drawingAnalysis.scale,
+            drawing_type: drawingAnalysis.drawing_type,
+            dimensions_found: drawingAnalysis.dimensions_found + (enhancedResult.measurements?.length || 0),
+            elements_detected: [
+              ...drawingAnalysis.elements_detected,
+              ...(enhancedResult.extractedElements?.map(e => e.type) || [])
+            ],
+            rooms: enhancedResult.rooms,
+            measurements: enhancedResult.measurements,
+            enhanced_analysis: enhancedResult
+          }
+        };
+      }
+      
       return {
         text: data.text,
         type: 'pdf',
@@ -92,6 +125,70 @@ class FileParser {
         }
       };
     }
+  }
+  
+  private isLikelyArchitecturalDrawing(text: string): boolean {
+    const drawingIndicators = [
+      /scale\s*[:=]\s*1[:]\d+/i,
+      /floor\s*plan/i,
+      /elevation/i,
+      /section/i,
+      /drawing\s*no/i,
+      /architectural/i,
+      /\d+\s*mm/i,
+      /\d+x\d+/i
+    ];
+    
+    let indicatorCount = 0;
+    for (const pattern of drawingIndicators) {
+      if (pattern.test(text)) indicatorCount++;
+    }
+    
+    return indicatorCount >= 2;
+  }
+  
+  private generateDrawingDescription(basicAnalysis: any, enhancedResult: any): string {
+    let description = `ARCHITECTURAL DRAWING ANALYSIS\n\n`;
+    
+    description += `Drawing Type: ${basicAnalysis.drawing_type}\n`;
+    description += `Scale: ${basicAnalysis.scale}\n\n`;
+    
+    if (enhancedResult.rooms && enhancedResult.rooms.length > 0) {
+      description += `ROOMS IDENTIFIED:\n`;
+      enhancedResult.rooms.forEach((room: any) => {
+        description += `- ${room.name}\n`;
+      });
+      description += `\n`;
+    }
+    
+    if (enhancedResult.measurements && enhancedResult.measurements.length > 0) {
+      description += `DIMENSIONS FOUND:\n`;
+      enhancedResult.measurements.slice(0, 20).forEach((m: any) => {
+        description += `- ${m.description}: ${m.value}${m.unit}\n`;
+      });
+      if (enhancedResult.measurements.length > 20) {
+        description += `... and ${enhancedResult.measurements.length - 20} more dimensions\n`;
+      }
+      description += `\n`;
+    }
+    
+    if (enhancedResult.extractedElements && enhancedResult.extractedElements.length > 0) {
+      description += `BUILDING ELEMENTS:\n`;
+      const elementGroups: any = {};
+      enhancedResult.extractedElements.forEach((elem: any) => {
+        if (!elementGroups[elem.type]) elementGroups[elem.type] = 0;
+        elementGroups[elem.type] += elem.quantity;
+      });
+      
+      Object.entries(elementGroups).forEach(([type, count]) => {
+        description += `- ${type}: ${count}\n`;
+      });
+      description += `\n`;
+    }
+    
+    description += `\nRAW DRAWING TEXT:\n${drawingAnalysis.original_text || basicAnalysis.text || ''}`;
+    
+    return description;
   }
 
   private async parseExcelFromBuffer(buffer: Buffer): Promise<ParsedFileContent> {
