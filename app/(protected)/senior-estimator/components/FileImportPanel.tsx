@@ -10,7 +10,7 @@ interface ImportedFile {
   name: string
   size: number
   type: string
-  status: 'uploading' | 'processing' | 'ready' | 'error'
+  status: 'uploading' | 'uploaded' | 'processing' | 'ready' | 'error'
   uploadProgress?: number
   file: File
   error?: string
@@ -28,7 +28,7 @@ export function FileImportPanel() {
       name: file.name,
       size: file.size,
       type: file.type,
-      status: 'ready' as const,
+      status: 'uploaded' as const,
       uploadProgress: 100,
       file: file
     }))
@@ -217,7 +217,7 @@ export function FileImportPanel() {
         {files.length > 0 && (
           <button
             onClick={analyzeFiles}
-            disabled={isAnalyzing || files.every(f => f.status === 'ready')}
+            disabled={isAnalyzing || files.length === 0}
             className="mt-4 w-full bg-electric-magenta text-white rounded-lg px-4 py-2 font-medium hover:bg-electric-magenta/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isAnalyzing ? (
@@ -268,6 +268,9 @@ export function FileImportPanel() {
               <div className="flex-shrink-0">
                 {file.status === 'uploading' && (
                   <div className="text-xs text-gray-400">Uploading...</div>
+                )}
+                {file.status === 'uploaded' && (
+                  <div className="text-xs text-gray-400">Ready to analyze</div>
                 )}
                 {file.status === 'processing' && (
                   <div className="text-xs text-vibrant-cyan">Processing...</div>
