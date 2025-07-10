@@ -73,6 +73,7 @@ export function ChatInterface() {
 
     try {
       // Call the Senior Estimator API
+      console.log('Calling main Senior Estimator API...')
       let response = await fetch('/api/senior-estimator/chat', {
         method: 'POST',
         headers: {
@@ -86,9 +87,11 @@ export function ChatInterface() {
         }),
       })
 
+      console.log('Main API response status:', response.status)
+
       // If main endpoint fails, try demo endpoint
       if (!response.ok && response.status === 500) {
-        console.log('Main API failed, trying demo mode...')
+        console.log('Main API failed with 500, trying demo mode...')
         response = await fetch('/api/senior-estimator/chat-demo', {
           method: 'POST',
           headers: {
@@ -109,6 +112,13 @@ export function ChatInterface() {
 
       const data = await response.json()
       
+      console.log('API Response:', {
+        sessionId: data.sessionId,
+        analysisId: data.analysisId,
+        demoMode: data.demoMode,
+        itemsFound: data.result?.scope_analysis?.extractedItems?.length || 0
+      })
+      
       // Update session
       if (!session) {
         setSession({ id: data.sessionId, status: 'active' })
@@ -116,10 +126,13 @@ export function ChatInterface() {
       
       // Show demo mode warning if applicable
       if (data.demoMode) {
+        console.log('Running in DEMO MODE')
         addActivity({
           type: 'response',
           message: '⚠️ Running in demo mode - results not saved to database'
         })
+      } else {
+        console.log('Running with FULL DATABASE persistence')
       }
 
       // Process the estimation result
