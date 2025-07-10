@@ -7,11 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/Badge'
 
 export function LiveEstimatorView() {
-  const { jobDetails, scopeSummary, todoItems, toggleTodoItem } = useEstimator()
+  const { jobDetails, scopeSummary, todoItems, toggleTodoItem, hasAnalyzedFiles, sessionId } = useEstimator()
   const [activeTab, setActiveTab] = useState<'details' | 'scope' | 'todos'>('details')
 
   return (
     <div className="h-full flex flex-col bg-dark-elevated">
+      {/* File Analysis Status */}
+      {hasAnalyzedFiles && (
+        <div className="px-4 py-2 bg-success-green/10 border-b border-success-green/20">
+          <p className="text-xs text-success-green flex items-center gap-2">
+            <CheckSquare className="h-3 w-3" />
+            Files analyzed - Session: {sessionId?.slice(0, 8)}...
+          </p>
+        </div>
+      )}
+      
       {/* Tabs */}
       <div className="flex border-b border-gray-800">
         <button
@@ -177,14 +187,21 @@ export function LiveEstimatorView() {
                           <p className={`text-sm ${todo.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
                             {todo.task}
                           </p>
-                          {todo.priority && (
-                            <Badge
-                              variant={todo.priority === 'high' ? 'error' : todo.priority === 'medium' ? 'warning' : 'default'}
-                              className="mt-1"
-                            >
-                              {todo.priority}
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            {todo.priority && (
+                              <Badge
+                                variant={todo.priority === 'high' ? 'error' : todo.priority === 'medium' ? 'warning' : 'default'}
+                                className="text-xs"
+                              >
+                                {todo.priority}
+                              </Badge>
+                            )}
+                            {todo.task.includes('questions') && (
+                              <span className="text-xs text-gray-400">
+                                Click to view in chat
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

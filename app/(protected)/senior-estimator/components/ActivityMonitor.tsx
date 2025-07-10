@@ -5,7 +5,7 @@ import { Activity, FileText, MessageSquare, CheckCircle, AlertCircle, Clock } fr
 import { useEstimator } from '../context/EstimatorContext'
 
 export function ActivityMonitor() {
-  const { activities } = useEstimator()
+  const { activities, estimateItems, hasAnalyzedFiles } = useEstimator()
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -86,16 +86,16 @@ export function ActivityMonitor() {
             <p className="text-xs text-gray-400">Files</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-white">
-              {activities.filter(a => a.type === 'analysis').length}
+            <p className="text-2xl font-bold text-electric-magenta">
+              {estimateItems.length}
             </p>
-            <p className="text-xs text-gray-400">Analyses</p>
+            <p className="text-xs text-gray-400">Items</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-white">
-              {activities.filter(a => a.type === 'complete').length}
+            <p className="text-2xl font-bold text-success-green">
+              {hasAnalyzedFiles ? '✓' : '—'}
             </p>
-            <p className="text-xs text-gray-400">Complete</p>
+            <p className="text-xs text-gray-400">Analyzed</p>
           </div>
         </div>
       </div>
