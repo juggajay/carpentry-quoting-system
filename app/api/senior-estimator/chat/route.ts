@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
 
     // Check if this is a query about analyzed files
     if (hasAnalyzedFiles && sessionId) {
+      console.log('Checking for analyses with sessionId:', sessionId);
+      
       // Check for existing analyses in this session
       const existingAnalyses = await db.estimatorAnalysis.findMany({
         where: { sessionId },
@@ -61,10 +63,15 @@ export async function POST(request: NextRequest) {
         take: 1
       });
       
+      console.log('Found analyses:', existingAnalyses.length);
+      
       if (existingAnalyses.length > 0) {
         const latestAnalysis = existingAnalyses[0];
         const scopeAnalysis = latestAnalysis.scopeAnalysis as any;
         const quoteItems = latestAnalysis.quoteItems as any;
+        
+        console.log('Scope analysis items:', scopeAnalysis?.extractedItems?.length || 0);
+        console.log('Quote items:', quoteItems?.length || 0);
         
         // For queries about files, return the analysis summary
         if (message.toLowerCase().includes('file') || message.toLowerCase().includes('upload') || message.toLowerCase().includes('drawing')) {
@@ -98,6 +105,8 @@ export async function POST(request: NextRequest) {
             }
           });
         }
+      } else {
+        console.log('No analyses found for session:', sessionId);
       }
     }
     

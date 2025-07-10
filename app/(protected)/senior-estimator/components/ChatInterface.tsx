@@ -148,7 +148,7 @@ export function ChatInterface() {
         
         addActivity({
           type: 'response',
-          message: `Intent: ${data.result.intent} (${Math.round(data.result.confidence * 100)}% confidence)`
+          message: `Intent: ${data.result.intent}${data.result.hasAnalysis ? ' (found existing analysis)' : ''}`
         })
         
         return
