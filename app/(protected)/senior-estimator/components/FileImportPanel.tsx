@@ -5,6 +5,7 @@ import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Link } from 'lu
 import { useDropzone } from 'react-dropzone'
 import { useEstimator } from '../context/EstimatorContext'
 import { LinkImportDialog } from './LinkImportDialog'
+import { BlobFileUpload } from './BlobFileUpload'
 
 interface ImportedFile {
   id: string
@@ -80,9 +81,45 @@ export function FileImportPanel() {
     setIsAnalyzing(true)
     
     try {
-      // Create FormData with all files
+      // Separate regular files from cloud/URL files
+      const regularFiles = files.filter(f => f.type !== 'cloud' && f.type !== 'url')
+      const cloudFiles = files.filter(f => f.type === 'cloud' || f.type === 'url')
+      
+      // If we have cloud files, use JSON format instead
+      if (cloudFiles.length > 0) {
+        // Use JSON format for cloud URLs
+        const fileUrls = cloudFiles.map(f => ({
+          url: (f.file as any).url,
+          name: f.name,
+          type: f.type,
+          size: f.size
+        }))
+        
+        const response = await fetch('/api/senior-estimator/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fileUrls,
+            sessionId,
+            projectType: projectConfig.projectType,
+            location: projectConfig.location
+          })
+        })
+        
+        if (!response.ok) {
+          throw new Error(`Analysis failed: ${response.status}`)
+        }
+        
+        const data = await response.json()
+        processAnalysisResult(data)
+        return
+      }
+      
+      // Otherwise use FormData for regular files
       const formData = new FormData()
-      files.forEach(file => {
+      regularFiles.forEach(file => {
         formData.append('files', file.file)
       })
       
@@ -111,58 +148,7 @@ export function FileImportPanel() {
       }
       
       const data = await response.json()
-      
-      // Update session ID
-      if (!sessionId && data.sessionId) {
-        setSessionId(data.sessionId)
-      }
-      
-      // Process the estimation result
-      const result = data.result
-      
-      // Update job details
-      if (result.scope_analysis.extractedItems.length > 0) {
-        updateJobDetails({
-          projectType: projectConfig.projectType,
-          location: projectConfig.location,
-          estimatedCost: 0,
-          estimatedDays: parseInt(result.estimated_duration)
-        })
-      }
-      
-      // Add extracted items to estimates
-      result.quote_items.forEach((item: any) => {
-        addEstimateItem({
-          id: item.id,
-          category: item.category || 'General',
-          description: item.description,
-          quantity: item.quantity,
-          unit: item.unit,
-          rate: item.unitPrice || 0,
-          total: item.totalPrice || 0,
-          confidence: item.confidence.score >= 85 ? 'high' : 
-                      item.confidence.score >= 70 ? 'medium' : 'low'
-        })
-      })
-      
-      // Update scope summary
-      const scopeItems = result.scope_analysis.extractedItems.map((item: any) => 
-        `${item.description} (${item.confidence.score}% confidence)`
-      )
-      updateScopeSummary(scopeItems)
-      
-      // Add next steps as todos
-      result.next_steps.forEach((step: string) => {
-        addTodoItem(step, 'medium')
-      })
-      
-      // Mark files as ready
-      setFiles(prev => prev.map(f => ({ ...f, status: 'ready' })))
-      
-      addActivity({
-        type: 'complete',
-        message: `Analysis complete: ${result.scope_analysis.extractedItems.length} items found`
-      })
+      processAnalysisResult(data)
       
     } catch (error) {
       console.error('Error analyzing files:', error)
@@ -194,6 +180,60 @@ export function FileImportPanel() {
 
   const removeFile = (fileId: string) => {
     setFiles(prev => prev.filter(f => f.id !== fileId))
+  }
+  
+  const processAnalysisResult = (data: any) => {
+    // Update session ID
+    if (!sessionId && data.sessionId) {
+      setSessionId(data.sessionId)
+    }
+    
+    // Process the estimation result
+    const result = data.result
+    
+    // Update job details
+    if (result.scope_analysis.extractedItems.length > 0) {
+      updateJobDetails({
+        projectType: projectConfig.projectType,
+        location: projectConfig.location,
+        estimatedCost: 0,
+        estimatedDays: parseInt(result.estimated_duration)
+      })
+    }
+    
+    // Add extracted items to estimates
+    result.quote_items.forEach((item: any) => {
+      addEstimateItem({
+        id: item.id,
+        category: item.category || 'General',
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        rate: item.unitPrice || 0,
+        total: item.totalPrice || 0,
+        confidence: item.confidence.score >= 85 ? 'high' : 
+                    item.confidence.score >= 70 ? 'medium' : 'low'
+      })
+    })
+    
+    // Update scope summary
+    const scopeItems = result.scope_analysis.extractedItems.map((item: any) => 
+      `${item.description} (${item.confidence.score}% confidence)`
+    )
+    updateScopeSummary(scopeItems)
+    
+    // Add next steps as todos
+    result.next_steps.forEach((step: string) => {
+      addTodoItem(step, 'medium')
+    })
+    
+    // Mark files as ready
+    setFiles(prev => prev.map(f => ({ ...f, status: 'ready' })))
+    
+    addActivity({
+      type: 'complete',
+      message: `Analysis complete: ${result.scope_analysis.extractedItems.length} items found`
+    })
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -243,13 +283,34 @@ export function FileImportPanel() {
           </p>
         </div>
 
+        {/* Blob Upload for large files */}
+        <BlobFileUpload 
+          onFileUploaded={(url, fileName, fileSize) => {
+            // Add as a cloud file
+            const cloudFile: ImportedFile = {
+              id: Math.random().toString(36).substr(2, 9),
+              name: fileName,
+              size: fileSize,
+              type: 'cloud',
+              status: 'uploaded',
+              uploadProgress: 100,
+              file: new File([], fileName) // Placeholder
+            }
+            
+            // Store the URL
+            (cloudFile.file as any).url = url;
+            
+            setFiles(prev => [...prev, cloudFile]);
+          }}
+        />
+
         {/* Import from URL button */}
         <button
           onClick={() => setShowLinkDialog(true)}
-          className="mt-4 w-full bg-gray-700 text-gray-200 rounded-lg px-4 py-2 font-medium hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+          className="mt-2 w-full bg-gray-700 text-gray-200 rounded-lg px-4 py-2 font-medium hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
         >
           <Link className="h-4 w-4" />
-          Import from URL (for files &gt; 4.5MB)
+          Import from External URL
         </button>
 
         {/* Analyze Button */}

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       location = formData.get('location') as string || 'NSW, Australia';
     }
 
-    if (files.length === 0 && !scopeText) {
+    if (files.length === 0 && fileUrls.length === 0 && !scopeText) {
       return NextResponse.json({ error: 'No files or scope text provided' }, { status: 400 });
     }
 
@@ -104,6 +104,7 @@ export async function POST(request: NextRequest) {
     const parsedFiles: ParsedFileContent[] = [];
     const failedFiles: { name: string; error: string }[] = [];
     
+    // Process regular files
     for (const file of files) {
       try {
         console.log(`Processing file: ${file.name} (${file.size} bytes)`);
@@ -124,6 +125,36 @@ export async function POST(request: NextRequest) {
         console.error(`Error parsing file ${file.name}:`, error);
         failedFiles.push({
           name: file.name,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+    
+    // Process URL files (from Vercel Blob or external URLs)
+    for (const fileUrl of fileUrls) {
+      try {
+        console.log(`Processing URL file: ${fileUrl.name} from ${fileUrl.url}`);
+        
+        // Fetch the file from URL
+        const response = await fetch(fileUrl.url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.status}`);
+        }
+        
+        const buffer = Buffer.from(await response.arrayBuffer());
+        
+        // Parse the file
+        const parsed = await fileParser.parseFile(buffer, fileUrl.name, fileUrl.type || 'application/pdf');
+        if (parsed) {
+          parsedFiles.push(parsed);
+          console.log(`Successfully parsed ${fileUrl.name}: ${parsed.text.length} characters extracted`);
+        } else {
+          throw new Error('Failed to parse file');
+        }
+      } catch (error) {
+        console.error(`Error parsing URL file ${fileUrl.name}:`, error);
+        failedFiles.push({
+          name: fileUrl.name,
           error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
