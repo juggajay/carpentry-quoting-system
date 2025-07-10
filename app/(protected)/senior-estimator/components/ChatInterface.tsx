@@ -50,6 +50,7 @@ export function ChatInterface() {
   }, [messages])
 
   const handleSend = async () => {
+    console.log('handleSend called with input:', input)
     if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
@@ -242,6 +243,12 @@ export function ChatInterface() {
       <div className="p-4 border-b border-gray-800">
         <h2 className="text-lg font-semibold text-white">Chat Assistant</h2>
         <p className="text-sm text-gray-400 mt-1">Ask questions about your project</p>
+        <button 
+          onClick={() => console.log('Test button clicked!')}
+          className="mt-2 text-xs bg-blue-500 text-white px-2 py-1 rounded"
+        >
+          Test Console
+        </button>
       </div>
 
       {/* Messages */}
