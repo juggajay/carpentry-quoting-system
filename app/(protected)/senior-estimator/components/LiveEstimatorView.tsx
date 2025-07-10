@@ -1,14 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Building2, FileText, CheckSquare, Square, Hash, Calendar, MapPin, Users } from 'lucide-react'
+import { Building2, FileText, CheckSquare, Square, Hash, Calendar, MapPin, Users, HelpCircle } from 'lucide-react'
 import { useEstimator } from '../context/EstimatorContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { QuestionsDialog } from './QuestionsDialog'
 
 export function LiveEstimatorView() {
   const { jobDetails, scopeSummary, todoItems, toggleTodoItem, hasAnalyzedFiles, sessionId } = useEstimator()
   const [activeTab, setActiveTab] = useState<'details' | 'scope' | 'todos'>('details')
+  const [showQuestions, setShowQuestions] = useState(false)
 
   return (
     <div className="h-full flex flex-col bg-dark-elevated">
@@ -171,10 +173,20 @@ export function LiveEstimatorView() {
                     {todoItems.map(todo => (
                       <div
                         key={todo.id}
-                        className="flex items-start gap-3 p-3 rounded-lg bg-dark-surface border border-gray-800 hover:border-gray-700 transition-colors"
+                        className={`flex items-start gap-3 p-3 rounded-lg bg-dark-surface border border-gray-800 transition-colors ${
+                          todo.task.includes('questions') ? 'hover:border-electric-magenta cursor-pointer' : 'hover:border-gray-700'
+                        }`}
+                        onClick={() => {
+                          if (todo.task.includes('questions')) {
+                            setShowQuestions(true)
+                          }
+                        }}
                       >
                         <button
-                          onClick={() => toggleTodoItem(todo.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleTodoItem(todo.id)
+                          }}
                           className="mt-0.5"
                         >
                           {todo.completed ? (
@@ -197,8 +209,9 @@ export function LiveEstimatorView() {
                               </Badge>
                             )}
                             {todo.task.includes('questions') && (
-                              <span className="text-xs text-gray-400">
-                                Click to view in chat
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <HelpCircle className="h-3 w-3" />
+                                Click to answer
                               </span>
                             )}
                           </div>
@@ -212,6 +225,15 @@ export function LiveEstimatorView() {
           </div>
         )}
       </div>
+      
+      {/* Questions Dialog */}
+      {sessionId && (
+        <QuestionsDialog
+          isOpen={showQuestions}
+          onClose={() => setShowQuestions(false)}
+          sessionId={sessionId}
+        />
+      )}
     </div>
   )
 }

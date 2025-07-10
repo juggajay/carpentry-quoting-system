@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Send, Paperclip, Bot, User, AlertCircle } from 'lucide-react'
 import { useEstimator } from '../context/EstimatorContext'
+import { FileAnalysisSummary } from './FileAnalysisSummary'
 
 interface Message {
   id: string
@@ -261,6 +262,11 @@ export function ChatInterface() {
       <div className="p-4 border-b border-gray-800">
         <h2 className="text-lg font-semibold text-white">Chat Assistant</h2>
         <p className="text-sm text-gray-400 mt-1">Ask questions about your project</p>
+      </div>
+
+      {/* File Analysis Summary */}
+      <div className="px-4 pt-4">
+        <FileAnalysisSummary />
       </div>
 
       {/* Messages */}
