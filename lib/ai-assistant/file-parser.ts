@@ -23,7 +23,7 @@ class FileParser {
   /**
    * Parse a file from a buffer
    */
-  async parseFile(buffer: Buffer, fileName: string, mimeType: string): Promise<ParsedFileContent | null> {
+  async parseFile(buffer: Buffer, fileName: string, _mimeType: string): Promise<ParsedFileContent | null> {
     const ext = path.extname(fileName).toLowerCase();
     
     try {
@@ -186,7 +186,7 @@ class FileParser {
       description += `\n`;
     }
     
-    description += `\nRAW DRAWING TEXT:\n${drawingAnalysis.original_text || basicAnalysis.text || ''}`;
+    description += `\nRAW DRAWING TEXT:\n${basicAnalysis.original_text || ''}`;
     
     return description;
   }

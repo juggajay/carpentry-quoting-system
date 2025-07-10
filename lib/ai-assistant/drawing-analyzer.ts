@@ -1,6 +1,4 @@
 import { OpenAI } from 'openai';
-import * as pdfjs from 'pdfjs-dist';
-import { createCanvas } from 'canvas';
 
 export interface DrawingAnalysisResult {
   pageAnalyses: PageAnalysis[];
@@ -54,10 +52,10 @@ export class DrawingAnalyzer {
     });
   }
 
-  async analyzeDrawing(pdfBuffer: Buffer): Promise<DrawingAnalysisResult> {
+  async analyzeDrawing(_pdfBuffer: Buffer): Promise<DrawingAnalysisResult> {
     try {
       // Convert PDF pages to images
-      const pageImages = await this.extractImagesFromPDF(pdfBuffer);
+      const pageImages = await this.extractImagesFromPDF(_pdfBuffer);
       
       // Analyze each page
       const pageAnalyses: PageAnalysis[] = [];

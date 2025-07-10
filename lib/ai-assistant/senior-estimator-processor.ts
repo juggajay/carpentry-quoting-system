@@ -306,10 +306,12 @@ export class SeniorEstimatorProcessor {
         // Extract dimensions from enhanced analysis
         if (file.metadata.measurements) {
           analysis.dimensions_extracted = file.metadata.measurements.map((m: any) => ({
+            id: crypto.randomUUID(),
             value: m.value,
             unit: m.unit,
             description: m.description,
-            confidence: 0.7
+            location: m.description,
+            confidence: getConfidenceLevel(70, ['Extracted from drawing'])
           }));
         }
         
@@ -339,7 +341,7 @@ export class SeniorEstimatorProcessor {
         }
         
         // Add room information to notes
-        if (file.metadata.rooms && file.metadata.rooms.length > 0) {
+        if (file.metadata.rooms && file.metadata.rooms.length > 0 && analysis.notes) {
           analysis.notes.push(`Rooms found: ${file.metadata.rooms.map((r: any) => r.name).join(', ')}`);
         }
         
@@ -389,7 +391,7 @@ export class SeniorEstimatorProcessor {
     return false;
   }
   
-  private inferConstructionMethod(scopeItem: ScopeItem, elements: BuildingElement[]): 'timber_frame' | 'steel_frame' | 'concrete' | 'masonry' {
+  private inferConstructionMethod(scopeItem: ScopeItem, _elements: BuildingElement[]): 'timber_frame' | 'steel_frame' | 'concrete' | 'masonry' {
     const description = scopeItem.description.toLowerCase();
     
     if (description.includes('timber') || description.includes('wood')) return 'timber_frame';
