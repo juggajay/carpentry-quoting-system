@@ -37,6 +37,11 @@ interface TodoItem {
   priority?: 'high' | 'medium' | 'low'
 }
 
+interface ProjectConfig {
+  projectType?: 'residential' | 'commercial' | 'industrial'
+  location?: string
+}
+
 interface EstimatorContextType {
   activities: Activity[]
   addActivity: (activity: Omit<Activity, 'id' | 'timestamp'>) => void
@@ -52,6 +57,8 @@ interface EstimatorContextType {
   addTodoItem: (task: string, priority?: 'high' | 'medium' | 'low') => void
   toggleTodoItem: (id: string) => void
   removeTodoItem: (id: string) => void
+  projectConfig: ProjectConfig
+  updateProjectConfig: (config: ProjectConfig) => void
 }
 
 const EstimatorContext = createContext<EstimatorContextType | undefined>(undefined)
@@ -62,6 +69,7 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
   const [jobDetails, setJobDetails] = useState<JobDetails>({})
   const [scopeSummary, setScopeSummary] = useState<string[]>([])
   const [todoItems, setTodoItems] = useState<TodoItem[]>([])
+  const [projectConfig, setProjectConfig] = useState<ProjectConfig>({})
 
   const addActivity = (activity: Omit<Activity, 'id' | 'timestamp'>) => {
     const newActivity: Activity = {
@@ -124,6 +132,14 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
     setTodoItems(prev => prev.filter(item => item.id !== id))
   }
 
+  const updateProjectConfig = (config: ProjectConfig) => {
+    setProjectConfig(config)
+    addActivity({
+      type: 'analysis',
+      message: `Updated project configuration: ${config.projectType} in ${config.location}`
+    })
+  }
+
   return (
     <EstimatorContext.Provider 
       value={{
@@ -140,7 +156,9 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
         todoItems,
         addTodoItem,
         toggleTodoItem,
-        removeTodoItem
+        removeTodoItem,
+        projectConfig,
+        updateProjectConfig
       }}
     >
       {children}

@@ -7,6 +7,7 @@ import { ActivityMonitor } from './components/ActivityMonitor'
 import { LiveEstimatorView } from './components/LiveEstimatorView'
 import { EstimatorHeader } from './components/EstimatorHeader'
 import { EstimatorProvider } from './context/EstimatorContext'
+import { ProjectConfiguration } from './components/ProjectConfiguration'
 
 export default function SeniorEstimatorPage() {
   const [projectName, setProjectName] = useState('New Project')
@@ -24,13 +25,18 @@ export default function SeniorEstimatorPage() {
         <div className="flex-1 flex overflow-hidden">
           {/* Left Column - 30% */}
           <div className="w-[30%] flex flex-col border-r border-gray-800">
-            {/* File Import Panel - Top */}
-            <div className="h-[55%] overflow-hidden">
+            {/* Project Configuration - Top */}
+            <div className="p-4 border-b border-gray-800">
+              <ProjectConfiguration />
+            </div>
+            
+            {/* File Import Panel - Middle */}
+            <div className="flex-1 overflow-hidden">
               <FileImportPanel />
             </div>
             
             {/* Activity Monitor - Bottom */}
-            <div className="h-[45%] border-t border-gray-800">
+            <div className="h-[35%] border-t border-gray-800">
               <ActivityMonitor />
             </div>
           </div>

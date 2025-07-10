@@ -20,7 +20,7 @@ export function FileImportPanel() {
   const [files, setFiles] = useState<ImportedFile[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
-  const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem } = useEstimator()
+  const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -47,6 +47,15 @@ export function FileImportPanel() {
   const analyzeFiles = async () => {
     if (files.length === 0 || isAnalyzing) return
 
+    // Check if project is configured
+    if (!projectConfig.projectType || !projectConfig.location) {
+      addActivity({
+        type: 'error',
+        message: 'Please configure your project type and location first'
+      })
+      return
+    }
+
     setIsAnalyzing(true)
     
     try {
@@ -60,8 +69,8 @@ export function FileImportPanel() {
         formData.append('sessionId', sessionId)
       }
       
-      formData.append('projectType', 'residential')
-      formData.append('location', 'NSW, Australia')
+      formData.append('projectType', projectConfig.projectType)
+      formData.append('location', projectConfig.location)
       
       // Mark all files as processing
       setFiles(prev => prev.map(f => ({ ...f, status: 'processing' })))
@@ -93,8 +102,8 @@ export function FileImportPanel() {
       // Update job details
       if (result.scope_analysis.extractedItems.length > 0) {
         updateJobDetails({
-          projectType: 'residential',
-          location: 'NSW, Australia',
+          projectType: projectConfig.projectType,
+          location: projectConfig.location,
           estimatedCost: 0,
           estimatedDays: parseInt(result.estimated_duration)
         })

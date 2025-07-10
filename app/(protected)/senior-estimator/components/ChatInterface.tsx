@@ -19,14 +19,7 @@ interface EstimatorSession {
 }
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: 'Hello! I\'m your Senior Estimator. Upload your project files and I\'ll help you analyze scope, quantities, and generate accurate estimates.',
-      sender: 'assistant',
-      timestamp: new Date()
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -38,7 +31,8 @@ export function ChatInterface() {
     addEstimateItem, 
     updateJobDetails,
     updateScopeSummary,
-    addTodoItem
+    addTodoItem,
+    projectConfig
   } = useEstimator()
 
   const scrollToBottom = () => {
@@ -51,6 +45,12 @@ export function ChatInterface() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
+
+    // Check if project is configured
+    if (!projectConfig.projectType || !projectConfig.location) {
+      setError('Please configure your project type and location first')
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -82,8 +82,8 @@ export function ChatInterface() {
         body: JSON.stringify({
           message: input,
           sessionId: session?.id,
-          projectType: 'residential', // This should be configurable
-          location: 'NSW, Australia' // This should be configurable
+          projectType: projectConfig.projectType,
+          location: projectConfig.location
         }),
       })
 
@@ -100,8 +100,8 @@ export function ChatInterface() {
           body: JSON.stringify({
             message: input,
             sessionId: session?.id,
-            projectType: 'residential',
-            location: 'NSW, Australia'
+            projectType: projectConfig.projectType,
+            location: projectConfig.location
           }),
         })
       }
@@ -141,8 +141,8 @@ export function ChatInterface() {
       // Update job details if extracted
       if (result.scope_analysis.extractedItems.length > 0) {
         updateJobDetails({
-          projectType: 'residential',
-          location: 'NSW, Australia',
+          projectType: projectConfig.projectType,
+          location: projectConfig.location,
           estimatedCost: 0, // Will be calculated after pricing
           estimatedDays: parseInt(result.estimated_duration)
         })
@@ -246,7 +246,18 @@ export function ChatInterface() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map(message => (
+        {messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="text-center max-w-md">
+              <Bot className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-300 mb-2">Start a conversation</h3>
+              <p className="text-sm text-gray-500">
+                Type your project scope or upload drawings to begin analysis
+              </p>
+            </div>
+          </div>
+        ) : (
+          messages.map(message => (
           <div
             key={message.id}
             className={`flex gap-3 ${
@@ -282,7 +293,8 @@ export function ChatInterface() {
               </div>
             )}
           </div>
-        ))}
+          ))
+        )}
 
         {isTyping && (
           <div className="flex gap-3">
