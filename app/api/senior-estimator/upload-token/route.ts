@@ -37,8 +37,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         },
         onUploadCompleted: async ({ blob, tokenPayload }) => {
           // Get the userId from the token payload
-          const { userId } = JSON.parse(tokenPayload);
-          console.log('Upload completed:', blob.pathname, 'for user:', userId);
+          if (tokenPayload) {
+            const { userId } = JSON.parse(tokenPayload);
+            console.log('Upload completed:', blob.pathname, 'for user:', userId);
+          }
         },
       });
 
