@@ -23,7 +23,7 @@ export function FileImportPanel() {
   const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const maxSize = 4.5 * 1024 * 1024; // 4.5MB limit for Vercel
+    const maxSize = 50 * 1024 * 1024; // 50MB limit for Vercel Pro
     const validFiles: typeof acceptedFiles = [];
     const oversizedFiles: string[] = [];
     
@@ -38,7 +38,7 @@ export function FileImportPanel() {
     if (oversizedFiles.length > 0) {
       addActivity({
         type: 'error',
-        message: `Files too large (max 4.5MB): ${oversizedFiles.join(', ')}`
+        message: `Files too large (max 50MB): ${oversizedFiles.join(', ')}`
       });
     }
     
@@ -168,7 +168,7 @@ export function FileImportPanel() {
       let errorMessage = 'Analysis failed'
       if (error instanceof Error) {
         if (error.message.includes('413')) {
-          errorMessage = 'File too large. Maximum size is 4.5MB per file due to platform limitations. Please compress your PDF or split it into smaller files.'
+          errorMessage = 'File too large. Maximum size is 50MB per file.'
         } else {
           errorMessage = error.message
         }
@@ -237,7 +237,7 @@ export function FileImportPanel() {
             }
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Supports PDF, Images, Excel, CSV • Max 4.5MB per file
+            Supports PDF, Images, Excel, CSV • Max 50MB per file
           </p>
         </div>
 

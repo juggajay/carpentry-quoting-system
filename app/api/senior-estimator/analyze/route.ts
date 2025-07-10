@@ -25,12 +25,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // For Vercel deployment, we need to handle large files differently
-    // The platform has a 4.5MB limit on free/hobby tier
+    // Vercel Pro supports up to 50MB
     const contentLength = request.headers.get('content-length');
-    if (contentLength && parseInt(contentLength) > 4.5 * 1024 * 1024) { // 4.5MB limit for Vercel
+    if (contentLength && parseInt(contentLength) > 50 * 1024 * 1024) { // 50MB limit for Vercel Pro
       return NextResponse.json(
-        { error: 'File size too large. Due to platform limitations, maximum file size is 4.5MB. Please compress your PDF or split it into smaller files.' },
+        { error: 'File size too large. Maximum file size is 50MB.' },
         { status: 413 }
       );
     }
@@ -46,11 +45,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No files or scope text provided' }, { status: 400 });
     }
 
-    // Check individual file sizes for Vercel limit
+    // Check individual file sizes for Vercel Pro limit
     for (const file of files) {
-      if (file.size > 4.5 * 1024 * 1024) { // 4.5MB per file for Vercel
+      if (file.size > 50 * 1024 * 1024) { // 50MB per file for Vercel Pro
         return NextResponse.json(
-          { error: `File "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Due to platform limitations, maximum file size is 4.5MB. Please compress your PDF or split it into smaller files.` },
+          { error: `File "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum file size is 50MB.` },
           { status: 413 }
         );
       }
