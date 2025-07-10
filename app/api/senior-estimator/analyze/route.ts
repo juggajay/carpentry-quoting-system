@@ -25,31 +25,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Vercel Pro supports up to 50MB
+    // Vercel has a hard limit of 4.5MB for request body, even on Pro plan
     const contentLength = request.headers.get('content-length');
-    if (contentLength && parseInt(contentLength) > 50 * 1024 * 1024) { // 50MB limit for Vercel Pro
+    if (contentLength && parseInt(contentLength) > 4.5 * 1024 * 1024) { // 4.5MB limit
       return NextResponse.json(
-        { error: 'File size too large. Maximum file size is 50MB.' },
+        { error: 'Request too large. Vercel has a 4.5MB limit for API requests. Please use one of these options:\n1. Compress your PDF (try smallpdf.com)\n2. Split into multiple smaller PDFs\n3. Convert to lower quality images\n4. Upload to a cloud service and share the link' },
         { status: 413 }
       );
     }
 
-    const formData = await request.formData();
-    const files = formData.getAll('files') as File[];
-    const sessionId = formData.get('sessionId') as string;
-    const scopeText = formData.get('scopeText') as string || '';
-    const projectType = formData.get('projectType') as string || 'residential';
-    const location = formData.get('location') as string || 'NSW, Australia';
+    // Try to parse as JSON first (for file URLs), fallback to FormData
+    let files: File[] = [];
+    let fileUrls: { url: string; name: string; type: string; size: number }[] = [];
+    let sessionId: string = '';
+    let scopeText: string = '';
+    let projectType: string = 'residential';
+    let location: string = 'NSW, Australia';
+
+    const contentType = request.headers.get('content-type');
+    
+    if (contentType?.includes('application/json')) {
+      // Handle JSON request with file URLs
+      const body = await request.json();
+      fileUrls = body.fileUrls || [];
+      sessionId = body.sessionId || '';
+      scopeText = body.scopeText || '';
+      projectType = body.projectType || 'residential';
+      location = body.location || 'NSW, Australia';
+    } else {
+      // Handle FormData request with actual files
+      const formData = await request.formData();
+      files = formData.getAll('files') as File[];
+      sessionId = formData.get('sessionId') as string || '';
+      scopeText = formData.get('scopeText') as string || '';
+      projectType = formData.get('projectType') as string || 'residential';
+      location = formData.get('location') as string || 'NSW, Australia';
+    }
 
     if (files.length === 0 && !scopeText) {
       return NextResponse.json({ error: 'No files or scope text provided' }, { status: 400 });
     }
 
-    // Check individual file sizes for Vercel Pro limit
+    // Check individual file sizes for Vercel limit
     for (const file of files) {
-      if (file.size > 50 * 1024 * 1024) { // 50MB per file for Vercel Pro
+      if (file.size > 4.5 * 1024 * 1024) { // 4.5MB limit
         return NextResponse.json(
-          { error: `File "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum file size is 50MB.` },
+          { error: `File "${file.name}" is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Vercel has a 4.5MB limit for API requests.\n\nOptions:\n1. Compress your PDF (try smallpdf.com)\n2. Split into multiple smaller PDFs\n3. Convert to lower quality images\n4. Upload to Google Drive/Dropbox and share the link` },
           { status: 413 }
         );
       }

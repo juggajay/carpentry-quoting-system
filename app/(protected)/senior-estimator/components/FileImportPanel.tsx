@@ -1,9 +1,10 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, X, CheckCircle, AlertCircle, Loader2, Link } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import { useEstimator } from '../context/EstimatorContext'
+import { LinkImportDialog } from './LinkImportDialog'
 
 interface ImportedFile {
   id: string
@@ -20,10 +21,11 @@ export function FileImportPanel() {
   const [files, setFiles] = useState<ImportedFile[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [showLinkDialog, setShowLinkDialog] = useState(false)
   const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const maxSize = 50 * 1024 * 1024; // 50MB limit for Vercel Pro
+    const maxSize = 4.5 * 1024 * 1024; // 4.5MB hard limit by Vercel
     const validFiles: typeof acceptedFiles = [];
     const oversizedFiles: string[] = [];
     
@@ -38,7 +40,7 @@ export function FileImportPanel() {
     if (oversizedFiles.length > 0) {
       addActivity({
         type: 'error',
-        message: `Files too large (max 50MB): ${oversizedFiles.join(', ')}`
+        message: `Files too large: ${oversizedFiles.join(', ')}\n\nVercel has a 4.5MB limit. Please:\n• Compress PDFs at smallpdf.com\n• Split large files\n• Use Google Drive links instead`
       });
     }
     
@@ -168,7 +170,7 @@ export function FileImportPanel() {
       let errorMessage = 'Analysis failed'
       if (error instanceof Error) {
         if (error.message.includes('413')) {
-          errorMessage = 'File too large. Maximum size is 50MB per file.'
+          errorMessage = 'File too large. Vercel has a 4.5MB limit. Try compressing at smallpdf.com or use Google Drive links.'
         } else {
           errorMessage = error.message
         }
@@ -237,9 +239,18 @@ export function FileImportPanel() {
             }
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Supports PDF, Images, Excel, CSV • Max 50MB per file
+            Supports PDF, Images, Excel, CSV • Max 4.5MB (Vercel limit)
           </p>
         </div>
+
+        {/* Import from URL button */}
+        <button
+          onClick={() => setShowLinkDialog(true)}
+          className="mt-4 w-full bg-gray-700 text-gray-200 rounded-lg px-4 py-2 font-medium hover:bg-gray-600 transition-colors flex items-center justify-center gap-2"
+        >
+          <Link className="h-4 w-4" />
+          Import from URL (for files &gt; 4.5MB)
+        </button>
 
         {/* Analyze Button */}
         {files.length > 0 && (
@@ -322,6 +333,33 @@ export function FileImportPanel() {
           ))}
         </div>
       </div>
+      
+      {/* Link Import Dialog */}
+      <LinkImportDialog
+        isOpen={showLinkDialog}
+        onClose={() => setShowLinkDialog(false)}
+        onImport={(url, fileName) => {
+          // Add the URL as a "file" to be analyzed
+          const linkFile: ImportedFile = {
+            id: Math.random().toString(36).substr(2, 9),
+            name: fileName,
+            size: 0, // Unknown size for URLs
+            type: 'url',
+            status: 'uploaded',
+            uploadProgress: 100,
+            file: new File([], fileName) // Placeholder file
+          }
+          
+          setFiles(prev => [...prev, linkFile]);
+          addActivity({
+            type: 'file',
+            message: `Added link: ${fileName}`
+          });
+          
+          // Store the URL in a way we can access it later
+          (linkFile.file as any).url = url
+        }}
+      />
     </div>
   )
 }
