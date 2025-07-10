@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { message, sessionId, projectFiles, projectType, location } = body;
+    const { message, sessionId, projectFiles, projectType, location, hasAnalyzedFiles } = body;
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
@@ -52,6 +52,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Check if this is a query about analyzed files
+    if (hasAnalyzedFiles && sessionId) {
+      // Check for existing analyses in this session
+      const existingAnalyses = await db.estimatorAnalysis.findMany({
+        where: { sessionId },
+        orderBy: { createdAt: 'desc' },
+        take: 1
+      });
+      
+      if (existingAnalyses.length > 0) {
+        const latestAnalysis = existingAnalyses[0];
+        const scopeAnalysis = latestAnalysis.scopeAnalysis as any;
+        const quoteItems = latestAnalysis.quoteItems as any;
+        
+        // For queries about files, return the analysis summary
+        if (message.toLowerCase().includes('file') || message.toLowerCase().includes('upload') || message.toLowerCase().includes('drawing')) {
+          const itemCount = scopeAnalysis?.extractedItems?.length || 0;
+          const quoteCount = quoteItems?.length || 0;
+          
+          let response = `I've analyzed your uploaded files and found:\n\n`;
+          response += `📋 **${itemCount} scope items** extracted\n`;
+          response += `💰 **${quoteCount} quote items** generated\n\n`;
+          
+          if (itemCount > 0) {
+            response += `**Key items found:**\n`;
+            scopeAnalysis.extractedItems.slice(0, 5).forEach((item: any) => {
+              response += `• ${item.description}\n`;
+            });
+            if (itemCount > 5) {
+              response += `• ... and ${itemCount - 5} more items\n`;
+            }
+          }
+          
+          response += `\n✅ The analysis is complete. You can see all details in the Estimates panel on the right.`;
+          
+          return NextResponse.json({
+            sessionId,
+            result: {
+              intent: 'file_query',
+              message: response,
+              confidence: 100,
+              hasAnalysis: true,
+              analysisId: latestAnalysis.id
+            }
+          });
+        }
+      }
+    }
+    
     // Detect intent first
     const intentResult = intentDetector.detectIntent(message);
     
@@ -61,7 +110,11 @@ export async function POST(request: NextRequest) {
       
       switch (intentResult.intent) {
         case 'file_query':
-          responseMessage = "I can help you analyze architectural drawings and construction documents. Please upload your files using the File Import panel on the left, and I'll extract scope items, measurements, and quantities from them.";
+          if (hasAnalyzedFiles) {
+            responseMessage = "I see you have files uploaded. Let me check the analysis results. You can view the extracted items in the Estimates panel on the right.";
+          } else {
+            responseMessage = "I can help you analyze architectural drawings and construction documents. Please upload your files using the File Import panel on the left, and I'll extract scope items, measurements, and quantities from them.";
+          }
           break;
         case 'greeting':
           responseMessage = "Hello! I'm your Senior Estimator assistant. I can help you analyze construction scopes, extract quantities from drawings, and generate accurate estimates. How can I help you today?";

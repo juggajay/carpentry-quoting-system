@@ -21,9 +21,8 @@ interface ImportedFile {
 export function FileImportPanel() {
   const [files, setFiles] = useState<ImportedFile[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
-  const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig } = useEstimator()
+  const { addActivity, addEstimateItem, updateJobDetails, updateScopeSummary, addTodoItem, projectConfig, sessionId, setSessionId, setHasAnalyzedFiles } = useEstimator()
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const maxSize = 4.5 * 1024 * 1024; // 4.5MB hard limit by Vercel
@@ -187,6 +186,9 @@ export function FileImportPanel() {
     if (!sessionId && data.sessionId) {
       setSessionId(data.sessionId)
     }
+    
+    // Mark that we have analyzed files
+    setHasAnalyzedFiles(true)
     
     // Process the estimation result
     const result = data.result

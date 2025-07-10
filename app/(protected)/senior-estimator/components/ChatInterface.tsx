@@ -13,10 +13,6 @@ interface Message {
   analysisResult?: any
 }
 
-interface EstimatorSession {
-  id: string
-  status: string
-}
 
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -24,7 +20,6 @@ export function ChatInterface() {
   const [isTyping, setIsTyping] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [session, setSession] = useState<EstimatorSession | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { 
     addActivity, 
@@ -32,7 +27,9 @@ export function ChatInterface() {
     updateJobDetails,
     updateScopeSummary,
     addTodoItem,
-    projectConfig
+    projectConfig,
+    sessionId,
+    hasAnalyzedFiles
   } = useEstimator()
 
   const scrollToBottom = () => {
@@ -81,9 +78,10 @@ export function ChatInterface() {
         },
         body: JSON.stringify({
           message: input,
-          sessionId: session?.id,
+          sessionId: sessionId,
           projectType: projectConfig.projectType,
-          location: projectConfig.location
+          location: projectConfig.location,
+          hasAnalyzedFiles: hasAnalyzedFiles
         }),
       })
 
@@ -99,9 +97,10 @@ export function ChatInterface() {
           },
           body: JSON.stringify({
             message: input,
-            sessionId: session?.id,
+            sessionId: sessionId,
             projectType: projectConfig.projectType,
-            location: projectConfig.location
+            location: projectConfig.location,
+            hasAnalyzedFiles: hasAnalyzedFiles
           }),
         })
       }
@@ -120,10 +119,7 @@ export function ChatInterface() {
         itemsFound: data.result?.scope_analysis?.extractedItems?.length || 0
       })
       
-      // Update session
-      if (!session) {
-        setSession({ id: data.sessionId, status: 'active' })
-      }
+      // Session is now handled in context
       
       // Show demo mode warning if applicable
       if (data.demoMode) {

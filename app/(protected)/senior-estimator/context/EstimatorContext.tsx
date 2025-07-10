@@ -59,6 +59,10 @@ interface EstimatorContextType {
   removeTodoItem: (id: string) => void
   projectConfig: ProjectConfig
   updateProjectConfig: (config: ProjectConfig) => void
+  sessionId: string | null
+  setSessionId: (id: string) => void
+  hasAnalyzedFiles: boolean
+  setHasAnalyzedFiles: (value: boolean) => void
 }
 
 const EstimatorContext = createContext<EstimatorContextType | undefined>(undefined)
@@ -70,6 +74,8 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
   const [scopeSummary, setScopeSummary] = useState<string[]>([])
   const [todoItems, setTodoItems] = useState<TodoItem[]>([])
   const [projectConfig, setProjectConfig] = useState<ProjectConfig>({})
+  const [sessionId, setSessionIdState] = useState<string | null>(null)
+  const [hasAnalyzedFiles, setHasAnalyzedFiles] = useState(false)
 
   const addActivity = (activity: Omit<Activity, 'id' | 'timestamp'>) => {
     const newActivity: Activity = {
@@ -158,7 +164,11 @@ export function EstimatorProvider({ children }: { children: ReactNode }) {
         toggleTodoItem,
         removeTodoItem,
         projectConfig,
-        updateProjectConfig
+        updateProjectConfig,
+        sessionId,
+        setSessionId: setSessionIdState,
+        hasAnalyzedFiles,
+        setHasAnalyzedFiles
       }}
     >
       {children}
