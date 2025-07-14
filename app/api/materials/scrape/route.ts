@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
 
       // Mark products with their status and ensure SKU and ID exist
       const productsWithStatus = valid.map(product => {
-        let sku = product.sku || generateMaterialSKU(product.name, supplier);
+        const sku = product.sku || generateMaterialSKU(product.name, supplier);
         
         // Check if this exact SKU exists for this user
         const existsForUser = existingSkus.has(sku);
