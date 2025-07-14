@@ -35,6 +35,14 @@ export async function POST(req: NextRequest) {
   }
   
   let body: any;
+  const results = {
+    imported: 0,
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+    details: [] as any[],
+  };
+  let invalid: any[] = [];
   
   try {
     // First, try to get the body to see what's being sent
@@ -151,7 +159,6 @@ export async function POST(req: NextRequest) {
     // For smaller imports, process synchronously as before
     // Validate all products first
     let validProducts: any[] = [];
-    let invalid: any[] = [];
     
     try {
       const validationResult = DataValidator.validateBatch(products);
@@ -192,13 +199,12 @@ export async function POST(req: NextRequest) {
       // Continue without progress tracking
     }
 
-    const results = {
-      imported: 0,
-      updated: 0,
-      skipped: 0,
-      errors: 0,
-      details: [] as any[],
-    };
+    // Reset results for this import
+    results.imported = 0;
+    results.updated = 0;
+    results.skipped = 0;
+    results.errors = 0;
+    results.details = [];
 
     // Process in batches to avoid overwhelming the database
     const batchSize = 50;
