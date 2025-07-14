@@ -45,7 +45,11 @@ interface ProgressUpdate {
   currentItem?: string;
 }
 
-export function MaterialImportButton() {
+interface MaterialImportButtonProps {
+  onImportComplete?: () => void;
+}
+
+export function MaterialImportButton({ onImportComplete }: MaterialImportButtonProps = {}) {
   const [scraperOpen, setScraperOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -139,6 +143,10 @@ export function MaterialImportButton() {
           // Handle async import
           setAsyncJobId(data.jobId);
           toast.info(data.message || `Processing ${selectedProducts.length} items in background`);
+          // For async, we might want to poll or wait, but for now just call the callback
+          if (onImportComplete) {
+            setTimeout(onImportComplete, 2000); // Give it 2 seconds then refresh
+          }
         } else {
           // Handle sync import
           toast.success(`Successfully imported ${data.results.imported} new and updated ${data.results.updated} existing materials`);
@@ -147,6 +155,10 @@ export function MaterialImportButton() {
           setImportProgress(null);
           // Refresh the page to show new materials
           router.refresh();
+          // Call the callback if provided
+          if (onImportComplete) {
+            onImportComplete();
+          }
         }
       } else {
         toast.error(data.error || 'Import failed');

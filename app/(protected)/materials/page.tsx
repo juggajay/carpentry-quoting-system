@@ -105,7 +105,7 @@ export default function MaterialsPage() {
               Export CSV
             </Button>
           )}
-          <MaterialImportButton />
+          <MaterialImportButton onImportComplete={loadMaterials} />
           <Button
             size="sm"
             onClick={handleAddMaterial}
@@ -132,7 +132,7 @@ export default function MaterialsPage() {
               Get started by importing materials from a supplier website or adding them manually.
             </p>
             <div className="flex justify-center gap-2">
-              <MaterialImportButton />
+              <MaterialImportButton onImportComplete={loadMaterials} />
               <Button onClick={handleAddMaterial}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Material

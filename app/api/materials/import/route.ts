@@ -311,7 +311,9 @@ export async function POST(req: NextRequest) {
       // Execute all operations in a transaction
       if (operations.length > 0) {
         try {
-          await prisma.$transaction(operations);
+          console.log(`[Import] Executing ${operations.length} operations in batch ${batchNumber}`);
+          const transactionResults = await prisma.$transaction(operations);
+          console.log(`[Import] Transaction completed, created/updated ${transactionResults.length} materials`);
         } catch (error) {
           console.error('Transaction error:', error);
           console.error('Failed batch sample:', JSON.stringify(batch[0], null, 2));
