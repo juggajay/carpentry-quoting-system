@@ -272,11 +272,6 @@ export async function POST(req: NextRequest) {
               type: 'update'
             });
             results.updated++;
-            try {
-              importProgress.recordUpdated(1, product.name);
-            } catch (e) {
-              console.error('Progress tracking error:', e);
-            }
           } else if (!existingId && options.importNew) {
             // Create new material
             let sku = product.sku || generateSKU(product.name, product.supplier);
@@ -325,11 +320,6 @@ export async function POST(req: NextRequest) {
               type: 'create'
             });
             results.imported++;
-            try {
-              importProgress.recordImported(1, product.name);
-            } catch (e) {
-              console.error('Progress tracking error:', e);
-            }
           } else {
             results.skipped++;
             try {
@@ -362,6 +352,13 @@ export async function POST(req: NextRequest) {
           
           try {
             await promise;
+            
+            // Record progress on success
+            if (type === 'create') {
+              importProgress.recordImported(1, product.name);
+            } else if (type === 'update') {
+              importProgress.recordUpdated(1, product.name);
+            }
           } catch (error: any) {
             console.error(`Operation ${i} failed:`, error);
             
@@ -408,6 +405,7 @@ export async function POST(req: NextRequest) {
               } else {
                 results.errors++;
                 if (type === 'create') results.imported--;
+                importProgress.recordError(1, product?.name || 'Unknown');
                 results.details.push({
                   product: product?.name || 'Unknown',
                   error: 'SKU already exists',
@@ -418,6 +416,7 @@ export async function POST(req: NextRequest) {
               results.errors++;
               if (type === 'create') results.imported--;
               if (type === 'update') results.updated--;
+              importProgress.recordError(1, product?.name || 'Unknown');
               
               results.details.push({
                 product: product?.name || 'Unknown',

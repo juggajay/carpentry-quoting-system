@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import * as React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -58,6 +59,7 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
   const [importProgress, setImportProgress] = useState<ProgressUpdate | null>(null);
   const [asyncJobId, setAsyncJobId] = useState<string | null>(null);
   const router = useRouter();
+  const pollIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleScrape = async (config: { source: string; category?: string; materials?: string[]; customUrl?: string; limit?: number }) => {
     setScraping(true);
@@ -123,6 +125,29 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
       });
     }
 
+    // Start polling for progress updates
+    if (selectedProducts.length <= 100) {
+      pollIntervalRef.current = setInterval(async () => {
+        try {
+          const progressRes = await fetch('/api/materials/import/progress');
+          if (progressRes.ok) {
+            const progress = await progressRes.json();
+            setImportProgress(progress);
+            
+            // Stop polling if complete
+            if (progress.percentComplete >= 100) {
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Progress polling error:', error);
+        }
+      }, 500); // Poll every 500ms
+    }
+
     try {
       const response = await fetch('/api/materials/import', {
         method: 'POST',
@@ -149,6 +174,12 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
           }
         } else {
           // Handle sync import
+          // Clean up polling interval
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          
           toast.success(`Successfully imported ${data.results.imported} new and updated ${data.results.updated} existing materials`);
           setScrapedProducts([]);
           setPreviewOpen(false);
@@ -180,6 +211,11 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
       toast.error('Connection error');
     } finally {
       setImporting(false);
+      // Clean up polling interval
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
     }
   };
 
