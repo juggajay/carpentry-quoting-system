@@ -214,24 +214,32 @@ export async function POST(req: NextRequest) {
       
       const batch = validProducts.slice(i, i + batchSize);
       
-      // Get existing materials by SKU
+      // Get existing materials by SKU (check ALL materials, not just user's)
       const skus = batch
         .map(p => p.sku)
         .filter((sku): sku is string => !!sku);
 
       const existingMaterials = await prisma.material.findMany({
         where: {
-          sku: { in: skus },
-          userId,
+          sku: { in: skus }
         },
         select: {
           id: true,
           sku: true,
+          userId: true,
         },
       });
 
-      const existingSkuMap = new Map(
-        existingMaterials.map(m => [m.sku!, m.id])
+      // Separate existing materials by ownership
+      const userMaterials = existingMaterials.filter(m => m.userId === userId);
+      const otherUserMaterials = existingMaterials.filter(m => m.userId !== userId);
+      
+      const userSkuMap = new Map(
+        userMaterials.map(m => [m.sku!, m.id])
+      );
+      
+      const globalSkuSet = new Set(
+        otherUserMaterials.map(m => m.sku!)
       );
 
       // Process each product in the batch
@@ -240,7 +248,8 @@ export async function POST(req: NextRequest) {
       
       for (const product of batch) {
         try {
-          const existingId = product.sku ? existingSkuMap.get(product.sku) : null;
+          const existingId = product.sku ? userSkuMap.get(product.sku) : null;
+          const skuExistsGlobally = product.sku ? globalSkuSet.has(product.sku) : false;
 
           if (existingId && options.updateExisting) {
             // Update existing material
@@ -268,11 +277,30 @@ export async function POST(req: NextRequest) {
             }
           } else if (!existingId && options.importNew) {
             // Create new material
+            let sku = product.sku || generateSKU(product.name, product.supplier);
+            
+            // If SKU exists globally (for another user), generate a unique one
+            if (skuExistsGlobally) {
+              console.log(`[Import] SKU ${sku} already exists for another user, generating new SKU`);
+              // Try adding user ID suffix
+              sku = `${sku}-${userId.substring(0, 8)}`;
+              
+              // If that still exists, add a timestamp
+              const existingWithSuffix = await prisma.material.findUnique({
+                where: { sku },
+                select: { id: true }
+              });
+              
+              if (existingWithSuffix) {
+                sku = `${product.sku || generateSKU(product.name, product.supplier)}-${Date.now()}`;
+              }
+            }
+            
             const materialData = {
               id: cuid(),
               name: product.name,
               description: product.description || null,
-              sku: product.sku || generateSKU(product.name, product.supplier),
+              sku,
               supplier: product.supplier,
               unit: product.unit as any, // Cast to enum type
               pricePerUnit: product.pricePerUnit,

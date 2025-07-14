@@ -241,12 +241,16 @@ export async function POST(req: NextRequest) {
 
       // Mark products with their status and ensure SKU and ID exist
       const productsWithStatus = valid.map(product => {
-        const sku = product.sku || generateMaterialSKU(product.name, supplier);
+        let sku = product.sku || generateMaterialSKU(product.name, supplier);
+        
+        // Check if this exact SKU exists for this user
+        const existsForUser = existingSkus.has(sku);
+        
         return {
           id: cuid(), // Generate temporary ID for UI tracking
           ...product,
           sku, // Ensure SKU is always present
-          status: existingSkus.has(sku) ? 'existing' : 'new',
+          status: existsForUser ? 'existing' : 'new',
         };
       });
       
