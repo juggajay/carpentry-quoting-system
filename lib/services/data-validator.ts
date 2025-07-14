@@ -30,7 +30,7 @@ export class DataValidator {
     if (!data.unit || typeof data.unit !== 'string') {
       errors.push('Unit is required and must be a string');
     } else {
-      const validUnits = ['EA', 'LM', 'SQM', 'KG', 'L', 'PACK', 'BOX', 'ROLL', 'SHEET', 'BAG'];
+      const validUnits = ['EA', 'LM', 'SQM', 'KG', 'L', 'PACK', 'BOX', 'ROLL', 'SHEET', 'BAG', 'HR', 'DAY'];
       sanitized.unit = data.unit.toUpperCase();
       if (!validUnits.includes(sanitized.unit)) {
         errors.push(`Invalid unit. Must be one of: ${validUnits.join(', ')}`);

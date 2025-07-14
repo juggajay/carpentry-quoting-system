@@ -105,11 +105,27 @@ export async function POST(req: NextRequest) {
     
     // For smaller imports, process synchronously as before
     // Validate all products first
-    const { valid: validProducts, invalid } = DataValidator.validateBatch(products);
+    let validProducts: any[] = [];
+    let invalid: any[] = [];
     
-    // Log validation results
-    if (invalid.length > 0) {
-      console.log('Validation errors found:', JSON.stringify(invalid.slice(0, 3), null, 2));
+    try {
+      const validationResult = DataValidator.validateBatch(products);
+      validProducts = validationResult.valid;
+      invalid = validationResult.invalid;
+      
+      // Log validation results
+      if (invalid.length > 0) {
+        console.log('Validation errors found:', JSON.stringify(invalid.slice(0, 3), null, 2));
+      }
+    } catch (validationError) {
+      console.error('Validation failed:', validationError);
+      return NextResponse.json(
+        { 
+          error: 'Product validation failed',
+          details: validationError instanceof Error ? validationError.message : 'Unknown validation error',
+        },
+        { status: 400 }
+      );
     }
 
     if (validProducts.length === 0) {
@@ -124,7 +140,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Start progress tracking
-    importProgress.start(validProducts.length);
+    try {
+      importProgress.start(validProducts.length);
+    } catch (progressError) {
+      console.error('Failed to start progress tracking:', progressError);
+      // Continue without progress tracking
+    }
 
     const results = {
       imported: 0,
@@ -140,7 +161,11 @@ export async function POST(req: NextRequest) {
     
     for (let i = 0; i < validProducts.length; i += batchSize) {
       batchNumber++;
-      importProgress.updateBatch(batchNumber);
+      try {
+        importProgress.updateBatch(batchNumber);
+      } catch (e) {
+        console.error('Progress tracking error:', e);
+      }
       
       const batch = validProducts.slice(i, i + batchSize);
       
@@ -186,7 +211,11 @@ export async function POST(req: NextRequest) {
               })
             );
             results.updated++;
-            importProgress.recordUpdated(1, product.name);
+            try {
+              importProgress.recordUpdated(1, product.name);
+            } catch (e) {
+              console.error('Progress tracking error:', e);
+            }
           } else if (!existingId && options.importNew) {
             // Create new material
             operations.push(
@@ -208,15 +237,27 @@ export async function POST(req: NextRequest) {
               })
             );
             results.imported++;
-            importProgress.recordImported(1, product.name);
+            try {
+              importProgress.recordImported(1, product.name);
+            } catch (e) {
+              console.error('Progress tracking error:', e);
+            }
           } else {
             results.skipped++;
-            importProgress.recordSkipped(1, product.name);
+            try {
+              importProgress.recordSkipped(1, product.name);
+            } catch (e) {
+              console.error('Progress tracking error:', e);
+            }
           }
         } catch (error) {
           console.error('Error processing product:', error);
           results.errors++;
-          importProgress.recordError(1, product.name);
+          try {
+            importProgress.recordError(1, product.name);
+          } catch (e) {
+            console.error('Progress tracking error:', e);
+          }
           results.details.push({
             product: product.name,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -250,7 +291,11 @@ export async function POST(req: NextRequest) {
     results.errors += invalid.length;
 
     // Complete progress tracking
-    importProgress.complete();
+    try {
+      importProgress.complete();
+    } catch (e) {
+      console.error('Progress tracking error:', e);
+    }
 
     return NextResponse.json({
       success: true,
