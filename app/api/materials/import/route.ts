@@ -6,6 +6,7 @@ import { DataValidator } from '@/lib/services/data-validator';
 import { importProgress } from '@/lib/services/import-progress';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 import { ChunkedImportService } from '@/lib/services/chunked-import';
+import { getImportSession, updateImportSession } from './session/route';
 
 interface ImportProduct {
   name: string;
@@ -78,12 +79,13 @@ export async function POST(req: NextRequest) {
     const rateLimitResponse = await withRateLimit(req, rateLimiters.import, clerkId);
     if (rateLimitResponse) return rateLimitResponse;
     
-    const { products, options } = body as {
+    const { products, options, sessionId } = body as {
       products: ImportProduct[];
       options: {
         updateExisting: boolean;
         importNew: boolean;
       };
+      sessionId?: string;
     };
 
     if (!products || !Array.isArray(products)) {
@@ -466,6 +468,20 @@ export async function POST(req: NextRequest) {
       userId,
     });
     
+    // Update session if provided
+    if (sessionId) {
+      const session = getImportSession(sessionId);
+      if (session) {
+        updateImportSession(sessionId, {
+          processedProducts: session.processedProducts + validProducts.length,
+          imported: session.imported + results.imported,
+          updated: session.updated + results.updated,
+          skipped: session.skipped + results.skipped,
+          errors: session.errors + results.errors,
+        });
+      }
+    }
+    
     // Verify materials were actually created
     if (results.imported > 0) {
       const verifyCount = await prisma.material.count({
@@ -484,6 +500,7 @@ export async function POST(req: NextRequest) {
           validationErrors: invalid.length,
         },
         details: results.details,
+        sessionId,
       }, { status: 500 });
     }
     
@@ -493,6 +510,7 @@ export async function POST(req: NextRequest) {
         ...results,
         validationErrors: invalid.length,
       },
+      sessionId,
     });
   } catch (error) {
     console.error('[Import API] ===== ERROR =====');

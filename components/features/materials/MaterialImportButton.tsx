@@ -108,107 +108,165 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
   const handleImport = async (selectedProducts: ScrapedProduct[]) => {
     setImporting(true);
     
-    // For large imports, show async progress
-    if (selectedProducts.length > 100) {
-      setImportProgress(null);
-    } else {
-      setImportProgress({
-        total: selectedProducts.length,
-        processed: 0,
-        imported: 0,
-        updated: 0,
-        skipped: 0,
-        errors: 0,
-        currentBatch: 0,
-        totalBatches: Math.ceil(selectedProducts.length / 50),
-        percentComplete: 0,
-      });
-    }
+    const CHUNK_SIZE = 100; // Process 100 items at a time
+    const isChunkedImport = selectedProducts.length > CHUNK_SIZE;
+    
+    // Initialize progress
+    setImportProgress({
+      total: selectedProducts.length,
+      processed: 0,
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: 0,
+      currentBatch: 0,
+      totalBatches: Math.ceil(selectedProducts.length / CHUNK_SIZE),
+      percentComplete: 0,
+    });
 
-    // Start polling for progress updates
-    if (selectedProducts.length <= 100) {
-      pollIntervalRef.current = setInterval(async () => {
-        try {
-          const progressRes = await fetch('/api/materials/import/progress');
-          if (progressRes.ok) {
-            const progress = await progressRes.json();
-            setImportProgress(progress);
-            
-            // Stop polling if complete
-            if (progress.percentComplete >= 100) {
-              if (pollIntervalRef.current) {
-                clearInterval(pollIntervalRef.current);
-                pollIntervalRef.current = null;
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Progress polling error:', error);
-        }
-      }, 500); // Poll every 500ms
-    }
+    let sessionId: string | undefined;
+    let cumulativeResults = {
+      imported: 0,
+      updated: 0,
+      skipped: 0,
+      errors: 0,
+    };
 
     try {
-      const response = await fetch('/api/materials/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          products: selectedProducts,
-          options: {
-            updateExisting: true,
-            importNew: true,
-          }
-        }),
-      });
+      // Create import session for chunked imports
+      if (isChunkedImport) {
+        const sessionRes = await fetch('/api/materials/import/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ totalProducts: selectedProducts.length }),
+        });
+        
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          sessionId = sessionData.sessionId;
+        }
+      }
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        if (data.async && data.jobId) {
-          // Handle async import
-          setAsyncJobId(data.jobId);
-          toast.info(data.message || `Processing ${selectedProducts.length} items in background`);
-          // For async, we might want to poll or wait, but for now just call the callback
-          if (onImportComplete) {
-            setTimeout(onImportComplete, 2000); // Give it 2 seconds then refresh
+      // Process in chunks
+      const chunks = [];
+      for (let i = 0; i < selectedProducts.length; i += CHUNK_SIZE) {
+        chunks.push(selectedProducts.slice(i, i + CHUNK_SIZE));
+      }
+
+      // Start progress polling for session
+      if (sessionId) {
+        pollIntervalRef.current = setInterval(async () => {
+          try {
+            const sessionRes = await fetch(`/api/materials/import/session?sessionId=${sessionId}`);
+            if (sessionRes.ok) {
+              const session = await sessionRes.json();
+              setImportProgress({
+                total: session.totalProducts,
+                processed: session.processedProducts,
+                imported: session.imported,
+                updated: session.updated,
+                skipped: session.skipped,
+                errors: session.errors,
+                currentBatch: Math.floor(session.processedProducts / CHUNK_SIZE) + 1,
+                totalBatches: Math.ceil(session.totalProducts / CHUNK_SIZE),
+                percentComplete: Math.round((session.processedProducts / session.totalProducts) * 100),
+              });
+              
+              // Stop polling if complete
+              if (session.status === 'completed') {
+                if (pollIntervalRef.current) {
+                  clearInterval(pollIntervalRef.current);
+                  pollIntervalRef.current = null;
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Session polling error:', error);
+          }
+        }, 1000); // Poll every second
+      }
+
+      // Process each chunk
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        console.log(`Processing chunk ${i + 1} of ${chunks.length} (${chunk.length} items)`);
+        
+        // Update progress before processing chunk
+        if (!sessionId) {
+          setImportProgress(prev => ({
+            ...prev!,
+            currentBatch: i + 1,
+            currentItem: `Processing batch ${i + 1} of ${chunks.length}...`,
+          }));
+        }
+        
+        const response = await fetch('/api/materials/import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            products: chunk,
+            options: {
+              updateExisting: true,
+              importNew: true,
+            },
+            sessionId,
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Update cumulative results
+          cumulativeResults.imported += data.results.imported;
+          cumulativeResults.updated += data.results.updated;
+          cumulativeResults.skipped += data.results.skipped;
+          cumulativeResults.errors += data.results.errors;
+          
+          // Update progress for non-session imports
+          if (!sessionId) {
+            setImportProgress(prev => ({
+              ...prev!,
+              processed: Math.min((i + 1) * CHUNK_SIZE, selectedProducts.length),
+              imported: cumulativeResults.imported,
+              updated: cumulativeResults.updated,
+              skipped: cumulativeResults.skipped,
+              errors: cumulativeResults.errors,
+              currentBatch: i + 1,
+              percentComplete: Math.round(((i + 1) * CHUNK_SIZE / selectedProducts.length) * 100),
+            }));
           }
         } else {
-          // Handle sync import
-          // Clean up polling interval
-          if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current);
-            pollIntervalRef.current = null;
-          }
-          
-          toast.success(`Successfully imported ${data.results.imported} new and updated ${data.results.updated} existing materials`);
-          setScrapedProducts([]);
-          setPreviewOpen(false);
-          setImportProgress(null);
-          // Refresh the page to show new materials
-          router.refresh();
-          // Call the callback if provided
-          if (onImportComplete) {
-            onImportComplete();
-          }
-        }
-      } else {
-        // Log detailed error information
-        console.error('Import failed:', data);
-        console.error('Error type:', data.errorType);
-        console.error('Error details:', data.details);
-        console.error('Full response:', response);
-        
-        let errorMessage = data.error || 'Import failed';
-        if (data.details && typeof data.details === 'string') {
-          errorMessage = `${errorMessage}: ${data.details}`;
-        } else if (data.details && Array.isArray(data.details)) {
-          errorMessage = `${errorMessage}: ${data.details.map((d: any) => d.error || d).join(', ')}`;
+          console.error(`Chunk ${i + 1} failed:`, data);
+          toast.error(`Failed to import chunk ${i + 1}: ${data.error || 'Unknown error'}`);
+          // Continue with next chunk even if one fails
         }
         
-        toast.error(errorMessage);
+        // Add a small delay between chunks to avoid overwhelming the server
+        if (i < chunks.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
-    } catch {
-      toast.error('Connection error');
+      
+      // All chunks processed
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      
+      toast.success(`Import complete! Imported ${cumulativeResults.imported} new and updated ${cumulativeResults.updated} existing materials`);
+      setScrapedProducts([]);
+      setPreviewOpen(false);
+      setImportProgress(null);
+      
+      // Refresh the page to show new materials
+      router.refresh();
+      
+      // Call the callback if provided
+      if (onImportComplete) {
+        onImportComplete();
+      }
+      console.error('Import error:', error);
+      toast.error('Import failed - check console for details');
     } finally {
       setImporting(false);
       // Clean up polling interval
