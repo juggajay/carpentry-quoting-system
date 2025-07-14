@@ -125,7 +125,7 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
     });
 
     let sessionId: string | undefined;
-    let cumulativeResults = {
+    const cumulativeResults = {
       imported: 0,
       updated: 0,
       skipped: 0,
