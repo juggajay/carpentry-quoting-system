@@ -161,7 +161,10 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
           }
         }
       } else {
-        toast.error(data.error || 'Import failed');
+        // Log detailed error information
+        console.error('Import failed:', data);
+        const errorMessage = data.details ? `${data.error}: ${JSON.stringify(data.details)}` : data.error || 'Import failed';
+        toast.error(errorMessage);
       }
     } catch {
       toast.error('Connection error');

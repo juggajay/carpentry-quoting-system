@@ -215,18 +215,7 @@ export default function MaterialsPage() {
                       </Badge>
                     </td>
                     <td className="p-4 text-sm text-muted-foreground">
-                      {material.lastScrapedAt ? (
-                        <div>
-                          <div>Scraped: {new Date(material.lastScrapedAt).toLocaleDateString()}</div>
-                          {material.scraperType && (
-                            <Badge variant="info" size="sm">
-                              {material.scraperType}
-                            </Badge>
-                          )}
-                        </div>
-                      ) : (
-                        new Date(material.updatedAt).toLocaleDateString()
-                      )}
+                      {new Date(material.updatedAt).toLocaleDateString()}
                     </td>
                   </tr>
                 ))}

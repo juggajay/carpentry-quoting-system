@@ -70,6 +70,8 @@ export async function GET(request: Request) {
         category: true,
         supplier: true,
         inStock: true,
+        gstInclusive: true,
+        updatedAt: true,
       }
     });
 

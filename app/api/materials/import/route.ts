@@ -320,6 +320,12 @@ export async function POST(req: NextRequest) {
         } catch (error) {
           console.error('Transaction error:', error);
           console.error('Failed batch sample:', JSON.stringify(batch[0], null, 2));
+          console.error('Transaction error details:', {
+            errorType: error?.constructor?.name,
+            message: error instanceof Error ? error.message : 'Unknown error',
+            operations: operations.length,
+            userId: userId,
+          });
           results.errors += operations.length;
           // Reset counts as transaction failed
           results.imported -= operations.filter(op => 'create' in op).length;
@@ -329,8 +335,12 @@ export async function POST(req: NextRequest) {
           results.details.push({
             batch: `Batch ${batchNumber}`,
             error: error instanceof Error ? error.message : 'Transaction failed',
-            sample: batch[0]?.name
+            sample: batch[0]?.name,
+            operationsCount: operations.length
           });
+          
+          // Throw error to stop processing and return error response
+          throw error;
         }
       }
     }
@@ -360,6 +370,19 @@ export async function POST(req: NextRequest) {
         where: { userId }
       });
       console.log(`[Import] Verification: User ${userId} now has ${verifyCount} materials`);
+    }
+    
+    // Check if there were transaction errors
+    if (results.errors > 0 && results.imported === 0 && results.updated === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to import materials',
+        results: {
+          ...results,
+          validationErrors: invalid.length,
+        },
+        details: results.details,
+      }, { status: 500 });
     }
     
     return NextResponse.json({

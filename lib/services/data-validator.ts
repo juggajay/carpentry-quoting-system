@@ -71,6 +71,11 @@ export class DataValidator {
     // Boolean fields
     sanitized.gstInclusive = Boolean(data.gstInclusive);
     sanitized.inStock = Boolean(data.inStock);
+    
+    // Preserve userId if provided
+    if (data.userId) {
+      sanitized.userId = data.userId;
+    }
 
     return {
       isValid: errors.length === 0,
