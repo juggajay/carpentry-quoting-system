@@ -264,8 +264,6 @@ export class PostgreSQLMCPServer {
             gstInclusive: material.gstInclusive,
             category: material.category,
             inStock: material.inStock,
-            lastScrapedAt: material.lastScrapedAt,
-            sourceUrl: material.sourceUrl,
             recentPriceUpdate: material.priceUpdates[0] || null
           }))
         }, null, 2)
