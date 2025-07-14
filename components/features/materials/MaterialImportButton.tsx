@@ -163,7 +163,17 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
       } else {
         // Log detailed error information
         console.error('Import failed:', data);
-        const errorMessage = data.details ? `${data.error}: ${JSON.stringify(data.details)}` : data.error || 'Import failed';
+        console.error('Error type:', data.errorType);
+        console.error('Error details:', data.details);
+        console.error('Full response:', response);
+        
+        let errorMessage = data.error || 'Import failed';
+        if (data.details && typeof data.details === 'string') {
+          errorMessage = `${errorMessage}: ${data.details}`;
+        } else if (data.details && Array.isArray(data.details)) {
+          errorMessage = `${errorMessage}: ${data.details.map(d => d.error || d).join(', ')}`;
+        }
+        
         toast.error(errorMessage);
       }
     } catch {

@@ -22,10 +22,16 @@ interface ImportProduct {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('[Import API] ===== START =====');
     console.log('[Import API] Request received at:', new Date().toISOString());
-  } catch (e) {
-    // Even console.log is failing
-    return NextResponse.json({ error: 'Critical error at start', details: String(e) }, { status: 500 });
+    console.log('[Import API] Headers:', Object.fromEntries(req.headers.entries()));
+  } catch (earlyError) {
+    console.error('[Import API] Very early error:', earlyError);
+    return NextResponse.json({ 
+      error: 'Critical error at start', 
+      details: String(earlyError),
+      stack: earlyError instanceof Error ? earlyError.stack : undefined
+    }, { status: 500 });
   }
   
   let body: any;
@@ -276,7 +282,11 @@ export async function POST(req: NextRequest) {
               notes: product.notes || null,
               userId,
             };
-            console.log('[Import] Creating material:', JSON.stringify(materialData, null, 2));
+            console.log('[Import] Creating material with data:', {
+              ...materialData,
+              userIdType: typeof userId,
+              userIdValue: userId,
+            });
             operations.push(
               prisma.material.create({
                 data: materialData,
@@ -393,18 +403,26 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Import error:', error);
-    console.error('Import error details:', {
+    console.error('[Import API] ===== ERROR =====');
+    console.error('[Import API] Import error:', error);
+    console.error('[Import API] Import error details:', {
       errorType: error?.constructor?.name,
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       body: body,
     });
     
+    // Check if it's a Prisma error
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('[Import API] Prisma error code:', (error as any).code);
+      console.error('[Import API] Prisma error meta:', (error as any).meta);
+    }
+    
     return NextResponse.json(
       { 
         error: 'Failed to import materials',
         details: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error?.constructor?.name,
         stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
       },
       { status: 500 }
