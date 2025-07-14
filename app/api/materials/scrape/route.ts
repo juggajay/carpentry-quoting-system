@@ -1,22 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getFirecrawlService, ScraperConfig } from '@/lib/services/firecrawl-service';
-import { transformBatch, categorizeProduct } from '@/lib/services/material-mapper';
+import { transformBatch, categorizeProduct, generateSKU as generateMaterialSKU } from '@/lib/services/material-mapper';
 import { prisma } from '@/lib/prisma';
 import { scrapeCache, requestDeduplicator } from '@/lib/services/firecrawl-cache';
 import { getCategoryUrls } from '@/lib/services/supplier-configs';
 import { DataValidator } from '@/lib/services/data-validator';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 
-function generateSKU(name: string, supplier: string): string {
-  const prefix = supplier.substring(0, 3).toUpperCase();
-  const namePart = name
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .substring(0, 10)
-    .toUpperCase();
-  const timestamp = Date.now().toString().slice(-6);
-  return `${prefix}-${namePart}-${timestamp}`;
-}
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -126,7 +117,7 @@ export async function POST(req: NextRequest) {
               unit: p.unit || 'LM', // Default to LM for timber
               inStock: p.inStock ?? true,
               description: p.description || null,
-              sku: p.sku || null,
+              sku: p.sku || generateMaterialSKU(p.name, 'Canterbury Timbers'),
               supplier: 'Canterbury Timbers',
               gstInclusive: true,
               category: categorizeProduct(p.name), // Use the categorize function
@@ -234,11 +225,15 @@ export async function POST(req: NextRequest) {
 
       const existingSkus = new Set(existingMaterials.map(m => m.sku));
 
-      // Mark products with their status
-      const productsWithStatus = valid.map(product => ({
-        ...product,
-        status: existingSkus.has(product.sku || '') ? 'existing' : 'new',
-      }));
+      // Mark products with their status and ensure SKU exists
+      const productsWithStatus = valid.map(product => {
+        const sku = product.sku || generateMaterialSKU(product.name, supplier);
+        return {
+          ...product,
+          sku, // Ensure SKU is always present
+          status: existingSkus.has(sku) ? 'existing' : 'new',
+        };
+      });
       
       // Log sample of products being returned
       console.log('[Scrape API] Sample product to be imported:', JSON.stringify(productsWithStatus[0], null, 2));
@@ -246,6 +241,7 @@ export async function POST(req: NextRequest) {
       // Add invalid products with error status
       const invalidWithStatus = invalid.map(({ data, errors }) => ({
         ...data,
+        sku: data.sku || generateMaterialSKU(data.name || 'Unknown', supplier),
         status: 'error',
         error: errors.join(', '),
       }));
@@ -280,7 +276,7 @@ export async function POST(req: NextRequest) {
                     data: {
                       name: product.name,
                       description: product.description,
-                      sku: product.sku || generateSKU(product.name, supplier),
+                      sku: product.sku || generateMaterialSKU(product.name, supplier),
                       supplier: product.supplier,
                       unit: product.unit as any,
                       pricePerUnit: product.pricePerUnit,
