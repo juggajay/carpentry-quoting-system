@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     let category: string | undefined;
     let urls: string[] | undefined;
     let customUrl: string | undefined;
+    let limit: number | undefined;
     let options: {
       updateExisting: boolean;
       importNew: boolean;
@@ -52,12 +53,14 @@ export async function POST(req: NextRequest) {
       category = config.category;
       customUrl = config.customUrl;
       options = config.options;
+      limit = body.limit;
     } else {
       // Old format from UI
       supplier = body.supplier;
       category = body.category;
       urls = body.urls;
       customUrl = body.customUrl;
+      limit = body.limit;
       options = body.options || {
         updateExisting: true,
         importNew: true,
@@ -134,11 +137,16 @@ export async function POST(req: NextRequest) {
           }
         }
         
+        // Apply limit if specified
+        const finalProducts = limit && limit > 0 
+          ? allProducts.slice(0, limit)
+          : allProducts;
+        
         return {
-          products: allProducts,
+          products: finalProducts,
           summary: {
-            total: allProducts.length,
-            new: allProducts.length,
+            total: finalProducts.length,
+            new: finalProducts.length,
             existing: 0,
             errors: 0,
           },
@@ -182,9 +190,16 @@ export async function POST(req: NextRequest) {
       const scrapedProducts = await Promise.race([scrapePromise, timeoutPromise]);
       console.log(`[Scrape API] ✅ Scrape completed, got ${scrapedProducts.length} products`);
 
+      // Apply limit if specified
+      const limitedProducts = limit && limit > 0 
+        ? scrapedProducts.slice(0, limit)
+        : scrapedProducts;
+      
+      console.log(`[Scrape API] Products before limit: ${scrapedProducts.length}, after limit: ${limitedProducts.length}`);
+      
       // Transform to our material format
       const transformedProducts = transformBatch(
-        scrapedProducts.map(p => ({
+        limitedProducts.map(p => ({
           title: p.name,
           price: p.price?.toString() || '0',
           url: '',

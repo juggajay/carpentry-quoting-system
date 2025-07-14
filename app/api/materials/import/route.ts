@@ -21,6 +21,8 @@ interface ImportProduct {
 }
 
 export async function POST(req: NextRequest) {
+  let body: any;
+  
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -31,7 +33,7 @@ export async function POST(req: NextRequest) {
     const rateLimitResponse = await withRateLimit(req, rateLimiters.import, userId);
     if (rateLimitResponse) return rateLimitResponse;
 
-    const body = await req.json();
+    body = await req.json();
     const { products, options } = body as {
       products: ImportProduct[];
       options: {
@@ -234,6 +236,13 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Import error:', error);
+    console.error('Import error details:', {
+      errorType: error?.constructor?.name,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      body: body,
+    });
+    
     return NextResponse.json(
       { 
         error: 'Failed to import materials',

@@ -50,7 +50,7 @@ const SUPPLIERS = {
 interface MaterialScraperDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onScrape: (config: { source: string; category?: string; materials?: string[]; customUrl?: string }) => Promise<void>;
+  onScrape: (config: { source: string; category?: string; materials?: string[]; customUrl?: string; limit?: number }) => Promise<void>;
 }
 
 export function MaterialScraperDialog({ 
@@ -61,6 +61,7 @@ export function MaterialScraperDialog({
   const [source, setSource] = useState<SupplierType>('bunnings');
   const [category, setCategory] = useState<string>('');
   const [customUrl, setCustomUrl] = useState('');
+  const [limit, setLimit] = useState<string>('10');
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<string>('');
 
@@ -74,6 +75,7 @@ export function MaterialScraperDialog({
         ...(source === 'custom' && {
           customUrl,
         }),
+        limit: limit ? parseInt(limit) : undefined,
       };
 
       setProgress(`Connecting to ${SUPPLIERS[source].name}...`);
@@ -160,6 +162,21 @@ export function MaterialScraperDialog({
             </div>
           )}
 
+          {/* Limit Configuration */}
+          <div className="space-y-2">
+            <Label>Number of Items to Scrape (for testing)</Label>
+            <Input
+              type="number"
+              placeholder="Leave empty for all items"
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              min="1"
+              max="1000"
+            />
+            <p className="text-xs text-gray-400">
+              Useful for testing. Leave empty to scrape all available items.
+            </p>
+          </div>
 
           {/* Preview of what will be scraped */}
           <div className="flex items-start space-x-2 p-4 bg-blue-900/20 border border-blue-700 rounded-md">
@@ -170,11 +187,13 @@ export function MaterialScraperDialog({
                   Will scrape from <strong>{SUPPLIERS[source].name}</strong>
                   {category && ` - ${category} category`}
                   {!category && ' - all categories'}
+                  {limit && ` (limit: ${limit} items)`}
                 </p>
               ) : (
                 <p>
                   Custom URL: <strong className="break-all">{customUrl || 'Not specified'}</strong>
                   {category && ` - ${category} category`}
+                  {limit && ` (limit: ${limit} items)`}
                 </p>
               )}
             </div>

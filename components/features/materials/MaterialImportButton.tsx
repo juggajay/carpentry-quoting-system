@@ -55,7 +55,7 @@ export function MaterialImportButton() {
   const [asyncJobId, setAsyncJobId] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleScrape = async (config: { source: string; category?: string; materials?: string[]; customUrl?: string }) => {
+  const handleScrape = async (config: { source: string; category?: string; materials?: string[]; customUrl?: string; limit?: number }) => {
     setScraping(true);
     
     try {
@@ -70,6 +70,7 @@ export function MaterialImportButton() {
           category: config.category,
           urls: config.customUrl ? [config.customUrl] : undefined,
           customUrl: config.customUrl,
+          limit: config.limit,
           options: {
             updateExisting: true,
             importNew: true,
