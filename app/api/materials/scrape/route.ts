@@ -8,6 +8,16 @@ import { getCategoryUrls } from '@/lib/services/supplier-configs';
 import { DataValidator } from '@/lib/services/data-validator';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 
+function generateSKU(name: string, supplier: string): string {
+  const prefix = supplier.substring(0, 3).toUpperCase();
+  const namePart = name
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .substring(0, 10)
+    .toUpperCase();
+  const timestamp = Date.now().toString().slice(-6);
+  return `${prefix}-${namePart}-${timestamp}`;
+}
+
 export async function POST(req: NextRequest) {
   let body: any;
   
@@ -230,9 +240,91 @@ export async function POST(req: NextRequest) {
         errors: invalidWithStatus.length,
       };
 
+      // Save to database if options specify
+      let saved = 0;
+      let updated = 0;
+      
+      if (options && (options.importNew || options.updateExisting)) {
+        const batchSize = 50;
+        
+        for (let i = 0; i < productsWithStatus.length; i += batchSize) {
+          const batch = productsWithStatus.slice(i, i + batchSize);
+          const operations = [];
+          
+          for (const product of batch) {
+            try {
+              if (product.status === 'new' && options.importNew) {
+                // Create new material
+                operations.push(
+                  prisma.material.create({
+                    data: {
+                      name: product.name,
+                      description: product.description,
+                      sku: product.sku || generateSKU(product.name, supplier),
+                      supplier: product.supplier,
+                      unit: product.unit as any,
+                      pricePerUnit: product.pricePerUnit,
+                      gstInclusive: product.gstInclusive || true,
+                      category: product.category,
+                      inStock: product.inStock ?? true,
+                      notes: product.notes,
+                      userId,
+                      lastScrapedAt: new Date(),
+                      sourceUrl: customUrl || scrapeUrls[0],
+                      scraperType: supplier,
+                    },
+                  })
+                );
+              } else if (product.status === 'existing' && options.updateExisting && product.sku) {
+                // Update existing material
+                operations.push(
+                  prisma.material.update({
+                    where: { 
+                      sku: product.sku,
+                      userId 
+                    },
+                    data: {
+                      name: product.name,
+                      description: product.description,
+                      pricePerUnit: product.pricePerUnit,
+                      unit: product.unit as any,
+                      category: product.category,
+                      inStock: product.inStock ?? true,
+                      gstInclusive: product.gstInclusive || true,
+                      lastScrapedAt: new Date(),
+                      sourceUrl: customUrl || scrapeUrls[0],
+                      scraperType: supplier,
+                    },
+                  })
+                );
+              }
+            } catch (error) {
+              console.error('Error preparing operation for product:', error);
+            }
+          }
+          
+          // Execute batch operations
+          if (operations.length > 0) {
+            try {
+              const results = await prisma.$transaction(operations);
+              const created = results.filter(r => r && 'createdAt' in r && r.createdAt).length;
+              const updated_count = results.length - created;
+              saved += created;
+              updated += updated_count;
+            } catch (error) {
+              console.error('Transaction error:', error);
+            }
+          }
+        }
+      }
+
       const responseData = {
         products: allProducts,
-        summary,
+        summary: {
+          ...summary,
+          saved,
+          updated,
+        },
       };
 
       // Cache successful results
