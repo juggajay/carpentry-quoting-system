@@ -16,11 +16,12 @@ export async function GET() {
   }
 
   try {
-    // Get all materials that have scraper configuration
+    // Get all materials
     const materials = await db.material.findMany({
       where: {
-        scraperType: { not: null }
-      }
+        supplier: { not: null }
+      },
+      take: 100 // Limit to prevent timeout
     });
 
     console.log(`Found ${materials.length} materials to update`);
@@ -32,23 +33,10 @@ export async function GET() {
       try {
         let newPrice: number | null = null;
         
-        if (material.scraperType === 'custom' && material.sourceUrl && material.scraperSelectors) {
-          // Use custom scraper
+        // Determine scraper based on supplier
+        if (material.supplier) {
           const scraper = new MaterialWebScraper({
-            source: 'customUrl',
-            customUrl: material.sourceUrl,
-            customSelectors: material.scraperSelectors as { productList: string; price: string; title: string; unit: string },
-            materials: [material.name]
-          });
-          
-          const results = await scraper.scrapePrices([material.name]);
-          if (results.length > 0) {
-            newPrice = results[0].price;
-          }
-        } else if (material.scraperType === 'bunnings') {
-          // Use Bunnings scraper
-          const scraper = new MaterialWebScraper({
-            source: 'bunnings',
+            source: material.supplier.toLowerCase() === 'bunnings' ? 'bunnings' : 'bunnings',
             materials: [material.name]
           });
           
@@ -63,7 +51,7 @@ export async function GET() {
             where: { id: material.id },
             data: {
               pricePerUnit: newPrice,
-              lastScrapedAt: new Date()
+              updatedAt: new Date()
             }
           });
           updated++;
