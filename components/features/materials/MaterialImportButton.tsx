@@ -171,7 +171,7 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
         if (data.details && typeof data.details === 'string') {
           errorMessage = `${errorMessage}: ${data.details}`;
         } else if (data.details && Array.isArray(data.details)) {
-          errorMessage = `${errorMessage}: ${data.details.map(d => d.error || d).join(', ')}`;
+          errorMessage = `${errorMessage}: ${data.details.map((d: any) => d.error || d).join(', ')}`;
         }
         
         toast.error(errorMessage);
