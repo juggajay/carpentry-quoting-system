@@ -230,6 +230,7 @@ export async function POST(req: NextRequest) {
 
       // Process each product in the batch
       const operations = [];
+      console.log(`[Import] Processing batch ${batchNumber} with ${batch.length} products`);
       
       for (const product of batch) {
         try {
@@ -261,22 +262,24 @@ export async function POST(req: NextRequest) {
             }
           } else if (!existingId && options.importNew) {
             // Create new material
+            const materialData = {
+              id: cuid(),
+              name: product.name,
+              description: product.description || null,
+              sku: product.sku || generateSKU(product.name, product.supplier),
+              supplier: product.supplier,
+              unit: product.unit as any, // Cast to enum type
+              pricePerUnit: product.pricePerUnit,
+              gstInclusive: product.gstInclusive,
+              category: product.category || null,
+              inStock: product.inStock,
+              notes: product.notes || null,
+              userId,
+            };
+            console.log('[Import] Creating material:', JSON.stringify(materialData, null, 2));
             operations.push(
               prisma.material.create({
-                data: {
-                  id: cuid(),
-                  name: product.name,
-                  description: product.description || null,
-                  sku: product.sku || generateSKU(product.name, product.supplier),
-                  supplier: product.supplier,
-                  unit: product.unit as any, // Cast to enum type
-                  pricePerUnit: product.pricePerUnit,
-                  gstInclusive: product.gstInclusive,
-                  category: product.category || null,
-                  inStock: product.inStock,
-                  notes: product.notes || null,
-                  userId,
-                },
+                data: materialData,
               })
             );
             results.imported++;
@@ -342,6 +345,23 @@ export async function POST(req: NextRequest) {
       console.error('Progress tracking error:', e);
     }
 
+    console.log('[Import] Final results:', {
+      imported: results.imported,
+      updated: results.updated,
+      skipped: results.skipped,
+      errors: results.errors,
+      validationErrors: invalid.length,
+      userId,
+    });
+    
+    // Verify materials were actually created
+    if (results.imported > 0) {
+      const verifyCount = await prisma.material.count({
+        where: { userId }
+      });
+      console.log(`[Import] Verification: User ${userId} now has ${verifyCount} materials`);
+    }
+    
     return NextResponse.json({
       success: true,
       results: {
