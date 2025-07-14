@@ -7,6 +7,7 @@ import { scrapeCache, requestDeduplicator } from '@/lib/services/firecrawl-cache
 import { getCategoryUrls } from '@/lib/services/supplier-configs';
 import { DataValidator } from '@/lib/services/data-validator';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
+import { cuid } from '@/lib/utils';
 
 
 export async function POST(req: NextRequest) {
@@ -112,6 +113,7 @@ export async function POST(req: NextRequest) {
             const products = await AlternativeScraper.scrapeDirectly(url, 50); // Fetch up to 50 pages for Canterbury
             console.log(`[Scrape API] Found ${products.length} products from ${url}`);
             allProducts.push(...products.map(p => ({
+              id: cuid(), // Temporary ID for UI
               name: p.name,
               pricePerUnit: p.price || 0,
               unit: p.unit || 'LM', // Default to LM for timber
@@ -225,10 +227,11 @@ export async function POST(req: NextRequest) {
 
       const existingSkus = new Set(existingMaterials.map(m => m.sku));
 
-      // Mark products with their status and ensure SKU exists
+      // Mark products with their status and ensure SKU and ID exist
       const productsWithStatus = valid.map(product => {
         const sku = product.sku || generateMaterialSKU(product.name, supplier);
         return {
+          id: cuid(), // Generate temporary ID for UI tracking
           ...product,
           sku, // Ensure SKU is always present
           status: existingSkus.has(sku) ? 'existing' : 'new',
@@ -240,6 +243,7 @@ export async function POST(req: NextRequest) {
 
       // Add invalid products with error status
       const invalidWithStatus = invalid.map(({ data, errors }) => ({
+        id: cuid(),
         ...data,
         sku: data.sku || generateMaterialSKU(data.name || 'Unknown', supplier),
         status: 'error',

@@ -54,6 +54,20 @@ export async function POST(req: NextRequest) {
     console.log('Import request - product count:', products.length);
     console.log('Import request - options:', options);
     
+    // Check if products have required fields
+    if (products.length > 0) {
+      const sampleProduct = products[0];
+      console.log('Product field check:', {
+        hasName: !!sampleProduct.name,
+        hasSupplier: !!sampleProduct.supplier,
+        hasUnit: !!sampleProduct.unit,
+        hasPricePerUnit: sampleProduct.pricePerUnit !== undefined,
+        priceType: typeof sampleProduct.pricePerUnit,
+        hasGstInclusive: sampleProduct.gstInclusive !== undefined,
+        gstType: typeof sampleProduct.gstInclusive,
+      });
+    }
+    
     // For large imports (> 100 items), use chunked import service
     if (products.length > 100) {
       // Check if ImportJob table exists
