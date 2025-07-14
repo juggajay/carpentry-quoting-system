@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getFirecrawlService, ScraperConfig } from '@/lib/services/firecrawl-service';
-import { transformBatch } from '@/lib/services/material-mapper';
+import { transformBatch, categorizeProduct } from '@/lib/services/material-mapper';
 import { prisma } from '@/lib/prisma';
 import { scrapeCache, requestDeduplicator } from '@/lib/services/firecrawl-cache';
 import { getCategoryUrls } from '@/lib/services/supplier-configs';
@@ -123,13 +123,15 @@ export async function POST(req: NextRequest) {
             allProducts.push(...products.map(p => ({
               name: p.name,
               pricePerUnit: p.price || 0,
-              unit: p.unit || 'EA',
+              unit: p.unit || 'LM', // Default to LM for timber
               inStock: p.inStock ?? true,
-              description: p.description,
-              sku: p.sku,
+              description: p.description || null,
+              sku: p.sku || null,
               supplier: 'Canterbury Timbers',
               gstInclusive: true,
-              category: 'Timber',
+              category: categorizeProduct(p.name), // Use the categorize function
+              notes: null,
+              userId: userId,
               status: 'new',
             })));
           } catch (urlError) {
@@ -237,6 +239,9 @@ export async function POST(req: NextRequest) {
         ...product,
         status: existingSkus.has(product.sku || '') ? 'existing' : 'new',
       }));
+      
+      // Log sample of products being returned
+      console.log('[Scrape API] Sample product to be imported:', JSON.stringify(productsWithStatus[0], null, 2));
 
       // Add invalid products with error status
       const invalidWithStatus = invalid.map(({ data, errors }) => ({

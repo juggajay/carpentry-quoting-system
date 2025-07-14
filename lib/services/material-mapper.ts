@@ -154,6 +154,17 @@ export function generateSKU(title: string): string {
   return `GEN-${hash}-${random}`;
 }
 
+// Map supplier codes to proper names
+function getSupplierName(supplier: string): string {
+  const supplierMap: Record<string, string> = {
+    'bunnings': 'Bunnings',
+    'blacktown': 'Blacktown Building Supplies',
+    'canterbury': 'Canterbury Timbers',
+    'custom': 'Custom Supplier'
+  };
+  return supplierMap[supplier.toLowerCase()] || supplier;
+}
+
 export function transformToMaterial(
   product: FirecrawlProduct, 
   supplier: string,
@@ -164,14 +175,14 @@ export function transformToMaterial(
   return {
     name: cleanProductName(product.title),
     sku: product.metadata.sku || generateSKU(product.title),
-    supplier: supplier,
+    supplier: getSupplierName(supplier),
     unit: mapUnit(product.metadata.unit, product.title),
     pricePerUnit: parsePrice(product.price, quantity),
     gstInclusive: true, // Australian suppliers include GST
     category: categorizeProduct(product.title),
     inStock: product.metadata.availability ?? true,
     description: product.metadata.description || null,
-    notes: `Imported from ${supplier} on ${new Date().toLocaleDateString()}`,
+    notes: `Imported from ${getSupplierName(supplier)} on ${new Date().toLocaleDateString()}`,
     userId: userId || null,
   };
 }

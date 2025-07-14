@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Log first product for debugging
-    console.log('Import request - first product:', products[0]);
+    console.log('Import request - first product:', JSON.stringify(products[0], null, 2));
     console.log('Import request - product count:', products.length);
+    console.log('Import request - options:', options);
     
     // For large imports (> 100 items), use chunked import service
     if (products.length > 100) {
@@ -81,13 +82,8 @@ export async function POST(req: NextRequest) {
           });
         } catch (error) {
           console.error('Failed to create import job:', error);
-          return NextResponse.json(
-            { 
-              error: 'Failed to create import job',
-              details: error instanceof Error ? error.message : 'Unknown error',
-            },
-            { status: 500 }
-          );
+          console.log('Falling back to sync import due to async error');
+          // Fall through to sync processing instead of returning error
         }
       }
       // If async not supported, fall through to sync processing
@@ -96,8 +92,14 @@ export async function POST(req: NextRequest) {
     // For smaller imports, process synchronously as before
     // Validate all products first
     const { valid: validProducts, invalid } = DataValidator.validateBatch(products);
+    
+    // Log validation results
+    if (invalid.length > 0) {
+      console.log('Validation errors found:', JSON.stringify(invalid.slice(0, 3), null, 2));
+    }
 
     if (validProducts.length === 0) {
+      console.error('All products failed validation:', invalid);
       return NextResponse.json(
         { 
           error: 'No valid products to import',
@@ -158,12 +160,13 @@ export async function POST(req: NextRequest) {
                 where: { id: existingId },
                 data: {
                   name: product.name,
-                  description: product.description,
+                  description: product.description || null,
                   pricePerUnit: product.pricePerUnit,
                   unit: product.unit as any, // Cast to enum type
-                  category: product.category,
+                  category: product.category || null,
                   inStock: product.inStock,
                   gstInclusive: product.gstInclusive,
+                  supplier: product.supplier,
                   updatedAt: new Date(),
                 },
               })
@@ -177,15 +180,15 @@ export async function POST(req: NextRequest) {
                 data: {
                   id: cuid(),
                   name: product.name,
-                  description: product.description,
+                  description: product.description || null,
                   sku: product.sku || generateSKU(product.name, product.supplier),
                   supplier: product.supplier,
                   unit: product.unit as any, // Cast to enum type
                   pricePerUnit: product.pricePerUnit,
                   gstInclusive: product.gstInclusive,
-                  category: product.category,
+                  category: product.category || null,
                   inStock: product.inStock,
-                  notes: product.notes,
+                  notes: product.notes || null,
                   userId,
                 },
               })
