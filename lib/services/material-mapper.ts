@@ -91,15 +91,15 @@ export function mapUnit(supplierUnit: string | undefined, title: string): string
 // Categorize products based on title/description
 export function categorizeProduct(title: string): string {
   const categories: Record<string, string[]> = {
+    'LVL Engineered Timber': ['lvl', 'gl15c', 'gl13c', 'gl17c', 'hyspan'],
     'Framing': ['stud', 'plate', 'bearer', 'joist', 'lintel', 'beam'],
     'Cladding': ['weatherboard', 'hardiplank', 'cladding', 'villa', 'linea'],
     'Decking': ['deck', 'decking', 'merbau', 'spotted gum', 'composite'],
     'Sheet Materials': ['plywood', 'mdf', 'particle', 'osb', 'hardboard'],
     'Flooring': ['flooring', 'tongue and groove', 't&g', 'parquet'],
     'Fencing': ['fence', 'paling', 'plinth', 'rail', 'post'],
-    'Structural': ['lvl', 'glulam', 'engineered', 'hyspan', 'h2', 'h3'],
-    'Pine': ['pine', 'radiata', 'treated pine', 'mgp'],
-    'Hardwood': ['hardwood', 'oak', 'blackbutt', 'jarrah', 'ironbark'],
+    'Structural': ['glulam', 'engineered', 'h2', 'h3'],
+    'Timber': ['pine', 'radiata', 'treated pine', 'mgp', 'hardwood', 'oak'],
     'Mouldings': ['moulding', 'architrave', 'skirting', 'scotia', 'quad'],
     'Hardware': ['screw', 'nail', 'bolt', 'bracket', 'joist hanger'],
     'Insulation': ['insulation', 'batts', 'glasswool', 'polyester'],
@@ -132,8 +132,22 @@ export function cleanProductName(title: string): string {
     'rad pine': 'Radiata Pine',
     'struct pine': 'Structural Pine',
     'h3 treated': 'H3 Treated',
-    'h2f treated': 'H2F Treated'
+    'h2f treated': 'H2F Treated',
+    'h2 treated': 'H2 Treated',
+    'h1 treated': 'H1 Treated'
   };
+  
+  // Handle special formatting for structural beams
+  const beamMatch = cleaned.match(/(\d+)\s*x\s*(\d+)\s*(H[123])?\s*(GL\d+C?)?\s*(Pine|Timber)?\s*(Beam|Joist|Bearer)?/i);
+  if (beamMatch) {
+    const parts = [];
+    parts.push(`${beamMatch[1]}x${beamMatch[2]}`);
+    if (beamMatch[3]) parts.push(beamMatch[3].toUpperCase());
+    if (beamMatch[4]) parts.push(beamMatch[4].toUpperCase());
+    if (beamMatch[5]) parts.push(beamMatch[5]);
+    if (beamMatch[6]) parts.push(beamMatch[6]);
+    cleaned = parts.join(' ');
+  }
   
   const lowerCleaned = cleaned.toLowerCase();
   for (const [find, replace] of Object.entries(replacements)) {
@@ -147,11 +161,29 @@ export function cleanProductName(title: string): string {
 }
 
 // Generate SKU if not provided
-export function generateSKU(title: string): string {
+export function generateSKU(title: string, supplier?: string): string {
+  // Try to extract meaningful parts from the title for SKU
+  const parts = title.match(/(\d+x\d+|\d+mm)/gi);
+  const h2h3 = title.match(/\b(H[123])\b/i);
+  const gl = title.match(/\b(GL\d+C?)\b/i);
+  
+  if (parts || h2h3 || gl) {
+    // Build SKU from meaningful parts
+    const skuParts = [];
+    if (gl) skuParts.push(gl[1].toUpperCase());
+    if (parts) skuParts.push(parts[0].toUpperCase());
+    if (h2h3) skuParts.push(h2h3[1].toUpperCase());
+    
+    if (skuParts.length > 0) {
+      return skuParts.join('-');
+    }
+  }
+  
+  // Fallback to generic SKU
   const cleaned = title.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   const hash = cleaned.substring(0, 8);
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `GEN-${hash}-${random}`;
+  const supplierPrefix = supplier ? supplier.substring(0, 3).toUpperCase() : 'GEN';
+  return `${supplierPrefix}-${hash}`;
 }
 
 // Map supplier codes to proper names
@@ -172,17 +204,19 @@ export function transformToMaterial(
 ): Partial<Material> {
   const quantity = extractQuantityFromTitle(product.title);
   
+  const supplierName = getSupplierName(supplier);
+  
   return {
     name: cleanProductName(product.title),
-    sku: product.metadata.sku || generateSKU(product.title),
-    supplier: getSupplierName(supplier),
+    sku: product.metadata.sku || generateSKU(product.title, supplierName),
+    supplier: supplierName,
     unit: mapUnit(product.metadata.unit, product.title),
     pricePerUnit: parsePrice(product.price, quantity),
     gstInclusive: true, // Australian suppliers include GST
     category: categorizeProduct(product.title),
     inStock: product.metadata.availability ?? true,
     description: product.metadata.description || null,
-    notes: `Imported from ${getSupplierName(supplier)} on ${new Date().toLocaleDateString()}`,
+    notes: `Imported from ${supplierName} on ${new Date().toLocaleDateString()}`,
     userId: userId || null,
   };
 }

@@ -216,10 +216,18 @@ export async function POST(req: NextRequest) {
           await prisma.$transaction(operations);
         } catch (error) {
           console.error('Transaction error:', error);
+          console.error('Failed batch sample:', JSON.stringify(batch[0], null, 2));
           results.errors += operations.length;
           // Reset counts as transaction failed
           results.imported -= operations.filter(op => 'create' in op).length;
           results.updated -= operations.filter(op => 'update' in op).length;
+          
+          // Add detailed error info
+          results.details.push({
+            batch: `Batch ${batchNumber}`,
+            error: error instanceof Error ? error.message : 'Transaction failed',
+            sample: batch[0]?.name
+          });
         }
       }
     }
