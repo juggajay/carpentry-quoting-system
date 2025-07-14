@@ -21,9 +21,22 @@ interface ImportProduct {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('[Import API] Request received');
   let body: any;
   
   try {
+    // First, try to get the body to see what's being sent
+    try {
+      body = await req.json();
+      console.log('[Import API] Received body:', JSON.stringify(body).substring(0, 500));
+    } catch (jsonError) {
+      console.error('[Import API] Failed to parse JSON:', jsonError);
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
+    
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -32,8 +45,7 @@ export async function POST(req: NextRequest) {
     // Apply rate limiting
     const rateLimitResponse = await withRateLimit(req, rateLimiters.import, userId);
     if (rateLimitResponse) return rateLimitResponse;
-
-    body = await req.json();
+    
     const { products, options } = body as {
       products: ImportProduct[];
       options: {
@@ -42,7 +54,15 @@ export async function POST(req: NextRequest) {
       };
     };
 
-    if (!products || products.length === 0) {
+    if (!products || !Array.isArray(products)) {
+      console.error('[Import API] Invalid products:', typeof products, products);
+      return NextResponse.json(
+        { error: 'Products must be an array' },
+        { status: 400 }
+      );
+    }
+    
+    if (products.length === 0) {
       return NextResponse.json(
         { error: 'No products to import' },
         { status: 400 }
@@ -76,7 +96,8 @@ export async function POST(req: NextRequest) {
         await prisma.$queryRaw`SELECT 1 FROM "ImportJob" LIMIT 1`;
         supportsAsync = true;
       } catch (error) {
-        console.log('ImportJob table not found - using sync import');
+        console.log('ImportJob table check error:', error instanceof Error ? error.message : 'Unknown');
+        // Continue with sync import
       }
       
       if (supportsAsync) {
