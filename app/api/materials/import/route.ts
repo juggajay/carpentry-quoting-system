@@ -243,7 +243,7 @@ export async function POST(req: NextRequest) {
       );
 
       // Process each product in the batch
-      const operations = [];
+      const operations: Array<{ promise: Promise<any>, product: any, type: 'create' | 'update' }> = [];
       console.log(`[Import] Processing batch ${batchNumber} with ${batch.length} products`);
       
       for (const product of batch) {
@@ -253,8 +253,8 @@ export async function POST(req: NextRequest) {
 
           if (existingId && options.updateExisting) {
             // Update existing material
-            operations.push(
-              prisma.material.update({
+            operations.push({
+              promise: prisma.material.update({
                 where: { id: existingId },
                 data: {
                   name: product.name,
@@ -267,8 +267,10 @@ export async function POST(req: NextRequest) {
                   supplier: product.supplier,
                   updatedAt: new Date(),
                 },
-              })
-            );
+              }),
+              product,
+              type: 'update'
+            });
             results.updated++;
             try {
               importProgress.recordUpdated(1, product.name);
@@ -315,11 +317,13 @@ export async function POST(req: NextRequest) {
               userIdType: typeof userId,
               userIdValue: userId,
             });
-            operations.push(
-              prisma.material.create({
+            operations.push({
+              promise: prisma.material.create({
                 data: materialData,
-              })
-            );
+              }),
+              product: { ...product, sku: materialData.sku },
+              type: 'create'
+            });
             results.imported++;
             try {
               importProgress.recordImported(1, product.name);
@@ -349,36 +353,78 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Execute all operations in a transaction
+      // Execute operations individually instead of in a transaction to handle SKU conflicts
       if (operations.length > 0) {
-        try {
-          console.log(`[Import] Executing ${operations.length} operations in batch ${batchNumber}`);
-          const transactionResults = await prisma.$transaction(operations);
-          console.log(`[Import] Transaction completed, created/updated ${transactionResults.length} materials`);
-        } catch (error) {
-          console.error('Transaction error:', error);
-          console.error('Failed batch sample:', JSON.stringify(batch[0], null, 2));
-          console.error('Transaction error details:', {
-            errorType: error?.constructor?.name,
-            message: error instanceof Error ? error.message : 'Unknown error',
-            operations: operations.length,
-            userId: userId,
-          });
-          results.errors += operations.length;
-          // Reset counts as transaction failed
-          results.imported -= operations.filter(op => 'create' in op).length;
-          results.updated -= operations.filter(op => 'update' in op).length;
+        console.log(`[Import] Executing ${operations.length} operations in batch ${batchNumber}`);
+        
+        for (let i = 0; i < operations.length; i++) {
+          const { promise, product, type } = operations[i];
           
-          // Add detailed error info
-          results.details.push({
-            batch: `Batch ${batchNumber}`,
-            error: error instanceof Error ? error.message : 'Transaction failed',
-            sample: batch[0]?.name,
-            operationsCount: operations.length
-          });
-          
-          // Throw error to stop processing and return error response
-          throw error;
+          try {
+            await promise;
+          } catch (error: any) {
+            console.error(`Operation ${i} failed:`, error);
+            
+            // Check if it's a unique constraint error on SKU
+            if (error.code === 'P2002' && error.meta?.target?.includes('sku')) {
+              console.log(`[Import] SKU conflict detected, attempting to resolve...`);
+              
+              // Only retry for create operations
+              if (type === 'create' && product && !product.sku?.includes(Date.now().toString())) {
+                // Generate a new unique SKU with timestamp
+                const newSku = `${product.sku || generateSKU(product.name, product.supplier)}-${Date.now()}`;
+                console.log(`[Import] Retrying with new SKU: ${newSku}`);
+                
+                try {
+                  // Retry the create operation with new SKU
+                  const retryData = {
+                    id: cuid(),
+                    name: product.name,
+                    description: product.description || null,
+                    sku: newSku,
+                    supplier: product.supplier,
+                    unit: product.unit as any,
+                    pricePerUnit: product.pricePerUnit,
+                    gstInclusive: product.gstInclusive,
+                    category: product.category || null,
+                    inStock: product.inStock,
+                    notes: product.notes || null,
+                    userId,
+                  };
+                  
+                  await prisma.material.create({ data: retryData });
+                  console.log(`[Import] Successfully created with new SKU: ${newSku}`);
+                } catch (retryError) {
+                  console.error(`[Import] Retry failed:`, retryError);
+                  results.errors++;
+                  results.imported--;
+                  results.details.push({
+                    product: product.name,
+                    error: 'SKU conflict could not be resolved',
+                    originalSku: product.sku,
+                    attemptedSku: newSku
+                  });
+                }
+              } else {
+                results.errors++;
+                if (type === 'create') results.imported--;
+                results.details.push({
+                  product: product?.name || 'Unknown',
+                  error: 'SKU already exists',
+                });
+              }
+            } else {
+              // Other types of errors
+              results.errors++;
+              if (type === 'create') results.imported--;
+              if (type === 'update') results.updated--;
+              
+              results.details.push({
+                product: product?.name || 'Unknown',
+                error: error instanceof Error ? error.message : 'Operation failed',
+              });
+            }
+          }
         }
       }
     }
