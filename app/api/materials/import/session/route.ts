@@ -1,31 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { cuid } from '@/lib/utils';
-
-// In-memory session storage (in production, use Redis or database)
-const importSessions = new Map<string, {
-  id: string;
-  userId: string;
-  totalProducts: number;
-  processedProducts: number;
-  imported: number;
-  updated: number;
-  skipped: number;
-  errors: number;
-  startedAt: Date;
-  lastActivityAt: Date;
-  status: 'active' | 'completed' | 'failed';
-}>();
-
-// Clean up old sessions after 30 minutes
-setInterval(() => {
-  const now = new Date();
-  for (const [id, session] of importSessions.entries()) {
-    if (now.getTime() - session.lastActivityAt.getTime() > 30 * 60 * 1000) {
-      importSessions.delete(id);
-    }
-  }
-}, 5 * 60 * 1000); // Run every 5 minutes
+import { importSessions } from '@/lib/services/import-session';
 
 export async function POST(req: NextRequest) {
   try {
@@ -140,21 +116,4 @@ export async function PATCH(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Export session getter for use in import route
-export function getImportSession(sessionId: string) {
-  return importSessions.get(sessionId);
-}
-
-export function updateImportSession(sessionId: string, updates: Partial<typeof importSessions extends Map<string, infer T> ? T : never>) {
-  const session = importSessions.get(sessionId);
-  if (session) {
-    Object.assign(session, {
-      ...updates,
-      lastActivityAt: new Date(),
-    });
-    importSessions.set(sessionId, session);
-  }
-  return session;
 }

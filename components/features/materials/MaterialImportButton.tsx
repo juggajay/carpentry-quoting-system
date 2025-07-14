@@ -265,6 +265,7 @@ export function MaterialImportButton({ onImportComplete }: MaterialImportButtonP
       if (onImportComplete) {
         onImportComplete();
       }
+    } catch (error) {
       console.error('Import error:', error);
       toast.error('Import failed - check console for details');
     } finally {

@@ -6,7 +6,7 @@ import { DataValidator } from '@/lib/services/data-validator';
 import { importProgress } from '@/lib/services/import-progress';
 import { rateLimiters, withRateLimit } from '@/lib/services/rate-limiter';
 import { ChunkedImportService } from '@/lib/services/chunked-import';
-import { getImportSession, updateImportSession } from './session/route';
+import { getImportSession, updateImportSession } from '@/lib/services/import-session';
 
 interface ImportProduct {
   name: string;
