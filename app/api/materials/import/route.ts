@@ -206,6 +206,10 @@ export async function POST(req: NextRequest) {
           sku: { in: skus },
           userId,
         },
+        select: {
+          id: true,
+          sku: true,
+        },
       });
 
       const existingSkuMap = new Map(
