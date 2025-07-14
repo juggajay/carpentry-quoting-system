@@ -289,9 +289,6 @@ export async function POST(req: NextRequest) {
                       inStock: product.inStock ?? true,
                       notes: product.notes,
                       userId,
-                      lastScrapedAt: new Date(),
-                      sourceUrl: customUrl || scrapeUrls[0],
-                      scraperType: supplier,
                     },
                   })
                 );
@@ -311,9 +308,7 @@ export async function POST(req: NextRequest) {
                       category: product.category,
                       inStock: product.inStock ?? true,
                       gstInclusive: product.gstInclusive || true,
-                      lastScrapedAt: new Date(),
-                      sourceUrl: customUrl || scrapeUrls[0],
-                      scraperType: supplier,
+                      supplier: product.supplier,
                     },
                   })
                 );

@@ -21,7 +21,13 @@ interface ImportProduct {
 }
 
 export async function POST(req: NextRequest) {
-  console.log('[Import API] Request received');
+  try {
+    console.log('[Import API] Request received at:', new Date().toISOString());
+  } catch (e) {
+    // Even console.log is failing
+    return NextResponse.json({ error: 'Critical error at start', details: String(e) }, { status: 500 });
+  }
+  
   let body: any;
   
   try {
