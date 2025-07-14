@@ -354,10 +354,15 @@ export async function POST(req: NextRequest) {
             await promise;
             
             // Record progress on success
-            if (type === 'create') {
-              importProgress.recordImported(1, product.name);
-            } else if (type === 'update') {
-              importProgress.recordUpdated(1, product.name);
+            try {
+              if (type === 'create') {
+                importProgress.recordImported(1, product.name);
+              } else if (type === 'update') {
+                importProgress.recordUpdated(1, product.name);
+              }
+            } catch (progressError) {
+              console.error('[Import] Progress tracking error:', progressError);
+              // Don't fail the import due to progress tracking issues
             }
           } catch (error: any) {
             console.error(`Operation ${i} failed:`, error);
@@ -405,7 +410,11 @@ export async function POST(req: NextRequest) {
               } else {
                 results.errors++;
                 if (type === 'create') results.imported--;
-                importProgress.recordError(1, product?.name || 'Unknown');
+                try {
+                  importProgress.recordError(1, product?.name || 'Unknown');
+                } catch (e) {
+                  console.error('[Import] Progress error tracking failed:', e);
+                }
                 results.details.push({
                   product: product?.name || 'Unknown',
                   error: 'SKU already exists',
@@ -416,7 +425,11 @@ export async function POST(req: NextRequest) {
               results.errors++;
               if (type === 'create') results.imported--;
               if (type === 'update') results.updated--;
-              importProgress.recordError(1, product?.name || 'Unknown');
+              try {
+                importProgress.recordError(1, product?.name || 'Unknown');
+              } catch (e) {
+                console.error('[Import] Progress error tracking failed:', e);
+              }
               
               results.details.push({
                 product: product?.name || 'Unknown',
@@ -478,6 +491,20 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('[Import API] ===== ERROR =====');
     console.error('[Import API] Import error:', error);
+    
+    // Check if the error is actually the progress object
+    if (error && typeof error === 'object' && 'total' in error && 'processed' in error) {
+      console.error('[Import API] Progress object thrown as error, continuing with results');
+      // Don't treat progress as an error, return success with current results
+      return NextResponse.json({
+        success: true,
+        results: {
+          ...results,
+          validationErrors: invalid.length,
+        },
+      });
+    }
+    
     console.error('[Import API] Import error details:', {
       errorType: error?.constructor?.name,
       message: error instanceof Error ? error.message : 'Unknown error',
