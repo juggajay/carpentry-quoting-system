@@ -16,6 +16,12 @@ export async function GET(request: Request) {
     const category = searchParams.get("category");
     const search = searchParams.get("search");
 
+    // Get the actual user from database
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true }
+    });
+    
     // Build query
     const where: {
       OR?: Array<Record<string, unknown>>;
@@ -25,7 +31,7 @@ export async function GET(request: Request) {
       // Get global materials (userId is null) or user-specific materials
       OR: [
         { userId: null },
-        { user: { clerkId: userId } }
+        ...(user ? [{ userId: user.id }] : [])
       ]
     };
 

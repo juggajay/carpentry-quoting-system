@@ -14,13 +14,25 @@ export async function POST(req: NextRequest) {
   let body: any;
   
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    // Get the actual user from database
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+      select: { id: true }
+    });
+    
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    
+    const userId = user.id;
 
     // Apply rate limiting
-    const rateLimitResponse = await withRateLimit(req, rateLimiters.scrape, userId);
+    const rateLimitResponse = await withRateLimit(req, rateLimiters.scrape, clerkId);
     if (rateLimitResponse) return rateLimitResponse;
 
     body = await req.json();

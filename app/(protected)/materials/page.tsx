@@ -28,7 +28,7 @@ export default function MaterialsPage() {
       const data = await response.json();
       
       if (response.ok) {
-        setMaterials(data.materials || []);
+        setMaterials(Array.isArray(data) ? data : data.materials || []);
       } else {
         toast.error('Failed to load materials');
       }
