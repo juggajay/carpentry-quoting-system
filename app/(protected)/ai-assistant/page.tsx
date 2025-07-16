@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import FileDropZone from "./components/FileDropZone";
 import QuotePreview from "./components/QuotePreview";
 import MCPSelector from "./components/MCPSelector";
@@ -25,6 +27,7 @@ export default function AIAssistantPage() {
   const [seniorEstimatorData, setSeniorEstimatorData] = useState<any>(null);
   const [liveUpdates, setLiveUpdates] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [showMobileUpdates, setShowMobileUpdates] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const updatesEndRef = useRef<HTMLDivElement>(null);
   
@@ -101,7 +104,7 @@ Let me search our treasure trove of materials for the best pricing!`;
 
           // Clear the session storage
           sessionStorage.removeItem('senior_estimator_takeoff');
-          addLiveUpdate("🧚 Junior Leprechaun awakening...");
+          addLiveUpdate("Initializing AI Assistant...");
           
           // Send the auto message after a short delay
           setTimeout(() => {
@@ -134,7 +137,7 @@ Let me search our treasure trove of materials for the best pricing!`;
     setMessages(prev => [...prev, newMessage]);
     setAttachedFiles([]); // Clear attachments after sending
     setIsProcessing(true);
-    addLiveUpdate("🧚 Junior Leprechaun thinking...");
+    addLiveUpdate("Processing request...");
 
     try {
       const response = await fetch('/api/ai-assistant/chat', {
@@ -291,261 +294,339 @@ Let me search our treasure trove of materials for the best pricing!`;
   };
 
   return (
-    <div className="h-[calc(100vh-0px)] flex flex-col bg-dark-surface">
+    <div className="h-screen flex flex-col bg-dark-surface">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2 px-4 py-3 bg-dark-elevated border-b border-gray-800">
-        <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-4 sm:px-6 py-4 bg-dark-elevated border-b border-dark-border">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
             <div className="flex items-center">
               <span className="text-2xl">🧑‍🦰</span>
               <span className="text-xl -ml-2">🍀</span>
-            </div> 
+            </div>
             <div>
-              <div className="flex items-center gap-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2">
                 Junior Estimator
-                <Badge variant="success" className="text-xs">Jr</Badge>
-              </div>
-              <p className="text-xs text-lime-green font-semibold italic">
-                {"A wee bit of magic for your quotes!"}
+                <Badge variant="success" className="text-xs">AI</Badge>
+              </h1>
+              <p className="text-sm text-dark-text-secondary">
+                {seniorEstimatorData || fromSeniorEstimator
+                  ? "Creating detailed quotes from takeoff data"
+                  : "Upload BOQ files for AI-powered quote generation"
+                }
               </p>
             </div>
-          </h1>
-          <p className="text-gray-400 text-xs mt-1">
-            {seniorEstimatorData || fromSeniorEstimator
-              ? "Using Senior Leprechaun's wisdom to craft detailed quotes"
-              : "Upload BOQ scrolls for magical quote generation"
-            }
-          </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="info" className="text-sm bg-lime-green/20 text-lime-green border-lime-green/40">
-            🌟 AI Assistant
-          </Badge>
-          <button
+          <Button
             onClick={() => setShowMCPSelector(true)}
-            className="btn btn-secondary btn-small flex items-center gap-2 relative"
+            variant="secondary"
+            size="sm"
+            className="relative"
           >
-            <span>🔌</span>
+            <span className="mr-2">🔌</span>
             MCP Tools
             {mcpConnections.filter(c => c.status === 'connected').length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-lime-green text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 bg-electric-magenta text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-bold">
                 {mcpConnections.filter(c => c.status === 'connected').length}
               </span>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Main Content Grid - Matching Senior Layout */}
-      <div className="flex-1 grid grid-cols-12 gap-2 px-4 pb-2 min-h-0">
-        {/* Left Column - Files & MCP (Small) */}
-        <div className="col-span-3 space-y-2 overflow-y-auto">
-          <div className="card bg-dark-elevated p-3">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-              📜 BOQ Scrolls
-            </h3>
-            <div className="text-xs">
-              <FileDropZone 
-                onFileUpload={handleFileUpload}
-                attachedFiles={attachedFiles}
-                onRemoveFile={handleRemoveFile}
-              />
-            </div>
-          </div>
+      {/* Main Content - Responsive Grid */}
+      <div className="flex-1 overflow-hidden">
+        <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 lg:p-6">
+          {/* Left Column - Files & MCP */}
+          <div className="lg:col-span-3 space-y-4 overflow-y-auto order-2 lg:order-1">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  📜 BOQ Files
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FileDropZone 
+                  onFileUpload={handleFileUpload}
+                  attachedFiles={attachedFiles}
+                  onRemoveFile={handleRemoveFile}
+                />
+              </CardContent>
+            </Card>
 
-          {/* Live Updates */}
-          <div className="card bg-dark-elevated p-3 flex-1">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-              ✨ Magical Updates
-            </h3>
-            <div className="h-32 overflow-y-auto bg-dark-surface border border-gray-700 rounded p-2 text-xs font-mono">
-              {liveUpdates.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">Waiting for magic...</p>
-              ) : (
-                liveUpdates.map((update, index) => (
-                  <div key={index} className="mb-1 text-lime-green">
-                    {update}
-                  </div>
-                ))
-              )}
-              <div ref={updatesEndRef} />
-            </div>
-          </div>
-
-          {/* MCP Connections */}
-          {mcpConnections.length > 0 && (
-            <div className="card bg-dark-elevated p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-                🔌 Magic Tools
-              </h3>
-              <div className="space-y-1">
-                {mcpConnections.map(conn => (
-                  <div key={conn.id} className="flex items-center justify-between p-1.5 rounded bg-dark-surface hover:bg-dark-navy border border-gray-700 transition-colors text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        conn.status === 'connected' ? 'bg-lime-green animate-pulse' : 'bg-gray-400'
-                      }`} />
-                      <span className="font-medium text-white">{conn.name}</span>
-                    </div>
-                    {conn.status === 'connected' && (
-                      <button
-                        className="text-xs text-critical-red hover:text-red-400"
-                        onClick={() => handleMCPDisconnect(conn.id)}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Middle Column - Chat Interface (Big) */}
-        <div className="col-span-6 flex flex-col min-h-0">
-          <div className="card bg-dark-elevated flex-1 flex flex-col p-3">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-              💬 Junior Leprechaun Chat
-            </h3>
-            
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto border border-gray-700 rounded-lg p-3 bg-dark-surface mb-2">
-              {messages.length === 0 && !generatedQuote ? (
-                <div className="text-center text-gray-400 py-8">
-                  <div className="flex items-center justify-center mb-2 animate-bounce">
-                    <span className="text-3xl">🧑‍🦰</span>
-                    <span className="text-2xl -ml-2">🍀</span>
-                  </div>
-                  <p className="font-medium text-sm text-white">Junior Leprechaun Ready!</p>
-                  <p className="text-xs mt-1 text-lime-green italic">{"Upload your BOQ scrolls or ask me anything!"}</p>
-                  <div className="flex justify-center gap-1 mt-2">
-                    <span className="text-lg">✨</span>
-                    <span className="text-lg">🪙</span>
-                    <span className="text-lg">💚</span>
-                  </div>
+            {/* Live Updates - Hidden on mobile by default */}
+            <Card className="hidden lg:block">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  ✨ Live Updates
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-32 overflow-y-auto bg-dark-surface border border-dark-border rounded-lg p-3 text-xs font-mono">
+                  {liveUpdates.length === 0 ? (
+                    <p className="text-dark-text-secondary text-center py-8">Waiting for updates...</p>
+                  ) : (
+                    liveUpdates.map((update, index) => (
+                      <div key={index} className="mb-1 text-electric-magenta">
+                        {update}
+                      </div>
+                    ))
+                  )}
+                  <div ref={updatesEndRef} />
                 </div>
-              ) : (
+              </CardContent>
+            </Card>
+
+            {/* MCP Connections */}
+            {mcpConnections.length > 0 && (
+              <Card className="hidden lg:block">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    🔌 Connected Tools
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {mcpConnections.map(conn => (
+                      <div key={conn.id} className="flex items-center justify-between p-2 rounded-lg bg-dark-surface hover:bg-dark-surface/80 border border-dark-border transition-colors">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${
+                            conn.status === 'connected' ? 'bg-success-green animate-pulse' : 'bg-dark-text-secondary'
+                          }`} />
+                          <span className="text-sm font-medium text-white">{conn.name}</span>
+                        </div>
+                        {conn.status === 'connected' && (
+                          <button
+                            className="text-critical-red hover:text-critical-red/80 transition-colors"
+                            onClick={() => handleMCPDisconnect(conn.id)}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Middle Column - Chat Interface */}
+          <div className="lg:col-span-6 flex flex-col min-h-0 order-1 lg:order-2">
+            <Card className="flex-1 flex flex-col overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  💬 AI Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col overflow-hidden p-4 sm:p-6">
+            
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto bg-dark-surface border border-dark-border rounded-lg p-4 mb-4">
+                  {messages.length === 0 && !generatedQuote ? (
+                    <div className="text-center py-12">
+                      <div className="flex items-center justify-center mb-4">
+                        <span className="text-4xl">🧑‍🦰</span>
+                        <span className="text-3xl -ml-3">🍀</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-white mb-2">AI Assistant Ready</h3>
+                      <p className="text-dark-text-secondary text-sm max-w-md mx-auto">
+                        Upload BOQ files or ask questions about materials, labor rates, and pricing.
+                      </p>
+                    </div>
+                  ) : (
                 <>
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`mb-3 p-3 rounded-lg ${
-                        message.role === 'user'
-                          ? 'bg-electric-magenta/20 ml-12 border border-electric-magenta/40'
-                          : 'bg-dark-elevated mr-12 border border-gray-700'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className={message.role === 'user' ? 'text-sm' : 'text-2xl'}>
-                          {message.role === 'user' ? '👤' : '🧑‍🦰🍀'}
-                        </span>
-                        <div className="flex-1">
-                          <p className="text-sm whitespace-pre-wrap text-white">{message.content}</p>
-                          <p className="text-xs text-gray-400 mt-1">
+                      {messages.map((message) => (
+                      <div
+                        key={message.id}
+                        className={`mb-4 flex ${
+                          message.role === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
+                      >
+                        <div className={`max-w-[85%] sm:max-w-[70%] ${
+                          message.role === 'user'
+                            ? 'order-2'
+                            : 'order-1'
+                        }`}>
+                          <div className={`p-3 rounded-lg ${
+                            message.role === 'user'
+                              ? 'bg-electric-magenta text-white'
+                              : 'bg-dark-elevated border border-dark-border'
+                          }`}>
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          </div>
+                          <p className={`text-xs text-dark-text-secondary mt-1 ${
+                            message.role === 'user' ? 'text-right' : 'text-left'
+                          }`}>
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </p>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </>
               )}
-              {isProcessing && (
-                <div className="mb-3 p-3 rounded-lg bg-dark-elevated mr-12 border border-gray-700">
-                  <div className="flex items-start gap-2">
-                    <div className="flex items-center animate-pulse">
-                      <span className="text-2xl">🧑‍🦰</span>
-                      <span className="text-xl -ml-2">🍀</span>
+                  {isProcessing && (
+                    <div className="flex justify-start mb-4">
+                      <div className="max-w-[85%] sm:max-w-[70%]">
+                        <div className="p-3 rounded-lg bg-dark-elevated border border-dark-border">
+                          <div className="flex items-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-electric-magenta border-t-transparent"></div>
+                            <p className="text-sm text-dark-text-secondary">AI is thinking...</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-lime-green italic">Junior Leprechaun is crafting magic...</p>
-                    </div>
-                  </div>
+                  )}
+                  <div ref={messagesEndRef} />
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
             
-            {/* Chat Input */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
-                placeholder="Ask about materials, pricing, or upload BOQ files..."
-                className="flex-1 p-2 border border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-electric-magenta bg-dark-surface text-white placeholder-gray-500"
-                disabled={isProcessing}
+                {/* Chat Input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
+                        e.preventDefault();
+                        handleSendMessage(inputValue);
+                        setInputValue("");
+                      }
+                    }}
+                    placeholder="Ask about materials, pricing, or upload BOQ files..."
+                    className="flex-1 px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-white placeholder-dark-text-secondary focus:outline-none focus:ring-2 focus:ring-electric-magenta focus:border-transparent transition-all"
+                    disabled={isProcessing}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (inputValue.trim()) {
+                        handleSendMessage(inputValue);
+                        setInputValue("");
+                      }
+                    }}
+                    disabled={!inputValue.trim() || isProcessing}
+                    size="md"
+                  >
+                    Send
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        
+          {/* Right Column - Quote Preview */}
+          <div className="lg:col-span-3 space-y-4 overflow-y-auto order-3">
+            {generatedQuote ? (
+              <QuotePreview 
+                quote={generatedQuote} 
+                sessionId={sessionId}
+                onQuoteCreated={(quoteId, quoteNumber) => {
+                  console.log(`Quote ${quoteNumber} created with ID: ${quoteId}`);
+                  addLiveUpdate(`✅ Quote ${quoteNumber} saved successfully!`);
+                }}
               />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    📋 Quote Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-3">📄</div>
+                    <p className="text-dark-text-secondary text-sm">
+                      No quote generated yet
+                    </p>
+                    <p className="text-xs text-dark-text-secondary mt-2">
+                      Upload files or chat to create a quote
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Senior Estimator Data Summary */}
+            {seniorEstimatorData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    📊 Takeoff Data
+                    <Badge variant="success" className="text-xs">
+                      {seniorEstimatorData.quantities.length} items
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    <div className="p-3 bg-success-green/10 border border-success-green/20 rounded-lg">
+                      <p className="font-medium text-success-green text-sm">Project: {seniorEstimatorData.project_summary.project_type}</p>
+                      <p className="text-dark-text-secondary text-xs mt-1">Location: {seniorEstimatorData.project_summary.location}</p>
+                      <p className="text-dark-text-secondary text-xs">Confidence: {seniorEstimatorData.project_summary.confidence}%</p>
+                    </div>
+                    {seniorEstimatorData.quantities.slice(0, 5).map((item: any, index: number) => (
+                      <div key={index} className="p-3 border border-dark-border rounded-lg bg-dark-surface">
+                        <p className="font-medium text-white text-sm">{item.description}</p>
+                        <p className="text-dark-text-secondary text-xs mt-1">{item.quantity} {item.unit}</p>
+                      </div>
+                    ))}
+                    {seniorEstimatorData.quantities.length > 5 && (
+                      <p className="text-xs text-center text-dark-text-secondary italic mt-2">
+                        ...and {seniorEstimatorData.quantities.length - 5} more items
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Live Updates Button */}
+      <div className="lg:hidden fixed bottom-4 right-4 z-50">
+        <Button
+          onClick={() => setShowMobileUpdates(!showMobileUpdates)}
+          variant="secondary"
+          size="icon"
+          className="shadow-lg"
+        >
+          ✨
+        </Button>
+      </div>
+
+      {/* Mobile Live Updates Drawer */}
+      {showMobileUpdates && (
+        <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-dark-elevated border-t border-dark-border rounded-t-xl shadow-xl">
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-white">Live Updates</h3>
               <button
-                onClick={() => handleSendMessage(inputValue)}
-                disabled={!inputValue.trim() || isProcessing}
-                className="btn btn-primary btn-small"
+                onClick={() => setShowMobileUpdates(false)}
+                className="text-dark-text-secondary hover:text-white"
               >
-                Send
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
+            </div>
+            <div className="h-48 overflow-y-auto bg-dark-surface border border-dark-border rounded-lg p-3 text-xs font-mono">
+              {liveUpdates.length === 0 ? (
+                <p className="text-dark-text-secondary text-center py-8">Waiting for updates...</p>
+              ) : (
+                liveUpdates.map((update, index) => (
+                  <div key={index} className="mb-1 text-electric-magenta">
+                    {update}
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
-        
-        {/* Right Column - Quote Preview */}
-        <div className="col-span-3 space-y-2 overflow-y-auto">
-          {generatedQuote ? (
-            <QuotePreview 
-              quote={generatedQuote} 
-              sessionId={sessionId}
-              onQuoteCreated={(quoteId, quoteNumber) => {
-                console.log(`Quote ${quoteNumber} created with ID: ${quoteId}`);
-                addLiveUpdate(`🪙 Quote ${quoteNumber} saved to treasure chest!`);
-              }}
-            />
-          ) : (
-            <div className="card bg-dark-elevated p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-                📋 Quote Preview
-              </h3>
-              <div className="text-center text-gray-400 py-4">
-                <div className="text-2xl mb-2">🪙</div>
-                <p className="text-xs">No quote generated yet</p>
-                <p className="text-xs mt-1 text-lime-green italic">
-                  {"The gold will appear when ready!"}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Senior Estimator Data Summary */}
-          {seniorEstimatorData && (
-            <div className="card bg-dark-elevated p-3">
-              <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-white">
-                🧑‍🦰🎩 From Senior Leprechaun
-                <Badge variant="success" className="text-xs">
-                  {seniorEstimatorData.quantities.length} items
-                </Badge>
-              </h3>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                <div className="p-2 bg-lime-green/10 border border-lime-green/20 rounded text-xs">
-                  <p className="font-medium text-lime-green">Project: {seniorEstimatorData.project_summary.project_type}</p>
-                  <p className="text-gray-400">Location: {seniorEstimatorData.project_summary.location}</p>
-                  <p className="text-gray-400">Confidence: {seniorEstimatorData.project_summary.confidence}%</p>
-                </div>
-                {seniorEstimatorData.quantities.slice(0, 5).map((item: any, index: number) => (
-                  <div key={index} className="p-2 border border-gray-700 rounded bg-dark-surface text-xs">
-                    <p className="font-medium text-white">{item.description}</p>
-                    <p className="text-gray-400">{item.quantity} {item.unit}</p>
-                  </div>
-                ))}
-                {seniorEstimatorData.quantities.length > 5 && (
-                  <p className="text-xs text-center text-gray-500 italic">
-                    ...and {seniorEstimatorData.quantities.length - 5} more items
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       {showMCPSelector && (
         <MCPSelector
