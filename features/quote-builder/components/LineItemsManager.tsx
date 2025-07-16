@@ -42,6 +42,7 @@ interface LineItem {
 interface LineItemsManagerProps {
   form: UseFormReturn<QuoteFormData>;
   onLineUpdate: (index: number) => void;
+  defaultUnit?: string;
 }
 
 function SortableLineItem({
@@ -448,6 +449,7 @@ function SortableLineItem({
 export default function LineItemsManager({
   form,
   onLineUpdate,
+  defaultUnit = "EA",
 }: LineItemsManagerProps) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -492,7 +494,7 @@ export default function LineItemsManager({
       type: "custom",
       description: "",
       quantity: 1,
-      unit: "each",
+      unit: defaultUnit,
       unitPrice: 0,
       total: 0,
     });

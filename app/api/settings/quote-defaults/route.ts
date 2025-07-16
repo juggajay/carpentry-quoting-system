@@ -12,7 +12,7 @@ export async function GET() {
     // Check if user has permission to view settings
     const user = await db.user.findUnique({
       where: { clerkId: userId },
-      select: { canManageSettings: true, role: true },
+      select: { id: true, canManageSettings: true, role: true },
     });
 
     if (!user || (!user.canManageSettings && user.role !== "OWNER")) {
@@ -21,7 +21,7 @@ export async function GET() {
 
     // Get settings from database
     const settings = await db.settings.findFirst({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     if (!settings) {

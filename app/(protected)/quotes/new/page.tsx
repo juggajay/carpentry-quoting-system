@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
@@ -36,6 +36,7 @@ interface ProjectDetailsForm {
 export default function NewQuotePage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const form = useForm<ProjectDetailsForm>({
     mode: "onChange", // This will show validation errors as user types
     defaultValues: {
@@ -63,6 +64,41 @@ export default function NewQuotePage() {
     }
   });
 
+  useEffect(() => {
+    // Load settings from database
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/settings/quote-defaults');
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings) {
+            // Update form with company details from settings
+            form.setValue('companyName', settings.companyName || '');
+            form.setValue('abn', settings.abn || '');
+            form.setValue('companyPhone', settings.companyPhone || '');
+            form.setValue('companyEmail', settings.companyEmail || '');
+            form.setValue('companyAddress', settings.companyAddress || '');
+            
+            // Update validity date based on defaultValidityDays
+            if (settings.defaultValidityDays) {
+              const validUntilDate = new Date(Date.now() + settings.defaultValidityDays * 24 * 60 * 60 * 1000);
+              form.setValue('validUntil', validUntilDate.toISOString().split('T')[0]);
+            }
+            
+            // Store default notes for later use
+            form.setValue('specialNotes', settings.defaultNotes || '');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+
+    loadSettings();
+  }, [form]);
+
   const handleContinue = form.handleSubmit(async (data) => {
     console.log('Step 1 - Form submitted:', data);
     setIsSubmitting(true);
@@ -87,6 +123,17 @@ export default function NewQuotePage() {
     })));
     setIsSubmitting(false);
   });
+
+  if (isLoadingSettings) {
+    return (
+      <div className="max-w-4xl mx-auto flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-electric-magenta mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">

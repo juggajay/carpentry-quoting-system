@@ -84,6 +84,9 @@ export default function QuoteItemsPage() {
   const router = useRouter();
   const [projectDetails, setProjectDetails] = useState<ProjectDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [defaultUnit, setDefaultUnit] = useState<string>("EA");
+  const [defaultTaxRate, setDefaultTaxRate] = useState<number>(10);
+  const [defaultTermsConditions, setDefaultTermsConditions] = useState<string>("");
   
   const form = useForm<QuoteFormData>({
     defaultValues: {
@@ -98,7 +101,7 @@ export default function QuoteItemsPage() {
         type: "custom",
         description: "",
         quantity: 1,
-        unit: "each",
+        unit: defaultUnit,
         unitPrice: 0,
         total: 0,
       }],
@@ -108,35 +111,62 @@ export default function QuoteItemsPage() {
     }
   });
 
-  // Load project details from previous step
+  // Load project details from previous step and settings
   useEffect(() => {
-    const savedDetails = sessionStorage.getItem('quoteProjectDetails');
-    if (!savedDetails) {
-      toast.error("No project details found. Please start from the beginning.");
-      router.push('/quotes/new');
-      return;
-    }
-    
-    const details = JSON.parse(savedDetails);
-    setProjectDetails(details);
+    const loadData = async () => {
+      // Load project details
+      const savedDetails = sessionStorage.getItem('quoteProjectDetails');
+      if (!savedDetails) {
+        toast.error("No project details found. Please start from the beginning.");
+        router.push('/quotes/new');
+        return;
+      }
+      
+      const details = JSON.parse(savedDetails);
+      setProjectDetails(details);
+      
+      // Load settings
+      try {
+        const response = await fetch('/api/settings/quote-defaults');
+        if (response.ok) {
+          const settings = await response.json();
+          if (settings) {
+            setDefaultUnit(settings.defaultUnit || "EA");
+            setDefaultTaxRate(settings.defaultTaxRate || 10);
+            setDefaultTermsConditions(settings.defaultTermsConditions || "");
+            
+            // Update form with settings
+            form.setValue('termsConditions', settings.defaultTermsConditions || '');
+            form.setValue('notes', settings.defaultNotes || '');
+            
+            // Update initial item with default unit
+            form.setValue('items.0.unit', settings.defaultUnit || "EA");
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
     
     // Merge with form data and set required fields
     Object.keys(details).forEach(key => {
       form.setValue(key as keyof QuoteFormData, details[key]);
     });
     
-    // Set required fields based on project details
-    form.setValue('title', details.projectTitle || 'Untitled Quote');
-    form.setValue('description', details.projectDescription || '');
-    form.setValue('validUntil', details.validUntil || '');
-    form.setValue('clientId', ''); // Will be set when creating the quote
+      // Set required fields based on project details
+      form.setValue('title', details.projectTitle || 'Untitled Quote');
+      form.setValue('description', details.projectDescription || '');
+      form.setValue('validUntil', details.validUntil || '');
+      form.setValue('clientId', ''); // Will be set when creating the quote
+      
+      setLoading(false);
+    };
     
-    setLoading(false);
-  }, [form, router]);
+    loadData();
+  }, [router]);
 
   const watchedItems = form.watch("items");
   const subtotal = watchedItems?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
-  const gst = subtotal * 0.1;
+  const gst = subtotal * (defaultTaxRate / 100);
   const total = subtotal + gst;
   const deposit = total * 0.1;
 
@@ -243,7 +273,7 @@ export default function QuoteItemsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LineItemsManager form={form} onLineUpdate={updateLineTotal} />
+            <LineItemsManager form={form} onLineUpdate={updateLineTotal} defaultUnit={defaultUnit} />
             
             {/* Totals */}
             <div className="mt-6 pt-6 border-t border-slate-700">
@@ -257,7 +287,7 @@ export default function QuoteItemsPage() {
                   </div>
                   
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-400">GST (10%):</span>
+                    <span className="text-slate-400">GST ({defaultTaxRate}%):</span>
                     <span className="text-white">
                       ${gst.toFixed(2)}
                     </span>

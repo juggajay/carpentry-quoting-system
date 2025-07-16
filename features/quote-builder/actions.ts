@@ -65,6 +65,11 @@ export async function updateQuote(quoteId: string, data: any) {
 
     if (!user) throw new Error("User not found");
 
+    // Fetch user settings
+    const settings = await db.settings.findUnique({
+      where: { userId: user.id },
+    });
+
     // Verify quote ownership
     const quote = await db.quote.findFirst({
       where: {
@@ -75,9 +80,10 @@ export async function updateQuote(quoteId: string, data: any) {
 
     if (!quote) throw new Error("Quote not found");
 
-    // Calculate totals
+    // Calculate totals using tax rate from settings or default
+    const taxRate = settings?.defaultTaxRate || 10;
     const subtotal = data.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
-    const tax = subtotal * 0.10; // 10% GST for Australia
+    const tax = subtotal * (taxRate / 100);
     const total = subtotal + tax;
 
     // Update quote in transaction
@@ -140,12 +146,18 @@ export async function createQuote(data: any) {
 
     if (!user) throw new Error("User not found");
 
+    // Fetch user settings
+    const settings = await db.settings.findUnique({
+      where: { userId: user.id },
+    });
+
     // Generate unique sequential quote number
     const quoteNumber = await generateUniqueQuoteNumber(user.id);
 
-    // Calculate totals
+    // Calculate totals using tax rate from settings or default
+    const taxRate = settings?.defaultTaxRate || 10;
     const subtotal = data.items?.reduce((sum: number, item: any) => sum + (item.total || 0), 0) || 0;
-    const tax = subtotal * 0.10; // 10% GST for Australia
+    const tax = subtotal * (taxRate / 100);
     const total = subtotal + tax;
 
     // Use transaction to ensure quote and items are created atomically
@@ -179,9 +191,9 @@ export async function createQuote(data: any) {
           quoteNumber,
           title: data.projectTitle || data.title || 'Untitled Quote',
           description: data.projectDescription || data.description || '',
-          notes: data.notes || '',
-          termsConditions: data.additionalTerms || data.termsConditions || '',
-          validUntil: data.validUntil ? new Date(data.validUntil) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          notes: data.notes || settings?.defaultNotes || '',
+          termsConditions: data.additionalTerms || data.termsConditions || settings?.defaultTermsConditions || '',
+          validUntil: data.validUntil ? new Date(data.validUntil) : new Date(Date.now() + (settings?.defaultValidityDays || 30) * 24 * 60 * 60 * 1000),
           subtotal,
           tax,
           total,
@@ -201,7 +213,7 @@ export async function createQuote(data: any) {
           data: data.items.map((item: any, index: number) => ({
             description: item.description,
             quantity: item.quantity,
-            unit: item.unit,
+            unit: item.unit || settings?.defaultUnit || "EA",
             unitPrice: item.unitPrice,
             total: item.total,
             sortOrder: index,
