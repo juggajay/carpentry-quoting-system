@@ -297,6 +297,7 @@ model Settings {
   companyPhone            String
   companyEmail            String
   abn                     String?
+  companyLogoUrl          String?  // URL to uploaded company logo
   
   // Quote Defaults
   defaultTaxRate          Float    @default(10)

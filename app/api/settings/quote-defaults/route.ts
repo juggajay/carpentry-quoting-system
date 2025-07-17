@@ -32,6 +32,7 @@ export async function GET() {
         companyPhone: "",
         companyEmail: "",
         abn: "",
+        companyLogoUrl: "",
         defaultTaxRate: 10,
         defaultValidityDays: 30,
         defaultTermsConditions: "",

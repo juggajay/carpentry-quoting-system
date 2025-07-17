@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 
 interface FormData {
   companyName: string;
@@ -14,6 +14,7 @@ interface FormData {
   companyPhone: string;
   companyEmail: string;
   abn: string;
+  companyLogoUrl: string;
   defaultTaxRate: number;
   defaultValidityDays: number;
   defaultTermsConditions: string;
@@ -26,12 +27,15 @@ interface FormData {
 export default function QuoteDefaults() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<FormData>({
     companyName: "",
     companyAddress: "",
     companyPhone: "",
     companyEmail: "",
     abn: "",
+    companyLogoUrl: "",
     defaultTaxRate: 10,
     defaultValidityDays: 30,
     defaultTermsConditions: "",
@@ -95,6 +99,57 @@ export default function QuoteDefaults() {
     }));
   };
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    setIsUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload/logo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload logo');
+      }
+
+      const { url } = await response.json();
+      handleChange('companyLogoUrl', url);
+      toast.success('Logo uploaded successfully');
+    } catch (error) {
+      console.error('Failed to upload logo:', error);
+      toast.error('Failed to upload logo');
+    } finally {
+      setIsUploadingLogo(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    handleChange('companyLogoUrl', '');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -129,6 +184,73 @@ export default function QuoteDefaults() {
               placeholder="12345678901"
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="companyLogo">Company Logo</Label>
+          <div className="flex items-center gap-4">
+            {formData.companyLogoUrl ? (
+              <div className="relative">
+                <img
+                  src={formData.companyLogoUrl}
+                  alt="Company Logo"
+                  className="h-16 w-auto max-w-32 object-contain border border-dark-border rounded"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveLogo}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="h-16 w-32 border-2 border-dashed border-dark-border rounded flex items-center justify-center text-dark-text-secondary">
+                <span className="text-sm">No logo</span>
+              </div>
+            )}
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+                id="logoUpload"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingLogo}
+              >
+                {isUploadingLogo ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 h-4 w-4" />
+                )}
+                {formData.companyLogoUrl ? 'Change Logo' : 'Upload Logo'}
+              </Button>
+              {formData.companyLogoUrl && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemoveLogo}
+                >
+                  <X className="mr-2 h-4 w-4" />
+                  Remove Logo
+                </Button>
+              )}
+            </div>
+          </div>
+          <p className="text-sm text-dark-text-secondary">
+            Upload an image file (PNG, JPG, SVG). Max file size: 5MB. This will appear on your quotes.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div className="space-y-2">
             <Label htmlFor="companyPhone">Phone</Label>
