@@ -11,7 +11,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const formData = await req.formData();
+    let formData;
+    try {
+      formData = await req.formData();
+    } catch (error) {
+      console.error("Failed to parse form data:", error);
+      return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+    }
+
     const file = formData.get("file") as File;
     
     if (!file) {

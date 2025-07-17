@@ -43,7 +43,13 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json(settings);
+    // Ensure companyLogoUrl field exists (for backward compatibility)
+    const settingsWithLogo = {
+      ...settings,
+      companyLogoUrl: settings.companyLogoUrl || "",
+    };
+
+    return NextResponse.json(settingsWithLogo);
   } catch (error) {
     console.error("Failed to fetch settings:", error);
     return NextResponse.json(
@@ -72,15 +78,20 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json();
 
-    // Upsert settings
+    // Extract logo URL safely (might not exist in DB schema yet)
+    const { companyLogoUrl, ...safeData } = data;
+
+    // Upsert settings - handle logo field safely
     const settings = await db.settings.upsert({
       where: { userId: user.id },
       update: {
-        ...data,
+        ...safeData,
+        ...(companyLogoUrl !== undefined && { companyLogoUrl }),
         updatedAt: new Date(),
       },
       create: {
-        ...data,
+        ...safeData,
+        ...(companyLogoUrl !== undefined && { companyLogoUrl }),
         userId: user.id,
       },
     });
