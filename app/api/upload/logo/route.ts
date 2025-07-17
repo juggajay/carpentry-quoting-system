@@ -6,7 +6,15 @@ import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    let userId;
+    try {
+      const authResult = await auth();
+      userId = authResult?.userId;
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      return NextResponse.json({ error: "Authentication failed" }, { status: 401 });
+    }
+
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
